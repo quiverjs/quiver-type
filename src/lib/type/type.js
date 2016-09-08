@@ -1,3 +1,4 @@
+import { TypeVariable } from './variable'
 
 /*
 data Type
@@ -9,27 +10,25 @@ data Type
 */
 
 class Type {
-  get isType() {
-    return true
+  constructor() {
+    if(this.constructor === Type)
+      throw new Error('abstract class Type cannot be instantiated')
   }
 
-  applyType(type) {
+  // freeTypeVariable :: () -> Set TypeVariable
+  freeTypeVariables() {
     throw new Error('Not implemented')
   }
 
-  freeTypeVariable() {
-    throw new Error('Not implemented')
-  }
-}
+  // typeCheck :: Type -> Exception
+  typeCheck(targetType) {
 
-class TypeVariable extends Type {
-  constructor(name) {
-    if(typeof(name) !== 'string')
-      throw new TypeError('Type variable name must be string')
-
-    this.name = name
   }
 
+  // bindType :: TypeVariable -> Type -> Type
+  bindType(typeVar, type) {
+
+  }
 }
 
 class TypeLiteral extends Type {
