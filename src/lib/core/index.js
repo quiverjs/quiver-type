@@ -3,7 +3,7 @@ export {
 } from './assert'
 
 export {
-  Set
+  Set, List, Map
 } from './container'
 
 export {

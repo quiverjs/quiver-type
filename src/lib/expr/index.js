@@ -6,6 +6,8 @@ export { FunctionExpression } from './function'
 
 export { VariableExpression } from './variable'
 
+export { TypedVariableExpression } from './typed-variable'
+
 export { TermLambdaExpression } from './term-lambda'
 
 export { TermApplicationExpression } from './term-application'

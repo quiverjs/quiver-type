@@ -1,4 +1,6 @@
+import { Set, unionMap } from '../core/container'
 import { assertList, assertType, assertFunction } from '../core/assert'
+
 import { Type } from '../type/type'
 
 import { Expression } from './expression'
@@ -8,7 +10,7 @@ const $returnType = Symbol('@returnType')
 const $func = Symbol('@func')
 
 export class FunctionExpression extends Expression {
-  // constructor :: List Expression -> Type -> Function -> ()
+  // constructor :: List Expression -> List Type -> Type -> Function -> ()
   constructor(argExprs, returnType, func) {
     assertList(argExprs)
 
@@ -39,10 +41,8 @@ export class FunctionExpression extends Expression {
   }
 
   freeTermVariables() {
-    return this.argExprs.reduce(
-      (result, argExpr) =>
-        result.union(argExpr.freeTermVariables()),
-      Set())
+    return this.argExprs::unionMap(
+      argExpr => argExpr.freeTermVariables())
   }
 
   exprType(env) {
@@ -50,7 +50,22 @@ export class FunctionExpression extends Expression {
   }
 
   bindTerm(termVar, expr) {
-    return this
+    const { argExprs, returnType, func } = this
+
+    let exprModified = false
+    const newArgExprs = argExprs.map(
+      argExpr => {
+        const newArgExpr = argExpr.bindTerm(termVar, expr)
+
+        if(newArgExpr !== argExpr)
+          exprModified = true
+
+        return newArgExpr
+      })
+
+    if(!exprModified) return this
+
+    return new FunctionExpression(newArgExprs, returnType, func)
   }
 
   bindType() {

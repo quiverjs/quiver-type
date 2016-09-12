@@ -1,3 +1,4 @@
+import { Set } from '../core/container'
 import { assertType } from '../core/assert'
 
 import { LiteralType } from '../type/literal'
