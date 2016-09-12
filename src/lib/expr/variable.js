@@ -1,11 +1,13 @@
-import { Set } from './container'
-import { TermVariable } from './variable'
-import { TermExpression } from './expr'
+import { TypeEnv } from '../core/env'
+import { Set } from '../core/container'
+import { assertType } from '../core/assert'
+import { TermVariable } from '../core/variable'
+
+import { Expression } from './expression'
 
 const $termVar = Symbol('@termVar')
 
-const VariableExpression = ExpressionClass(
-class extends TermExpression {
+export class VariableExpression extends Expression {
   constructor(termVar) {
     assertType(termVar, TermVariable)
 
@@ -20,6 +22,17 @@ class extends TermExpression {
     return Set([this.termVar])
   }
 
+  exprType(env) {
+    assertType(env, TypeEnv)
+
+    const type = env.get(this.termVar)
+
+    if(!type)
+      throw new Error('type of term variable is not bound in typeEnv')
+
+    return type
+  }
+
   bindTerm(termVar, expr) {
     assertType(termVar, TermVariable)
     assertType(expr, Expression)
@@ -31,23 +44,15 @@ class extends TermExpression {
     }
   }
 
-  bindTypeVariable(typeVar, typeExpr) {
-    // no op
+  bindType(typeVar, type) {
+    return this
   }
 
-  getType(env) {
-    assertType(env, TypeEnv)
-
-    const type = env.get(this.termVar)
-
-    if(!type)
-      throw new Error('type of term variable is not bound in typeEnv')
-
-    return type
+  evaluate() {
+    return this
   }
-
 
   isTerminal() {
     return false
   }
-})
+}

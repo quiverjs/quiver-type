@@ -1,15 +1,4 @@
-import { TypeVariable } from './variable'
-
-/*
-data Type
-  = TypeVariable String
-  | TypeLiteral String
-  | FuncType Type Type
-  | ApplicationType Type Type
-  | ForAllType TypeVariable Type
-*/
-
-class Type {
+export class Type {
   constructor() {
     if(this.constructor === Type)
       throw new Error('abstract class Type cannot be instantiated')
@@ -22,39 +11,23 @@ class Type {
 
   // typeCheck :: Type -> Exception
   typeCheck(targetType) {
-
+    throw new Error('Not implemented')
   }
 
   // bindType :: TypeVariable -> Type -> Type
   bindType(typeVar, type) {
-
+    throw new Error('Not implemented')
   }
-}
 
-class TypeLiteral extends Type {
-
-}
-
-class ApplicativeType extends Type {
-  constructor(type1, type2) {
-    assertType(type1, 'type1 must be a type')
-    assertType(type2, 'type2 must be a type')
-
-    this.type1 = type1
-    this.type2 = type2
+  // typeKind :: Map TypeVariable Kind -> Kind
+  typeKind(env) {
+    throw new Error('Not implemented')
   }
-}
 
-class ForAllType extends Type {
-  constructor(tvar, type) {
-
-  }
-}
-
-class Scheme {
-  constructor(tvars, type)
-
-  get isScheme() {
-    return true
+  // isTerminal :: Bool
+  // Terminal type allows type application to proceed,
+  // similar to eager evaluation in term lambda application.
+  isTerminal() {
+    throw new Error('Not implemented')
   }
 }

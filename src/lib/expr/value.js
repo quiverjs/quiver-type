@@ -1,8 +1,16 @@
+import { assertType } from '../core/assert'
 
-export const ConstantExpression = ExpressionClass(
-class extends Expression {
+import { ConstantType } from '../type/constant'
+
+import { Expression } from './expression'
+
+const $value = Symbol('@value')
+const $type = Symbol('@type')
+
+export class ValueExpression extends Expression {
   constructor(value, type) {
     assertType(type, ConstantType)
+    type.checkInstance(value)
 
     this[$value] = value
     this[$type] = type
@@ -20,11 +28,7 @@ class extends Expression {
     return Set()
   }
 
-  freeTypeVariables() {
-    return Set()
-  }
-
-  getType(env) {
+  exprType(env) {
     return this.type
   }
 
@@ -36,15 +40,11 @@ class extends Expression {
     return this
   }
 
-  reduce() {
-    return this
-  }
-
   evaluate() {
-    return this.value
+    return this
   }
 
   isTerminal() {
     return true
   }
-})
+}

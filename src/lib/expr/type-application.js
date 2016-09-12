@@ -1,11 +1,25 @@
+import { TypeEnv } from '../core/env'
+import { assertType } from '../core/assert'
+import { TermVariable, TypeVariable } from '../core/variable'
 
-export const TypeApplicationExpression = ExpressionClass(
-class extends Expression {
-  constructor(expr, argType) {
+import { Type } from '../type/type'
+import { ForAllType } from '../type/forall'
+
+import { Expression } from './expression'
+import { TypeLambdaExpression } from './type-lambda'
+
+const $expr = Symbol('@expr')
+const $type = Symbol('@type')
+
+export class TypeApplicationExpression extends Expression {
+  // constructor :: Expr -> Type -> ()
+  constructor(expr, type) {
     assertType(expr, Expression)
-    assertType(type, type)
+    assertType(type, Type)
 
-    assertType(expr.getType(), ForAllType,
+    const exprType = expr.exprType(new TypeEnv())
+
+    assertType(exprType, ForAllType,
       'applied expression must have forall type')
 
     this[$expr] = expr
@@ -20,9 +34,23 @@ class extends Expression {
     return this[$type]
   }
 
-  getType(env) {
+  freeTermVariables() {
+    return this.expr.freeTermVariables()
+  }
+
+  exprType(env) {
+    assertType(env, TypeEnv)
+
     const { expr, type } = this
-    return expr.getType(env).applyType(type)
+
+    // exprType should be ForAllType
+    const exprType = expr.exprType(env)
+
+    assertType(exprType, ForAllType,
+      'applied expression must have forall type')
+
+    // Type of type lambda application is from (Forall a. e) to ([a->T] e)
+    return exprType.applyType(type)
   }
 
   bindTerm(termVar, targetExpr) {
@@ -31,10 +59,11 @@ class extends Expression {
 
     const { expr, type } = this
 
-    if(!expr.freeTermVariables().has(termVar))
+    const newExpr = expr.bindTerm(termVar, targetExpr)
+
+    if(newExpr === expr)
       return this
 
-    const newExpr = expr.bindTerm(termVar, targetExpr)
     return new TypeApplicationExpression(newExpr, type)
   }
 
@@ -44,28 +73,32 @@ class extends Expression {
 
     const { expr, type } = this
 
-    if(!expr.freeTypeVariables.has(typeVar) &&
-      !type.freeTypeVariables().has(typeVar))
-    {
-      return this
-    }
-
     const newExpr = expr.bindType(typeVar, targetType)
     const newType = type.bindType(typeVar, targetType)
+
+    if((newExpr === expr) && (newType === type))
+      return this
 
     return new TypeApplicationExpression(newExpr, newType)
   }
 
-  reduce() {
+  evaluate() {
     const { expr, type } = this
 
-    const reducedExpr = expr.reduce
-    if(reducedExpr === expr) return this
+    const newExpr = expr.reduce
 
-    if(reducedExpr instanceof TypeLambdaExpression) {
-      return reducedExpr.applyType(type).reduce()
-    } else {
-      return new TypeApplication(reducedExpr, type)
+    // Only reduce the type application if type argument is terminal,
+    // i.e. when type argument has no free type variable.
+    if((newExpr instanceof TypeLambdaExpression) && type.isTerminal()) {
+      return newExpr.applyType(type).evaluate()
     }
+
+    if(newExpr === expr) return this
+
+    return new TypeApplicationExpression(newExpr, type)
   }
-})
+
+  isTerminal() {
+    return false
+  }
+}

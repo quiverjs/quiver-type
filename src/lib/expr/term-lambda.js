@@ -1,5 +1,17 @@
+import { TypeEnv } from '../core/env'
+import { assertType } from '../core/assert'
+import { TermVariable, TypeVariable } from '../core/variable'
 
-export class LambdaExpression extends Expression {
+import { Type } from '../type/type'
+import { ArrowType } from '../type/arrow'
+
+import { Expression } from './expression'
+
+const $argVar = Symbol('@argVar')
+const $argType = Symbol('@argType')
+const $bodyExpr = Symbol('@bodyExpr')
+
+export class TermLambdaExpression extends Expression {
   // constructor :: TermVariable -> Type -> Expression -> ()
   constructor(argVar, argType, bodyExpr) {
     assertType(argVar, TermVariable)
@@ -23,63 +35,74 @@ export class LambdaExpression extends Expression {
     return this[$bodyExpr]
   }
 
-  getType(env) {
+  freeTermVariables() {
+    const { argVar, bodyExpr } = this
+
+    return bodyExpr.freeTermVariables()
+      .delete(argVar)
+  }
+
+  exprType(env) {
     assertType(env, TypeEnv)
 
     const { argVar, argType, bodyExpr } = this
 
     const inEnv = env.set(argVar, argType)
-    const bodyType = bodyExpr.getType(inEnv)
+    const bodyType = bodyExpr.exprType(inEnv)
 
     return new ArrowType(argType, bodyType)
   }
 
-  freeTermVariables() {
-    const { argVar, bodyExpr } = this
-    return bodyExpr.freeTermVariables()
-      .delete(argVar)
-  }
-
-  freeTypeVariables() {
-    const { argType, bodyExpr } = this
-    return bodyExpr.freeTypeVariables()
-      .union(argType.freeTypeVariables())
-  }
-
-  // bindTermVariable :: TermVariable -> Expression
-  bindTermVariable(termVar, expr) {
+  // bindTerm :: TermVariable -> Expression
+  bindTerm(termVar, expr) {
     assertType(termVar, TermVariable)
     assertType(expr, Expression)
 
-    if(termVar === this[$termVar]) return this
+    const { argVar, argType, bodyExpr } = this
 
-    const bodyExpr = this[$bodyExpr]
-    const newBodyExpr = bodyExpr.bindTermVariable(termVar, expr)
+    if(termVar === argVar) return this
 
-    if(newBodyExpr === bodyExpr) return this
+    if(expr.freeTypeVariables().has(termVar)) {
+      const argVar2 = new TermVariable(argVar.name)
+      const bodyExpr2 = bodyExpr.bindTerm(argVar, argVar2)
+      const newBodyExpr = bodyExpr2.bindTerm(termVar, expr)
 
-    return new LambdaExpression(termVar, termType, newBodyExpr)
+      return new TermLambdaExpression(argVar2, argType, newBodyExpr)
+
+    } else {
+      const newBodyExpr = bodyExpr.bindTerm(termVar, expr)
+
+      if(newBodyExpr === bodyExpr) return this
+
+      return new TermLambdaExpression(argVar, argType, newBodyExpr)
+    }
   }
 
-  bindType(typeVar, typeExpr) {
+  bindType(typeVar, type) {
     assertType(typeVar, TypeVariable)
-    assertType(type, TypeExpression)
-
-    if(!this.freeTypeVariables().has(typeVar))
-      return this
+    assertType(type, Type)
 
     const { argVar, argType, bodyExpr } = this
-    const newArgType = argType.bindType(typeVar, typeExpr.getType())
-    const newBodyExpr = bodyExpr.bindType(typeVar, typeExpr)
+    const newArgType = argType.bindType(typeVar, type.getType())
+    const newBodyExpr = bodyExpr.bindType(typeVar, type)
 
-    return new LambdaExpression(argVar, newArgType, newBodyExpr)
+    if((newArgType === argType) && (newBodyExpr === bodyExpr))
+      return this
+
+    return new TermLambdaExpression(argVar, newArgType, newBodyExpr)
   }
 
+  isTerminal() {
+    return true
+  }
+
+  // applyExpr :: Expression -> Expression
+  // Term application to the lambda expression
   applyExpr(expr) {
     assertType(expr, Expression)
 
     const { argVar, argType, bodyExpr } = this
-    typeCheck(argType, expr.getType())
+    argType.typeCheck(expr.getType())
 
     return bodyExpr.bindTermVariable(argVar, expr)
   }

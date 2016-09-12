@@ -1,6 +1,16 @@
+import { assertType } from '../core/assert'
+import { TermVariable, TypeVariable } from '../core/variable'
 
-export const TermApplication = ExpressionClass(
-class extends Expression {
+import { Type } from '../type/type'
+import { ArrowType } from '../type/arrow'
+
+import { Expression } from './expression'
+import { TermLambdaExpression } from './term-lambda'
+
+const $leftExpr = Symbol('@leftExpr')
+const $rightExpr = Symbol('@rightExpr')
+
+export class TermApplication extends Expression {
   constructor(leftExpr, rightExpr) {
     assertType(leftExpr, Expression)
     assertType(rightExpr, Expression)
@@ -28,6 +38,7 @@ class extends Expression {
   }
 
   getType(env) {
+    // Term application reduces the left type from (a -> b) to b
     return this.leftExpr.getType(env).rightType
   }
 
@@ -35,12 +46,6 @@ class extends Expression {
     const { leftExpr, rightExpr } = this
     return leftExpr.freeTermVariables()
       .union(rightExpr.freeTermVariables())
-  }
-
-  freeTypeVariables() {
-    const { leftExpr, rightExpr } = this
-    return leftExpr.freeTypeVariables()
-      .union(rightExpr.freeTypeVariables())
   }
 
   bindTerm(termVar, expr) {
@@ -62,31 +67,36 @@ class extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    if(!this.freeTypeVariables().has(typeVar))
-      return this
-
     const { leftExpr, rightExpr } = this
 
     const newLeftExpr = leftExpr.bindType(typeVar, type)
     const newRightExpr = rightExpr.bindType(typeVar, type)
 
+    if((newLeftExpr === leftExpr) && (newRightExpr === rightExpr))
+      return this
+
     return new TermApplication(newLeftExpr, newRightExpr)
   }
 
-  reduce() {
+  evaluate() {
     const { leftExpr, rightExpr } = this
 
-    const newLeftExpr = leftExpr.reduce()
-    const newRightExpr = rightExpr.reduce()
+    const newLeftExpr = leftExpr.evaluate()
+    const newRightExpr = rightExpr.evaluate()
 
-    if(leftExpr === newLeftExpr && rightExpr === newRightExpr) {
+    if(leftExpr === newLeftExpr && rightExpr === newRightExpr)
       return this
-    }
 
-    if(newLeftExpr instanceof LambdaExpression) {
-      return newLeftExpr.applyTerm(newRightExpr).reduce()
+    if((newLeftExpr instanceof TermLambdaExpression) &&
+        newRightExpr.isTerminal())
+    {
+      return newLeftExpr.applyExpr(newRightExpr).evaluate()
     } else {
       return new TermApplication(newLeftExpr, newRightExpr)
     }
   }
-})
+
+  isTerminal() {
+    return false
+  }
+}

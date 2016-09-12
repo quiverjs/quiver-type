@@ -1,39 +1,78 @@
+import { assertList, assertType, assertFunction } from '../core/assert'
+import { Type } from '../type/type'
 
-class FunctionExpression extends Expression {
-  // constructor :: List TermVariable -> List Type -> Type -> Function -> ()
-  constructor(argVars, argTypes, returnType, func) {
-    assertList(argVars)
-    assertList(inputTypes)
+import { Expression } from './expression'
 
-    for(const argVar of argVars) {
-      assertType(argVar, TermVariable)
-    }
+const $argExprs = Symbol('@argExprs')
+const $returnType = Symbol('@returnType')
+const $func = Symbol('@func')
 
-    for(const type of argTypes) {
-      assertType(type, Type)
-    }
+export class FunctionExpression extends Expression {
+  // constructor :: List Expression -> Type -> Function -> ()
+  constructor(argExprs, returnType, func) {
+    assertList(argExprs)
 
-    if(argVars.size !== argTypes.size) {
-      throw new Error('size of argument variables and types must match')
+    for(const argVar of argExprs) {
+      assertType(argVar, Expression)
     }
 
     assertType(returnType, Type)
     assertFunction(func)
 
-    const inputTypeVars = inputTypes.reduce(
-      (set, type) => set.union(type.freeTypeVariables()),
-      Set())
-
-    const returnTypeVars = returnType.freeTypeVariables()
-
-    if(!returnTypeVars.isSubset(inputTypeVars)) {
-      throw new Error('return type variables must be derived from input type')
-    }
-
-    this[$argVars] = argVars
-    this[$inputTypes] = inputTypes
+    this[$argExprs] = argExprs
     this[$returnType] = returnType
     this[$func] = func
   }
 
+  get argExprs() {
+    return this[$argExprs]
+  }
+
+  get returnType() {
+    return this[$returnType]
+  }
+
+  get func() {
+    return this[$func]
+  }
+
+  freeTermVariables() {
+    return this.argExprs.reduce(
+      (result, argExpr) =>
+        result.union(argExpr.freeTermVariables()),
+      Set())
+  }
+
+  exprType(env) {
+    return this.returnType
+  }
+
+  bindTerm(termVar, expr) {
+    return this
+  }
+
+  bindType() {
+    return this
+  }
+
+  reduce() {
+    return this
+  }
+
+  evaluate() {
+    const args = this.argExprs.map(argExpr => {
+      const reducedExpr = argExpr.reduce()
+      if(!reducedExpr.isValue()) {
+        throw new Error('argument expression cannot be evaluated to value')
+      }
+
+      return reducedExpr.evaluate()
+    })
+
+    return this.func(...args)
+  }
+
+  isTerminal() {
+    return true
+  }
 }
