@@ -10,6 +10,8 @@ export class ArrowKind extends Kind {
     assertType(leftKind, Kind)
     assertType(rightKind, Kind)
 
+    super()
+
     this[$leftKind] = leftKind
     this[$rightKind] = rightKind
   }

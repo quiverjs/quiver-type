@@ -15,6 +15,8 @@ export class TypeLambdaExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(bodyExpr, Expression)
 
+    super()
+
     this[$typeVar] = typeVar
     this[$bodyExpr] = bodyExpr
   }

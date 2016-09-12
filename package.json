@@ -12,6 +12,7 @@
     "url": "git@github.com:quiverjs/quiver-signal.type"
   },
   "dependencies": {
+    "immutable": "^3.8.1",
     "quiver-util": "^1.2.5"
   },
   "devDependencies": {

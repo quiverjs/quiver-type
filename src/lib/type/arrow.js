@@ -1,7 +1,7 @@
 import { assertType } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
-import { typeKind } from '../kind/type-kind'
+import { typeKind } from '../kind/type'
 
 import { Type } from './type'
 
@@ -13,6 +13,8 @@ export class ArrowType extends Type {
   constructor(leftType, rightType) {
     assertType(leftType, Type)
     assertType(rightType, Type)
+
+    super()
 
     this[$leftType] = leftType
     this[$rightType] = rightType

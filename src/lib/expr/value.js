@@ -1,6 +1,6 @@
 import { assertType } from '../core/assert'
 
-import { ConstantType } from '../type/constant'
+import { LiteralType } from '../type/literal'
 
 import { Expression } from './expression'
 
@@ -9,8 +9,10 @@ const $type = Symbol('@type')
 
 export class ValueExpression extends Expression {
   constructor(value, type) {
-    assertType(type, ConstantType)
-    type.checkInstance(value)
+    assertType(type, LiteralType)
+    type.typeCheckObject(value)
+
+    super()
 
     this[$value] = value
     this[$type] = type

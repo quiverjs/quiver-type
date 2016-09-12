@@ -11,6 +11,8 @@ export class VariableExpression extends Expression {
   constructor(termVar) {
     assertType(termVar, TermVariable)
 
+    super()
+
     this[$termVar] = termVar
   }
 

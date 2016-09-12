@@ -1,4 +1,3 @@
-
 export class Expression {
   constructor() {
     if(this.constructor === Expression)

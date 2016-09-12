@@ -18,6 +18,8 @@ export class TermLambdaExpression extends Expression {
     assertType(argType, Type)
     assertType(bodyExpr, Expression)
 
+    super()
+
     this[$argVar] = argVar
     this[$argType] = argType
     this[$bodyExpr] = bodyExpr

@@ -12,6 +12,8 @@ export class TypeConstructor extends Type {
     assertList(argTypes)
     assertFunction(func)
 
+    super()
+
     for(const argType of argTypes) {
       assertType(argType, Type)
     }

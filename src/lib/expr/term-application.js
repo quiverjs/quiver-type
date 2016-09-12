@@ -10,7 +10,7 @@ import { TermLambdaExpression } from './term-lambda'
 const $leftExpr = Symbol('@leftExpr')
 const $rightExpr = Symbol('@rightExpr')
 
-export class TermApplication extends Expression {
+export class TermApplicationExpression extends Expression {
   constructor(leftExpr, rightExpr) {
     assertType(leftExpr, Expression)
     assertType(rightExpr, Expression)
@@ -24,6 +24,8 @@ export class TermApplication extends Expression {
     const rightType = rightExpr.getType()
 
     argType.typeCheck(rightType)
+
+    super()
 
     this[$leftExpr] = leftExpr
     this[$rightExpr] = rightExpr
@@ -60,7 +62,7 @@ export class TermApplication extends Expression {
     const newLeftExpr = leftExpr.bindTerm(termVar, expr)
     const newRightExpr = rightExpr.bindTerm(termVar, expr)
 
-    return new TermApplication(newLeftExpr, newRightExpr)
+    return new TermApplicationExpression(newLeftExpr, newRightExpr)
   }
 
   bindType(typeVar, type) {
@@ -75,7 +77,7 @@ export class TermApplication extends Expression {
     if((newLeftExpr === leftExpr) && (newRightExpr === rightExpr))
       return this
 
-    return new TermApplication(newLeftExpr, newRightExpr)
+    return new TermApplicationExpression(newLeftExpr, newRightExpr)
   }
 
   evaluate() {
@@ -92,7 +94,7 @@ export class TermApplication extends Expression {
     {
       return newLeftExpr.applyExpr(newRightExpr).evaluate()
     } else {
-      return new TermApplication(newLeftExpr, newRightExpr)
+      return new TermApplicationExpression(newLeftExpr, newRightExpr)
     }
   }
 

@@ -15,6 +15,8 @@ export class ForAllType extends Type {
     assertType(typeVar, TypeVariable)
     assertType(bodyType, Type)
 
+    super()
+
     this[$typeVar] = typeVar
     this[$bodyType] = bodyType
   }

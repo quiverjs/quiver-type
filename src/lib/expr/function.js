@@ -19,6 +19,8 @@ export class FunctionExpression extends Expression {
     assertType(returnType, Type)
     assertFunction(func)
 
+    super()
+
     this[$argExprs] = argExprs
     this[$returnType] = returnType
     this[$func] = func
@@ -55,24 +57,22 @@ export class FunctionExpression extends Expression {
     return this
   }
 
-  reduce() {
-    return this
-  }
-
   evaluate() {
-    const args = this.argExprs.map(argExpr => {
-      const reducedExpr = argExpr.reduce()
-      if(!reducedExpr.isValue()) {
-        throw new Error('argument expression cannot be evaluated to value')
-      }
+    const { argExprs, returnType, func } = this
 
-      return reducedExpr.evaluate()
-    })
+    for(const argExpr of argExprs) {
+      if(!argExpr.isTerminal()) return this
+    }
 
-    return this.func(...args)
+    const resultExpr = this.func(...argExprs)
+
+    assertType(resultExpr, Expression)
+    returnType.typeCheck(resultExpr.exprType())
+
+    return resultExpr
   }
 
   isTerminal() {
-    return true
+    return false
   }
 }

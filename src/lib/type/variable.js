@@ -10,6 +10,8 @@ export class VariableType extends Type {
     assertType(typeVar, TypeVariable,
       'typeVar must be TypeVariable')
 
+    super()
+
     this[$typeVar] = typeVar
   }
 

@@ -22,6 +22,8 @@ export class TypeApplicationExpression extends Expression {
     assertType(exprType, ForAllType,
       'applied expression must have forall type')
 
+    super()
+
     this[$expr] = expr
     this[$type] = type
   }
