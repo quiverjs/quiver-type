@@ -33,11 +33,11 @@ export class ArrowType extends Type {
       .union(this.rightType.freeTypeVariables())
   }
 
-  typeCheck(env, targetType) {
+  typeCheck(targetType) {
     assertType(targetType, ArrowType)
 
-    this.leftType.typeCheck(env, targetType.leftType)
-    this.rightType.typeCheck(env, targetType.rightType)
+    this.leftType.typeCheck(targetType.leftType)
+    this.rightType.typeCheck(targetType.rightType)
   }
 
   bindType(typeVar, type) {

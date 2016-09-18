@@ -36,12 +36,12 @@ export class TypedVariableExpression extends Expression {
   exprType(env) {
     assertType(env, TypeEnv)
 
-    const type = env.get(this.termVar)
+    const { termVar, varType } = this
 
-    if(!type)
-      throw new Error('type of term variable is not bound in typeEnv')
+    const type = env.get(termVar)
+    if(!type) return varType
 
-    this.varType.typeCheck(type)
+    varType.typeCheck(type)
 
     return type
   }

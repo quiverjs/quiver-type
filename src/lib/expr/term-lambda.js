@@ -69,7 +69,7 @@ export class TermLambdaExpression extends Expression {
 
     if(termVar === argVar) return this
 
-    if(expr.freeTypeVariables().has(termVar)) {
+    if(expr.freeTermVariables().has(termVar)) {
       const argVar2 = new TermVariable(argVar.name)
       const bodyExpr2 = bodyExpr.bindTerm(argVar, argVar2)
       const newBodyExpr = bodyExpr2.bindTerm(termVar, expr)

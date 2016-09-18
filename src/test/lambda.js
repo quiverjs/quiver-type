@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  TermVariable, Set, List
+  TermVariable, Set, List, TypeEnv
 } from '../lib/core'
 
 import {
@@ -13,7 +13,7 @@ import {
 } from '../lib/expr'
 
 import {
-  LiteralType
+  LiteralType, ArrowType
 } from '../lib/type'
 
 const assertNumber = num => {
@@ -28,6 +28,10 @@ const assertString = str => {
 
 const equals = function(result, expected, message) {
   return this.ok(result.equals(expected), message)
+}
+
+const equalsType = function(result, expectedType) {
+  expectedType.typeCheck(result.exprType(new TypeEnv()))
 }
 
 test('term lambda test', assert => {
@@ -86,7 +90,7 @@ test('term lambda test', assert => {
     assert.end()
   })
 
-  test('ignored variable lambda', assert => {
+  assert.test('ignored variable lambda', assert => {
     const xVar = new TermVariable('x')
 
     const constantExpr = new ValueExpression('foo', StringType)
@@ -102,6 +106,59 @@ test('term lambda test', assert => {
     const resultExpr = appliedExpr.evaluate()
     assert.equal(resultExpr, constantExpr)
     assert.equal(resultExpr.value, 'foo')
+
+    assert.end()
+  })
+
+  assert.test('two variables lambda', assert => {
+    const xVar = new TermVariable('x')
+    const yVar = new TermVariable('y')
+
+    const plusExpr = new FunctionExpression(
+      List([
+        new TypedVariableExpression(xVar, NumberType),
+        new TypedVariableExpression(yVar, NumberType)
+      ]),
+      NumberType,
+      (xExpr, yExpr) => {
+        const result = xExpr.value + yExpr.value
+        return new ValueExpression(result, NumberType)
+      })
+
+    const yPlusLambda = new TermLambdaExpression(
+      yVar, NumberType, plusExpr)
+
+    assert::equals(yPlusLambda.freeTermVariables(), Set([xVar]))
+
+    const plusLambda = new TermLambdaExpression(
+      xVar, NumberType, yPlusLambda)
+
+    assert::equals(plusLambda.freeTermVariables(), Set())
+
+    const plusType = new ArrowType(NumberType, new ArrowType(NumberType, NumberType))
+    assert::equalsType(plusLambda, plusType)
+
+    const arg1 = new ValueExpression(2, NumberType)
+    const plusTwoLambda = new TermApplicationExpression(
+      plusLambda, arg1
+    ).evaluate()
+
+    const plusTwoType = new ArrowType(NumberType, NumberType)
+    assert::equalsType(plusTwoLambda, plusTwoType)
+
+    const arg2 = new ValueExpression(3, NumberType)
+    const result1 = new TermApplicationExpression(
+      plusTwoLambda, arg2
+    ).evaluate()
+
+    assert.equal(result1.value, 5)
+
+    const arg3 = new ValueExpression(4, NumberType)
+    const result2 = new TermApplicationExpression(
+      plusTwoLambda, arg3
+    ).evaluate()
+
+    assert.equal(result2.value, 6)
 
     assert.end()
   })
