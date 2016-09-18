@@ -1,3 +1,4 @@
+import { TypeEnv } from '../core/env'
 import { assertType } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
@@ -15,13 +16,15 @@ export class TermApplicationExpression extends Expression {
     assertType(leftExpr, Expression)
     assertType(rightExpr, Expression)
 
-    const leftType = leftExpr.getType()
+    const env = new TypeEnv()
+
+    const leftType = leftExpr.exprType(env)
 
     assertType(leftType, ArrowType,
       'type of leftExpr must be arrow type')
 
     const argType = leftType.leftType
-    const rightType = rightExpr.getType()
+    const rightType = rightExpr.exprType(env)
 
     argType.typeCheck(rightType)
 
@@ -86,15 +89,17 @@ export class TermApplicationExpression extends Expression {
     const newLeftExpr = leftExpr.evaluate()
     const newRightExpr = rightExpr.evaluate()
 
-    if(leftExpr === newLeftExpr && rightExpr === newRightExpr)
-      return this
-
     if((newLeftExpr instanceof TermLambdaExpression) &&
         newRightExpr.isTerminal())
     {
       return newLeftExpr.applyExpr(newRightExpr).evaluate()
+
+    } else if(leftExpr === newLeftExpr && rightExpr === newRightExpr) {
+      return this
+
     } else {
       return new TermApplicationExpression(newLeftExpr, newRightExpr)
+
     }
   }
 

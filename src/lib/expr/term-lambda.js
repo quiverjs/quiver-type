@@ -94,6 +94,10 @@ export class TermLambdaExpression extends Expression {
     return new TermLambdaExpression(argVar, newArgType, newBodyExpr)
   }
 
+  evaluate() {
+    return this
+  }
+
   isTerminal() {
     return true
   }
@@ -104,8 +108,8 @@ export class TermLambdaExpression extends Expression {
     assertType(expr, Expression)
 
     const { argVar, argType, bodyExpr } = this
-    argType.typeCheck(expr.getType())
+    argType.typeCheck(expr.exprType(new TypeEnv()))
 
-    return bodyExpr.bindTermVariable(argVar, expr)
+    return bodyExpr.bindTerm(argVar, expr)
   }
 }
