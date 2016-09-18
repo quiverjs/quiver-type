@@ -10,7 +10,7 @@ const $returnType = Symbol('@returnType')
 const $func = Symbol('@func')
 
 export class FunctionExpression extends Expression {
-  // constructor :: List Expression -> List Type -> Type -> Function -> ()
+  // constructor :: List Expression -> Type -> Function -> ()
   constructor(argExprs, returnType, func) {
     assertList(argExprs)
 
@@ -46,6 +46,10 @@ export class FunctionExpression extends Expression {
   }
 
   exprType(env) {
+    for(const expr of this.argExprs) {
+      expr.exprType(env)
+    }
+
     return this.returnType
   }
 

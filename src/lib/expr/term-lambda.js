@@ -18,6 +18,11 @@ export class TermLambdaExpression extends Expression {
     assertType(argType, Type)
     assertType(bodyExpr, Expression)
 
+    const typeEnv = new TypeEnv()
+      .set(argVar, argType)
+
+    bodyExpr.exprType(typeEnv)
+
     super()
 
     this[$argVar] = argVar

@@ -41,7 +41,7 @@ export class TypedVariableExpression extends Expression {
     if(!type)
       throw new Error('type of term variable is not bound in typeEnv')
 
-    this.type.typeCheck(type)
+    this.varType.typeCheck(type)
 
     return type
   }

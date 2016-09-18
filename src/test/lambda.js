@@ -79,6 +79,30 @@ test('term lambda test', assert => {
       new TermApplicationExpression(idNumLambda, idNumLambda)
     }, 'type check should reject accept lambda argument')
 
+    assert.throws(() => {
+      new TermLambdaExpression(xVar, StringType, idNumExpr)
+    }, 'function expr should type check lambda bound arg type')
+
+    assert.end()
+  })
+
+  test('ignored variable lambda', assert => {
+    const xVar = new TermVariable('x')
+
+    const constantExpr = new ValueExpression('foo', StringType)
+
+    const constantLambda = new TermLambdaExpression(
+      xVar, NumberType, constantExpr)
+
+    const argExpr = new ValueExpression(8, NumberType)
+
+    const appliedExpr = new TermApplicationExpression(
+      constantLambda, argExpr)
+
+    const resultExpr = appliedExpr.evaluate()
+    assert.equal(resultExpr, constantExpr)
+    assert.equal(resultExpr.value, 'foo')
+
     assert.end()
   })
 })
