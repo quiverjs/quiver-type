@@ -66,7 +66,7 @@ export class TypedVariableExpression extends Expression {
     if(newVarType === varType)
       return this
 
-    return new TypedVariableExpression(typevar, newVarType)
+    return new TypedVariableExpression(termVar, newVarType)
   }
 
   evaluate() {

@@ -24,6 +24,11 @@ export class Type {
     throw new Error('Not implemented')
   }
 
+  // compileType :: () -> CompiledType
+  compileType() {
+    throw new Error('Not implemented')
+  }
+
   // isTerminal :: Bool
   // Terminal type allows type application to proceed,
   // similar to eager evaluation in term lambda application.

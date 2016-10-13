@@ -1,5 +1,8 @@
-import { Set, unionMap } from '../core/container'
-import { assertList, assertType, assertFunction } from '../core/assert'
+import { mapUnique } from '../core/util'
+import { unionMap } from '../core/container'
+import {
+  assertListContent, assertType, assertFunction
+} from '../core/assert'
 
 import { Type } from '../type/type'
 
@@ -9,14 +12,10 @@ const $argExprs = Symbol('@argExprs')
 const $returnType = Symbol('@returnType')
 const $func = Symbol('@func')
 
-export class FunctionExpression extends Expression {
+export class BodyExpression extends Expression {
   // constructor :: List Expression -> Type -> Function -> ()
   constructor(argExprs, returnType, func) {
-    assertList(argExprs)
-
-    for(const argVar of argExprs) {
-      assertType(argVar, Expression)
-    }
+    assertListContent(argExprs, Expression)
 
     assertType(returnType, Type)
     assertFunction(func)
@@ -56,24 +55,27 @@ export class FunctionExpression extends Expression {
   bindTerm(termVar, expr) {
     const { argExprs, returnType, func } = this
 
-    let exprModified = false
-    const newArgExprs = argExprs.map(
-      argExpr => {
-        const newArgExpr = argExpr.bindTerm(termVar, expr)
+    const [newArgExprs, exprModified] = argExprs::mapUnique(
+      argExpr => argExpr.bindTerm(termVar, expr))
 
-        if(newArgExpr !== argExpr)
-          exprModified = true
-
-        return newArgExpr
-      })
-
-    if(!exprModified) return this
-
-    return new FunctionExpression(newArgExprs, returnType, func)
+    if(exprModified) {
+      return new BodyExpression(newArgExprs, returnType, func)
+    } else {
+      return this
+    }
   }
 
-  bindType() {
-    return this
+  bindType(typeVar, type) {
+    const { argExprs, returnType, func } = this
+
+    const [newArgExprs, exprModified] = argExprs::mapUnique(
+      argExpr => argExpr.bindType(typeVar, type))
+
+    if(exprModified) {
+      return new BodyExpression(newArgExprs, returnType, func)
+    } else {
+      return this
+    }
   }
 
   evaluate() {
@@ -83,7 +85,7 @@ export class FunctionExpression extends Expression {
       if(!argExpr.isTerminal()) return this
     }
 
-    const resultExpr = this.func(...argExprs)
+    const resultExpr = func(...argExprs)
 
     assertType(resultExpr, Expression)
     returnType.typeCheck(resultExpr.exprType())

@@ -6,7 +6,7 @@ import {
 
 import {
   ValueExpression,
-  FunctionExpression,
+  BodyExpression,
   TypedVariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
@@ -16,23 +16,9 @@ import {
   LiteralType, ArrowType
 } from '../lib/type'
 
-const assertNumber = num => {
-  if(typeof(num) !== 'number')
-    throw new TypeError('argument must be number')
-}
-
-const assertString = str => {
-  if(typeof(str) !== 'string')
-    throw new TypeError('argument must be string')
-}
-
-const equals = function(result, expected, message) {
-  return this.ok(result.equals(expected), message)
-}
-
-const equalsType = function(result, expectedType) {
-  expectedType.typeCheck(result.exprType(new TypeEnv()))
-}
+import {
+  assertNumber, assertString, equals, equalsType
+} from './util'
 
 test('term lambda test', assert => {
   const NumberType = new LiteralType(assertNumber)
@@ -41,11 +27,13 @@ test('term lambda test', assert => {
   assert.test('identity test', assert => {
     const xVar = new TermVariable('x')
 
-    const idNumExpr = new FunctionExpression(
+    const idNumExpr = new BodyExpression(
       List([new TypedVariableExpression(xVar, NumberType)]),
       NumberType,
       x => x)
 
+    // idNum :: Number -> Number
+    // idNum = \x :: Number -> x
     const idNumLambda = new TermLambdaExpression(
       xVar, NumberType, idNumExpr)
 
@@ -114,7 +102,7 @@ test('term lambda test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const plusExpr = new FunctionExpression(
+    const plusExpr = new BodyExpression(
       List([
         new TypedVariableExpression(xVar, NumberType),
         new TypedVariableExpression(yVar, NumberType)

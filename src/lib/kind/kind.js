@@ -1,4 +1,3 @@
-
 export class Kind {
   constructor() {
     if(this.constructor === Kind)

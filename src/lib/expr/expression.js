@@ -34,6 +34,20 @@ export class Expression {
     throw new Error('not implemented')
   }
 
+  // compileBody :: List TypedVariable -> Function
+  compileBody(argSpecs) {
+    throw new Error('not implemented')
+  }
+
+  // compileExpr :: List TypedVariable -> Function
+  compileLambda(argSpecs) {
+    throw new Error('not implemented')
+  }
+
+  compileApplication(argSpecs, argExprs) {
+    throw new Error('not implemented')
+  }
+
   // isTerminal :: () -> Bool
   // Used to signal that the expression is terminal
   // so that lambda application can proceed with call by value

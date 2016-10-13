@@ -2,6 +2,7 @@ import { assertType } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { typeKind } from '../kind/type'
+import { CompiledArrowType } from '../compiled/arrow'
 
 import { Type } from './type'
 
@@ -57,6 +58,10 @@ export class ArrowType extends Type {
 
   typeKind(env) {
     return typeKind
+  }
+
+  compileType() {
+    return new CompiledArrowType(this)
   }
 
   isTerminal() {

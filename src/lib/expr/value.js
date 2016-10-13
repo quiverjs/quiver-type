@@ -8,6 +8,9 @@ import { Expression } from './expression'
 const $value = Symbol('@value')
 const $type = Symbol('@type')
 
+const constantFunc = value =>
+  () => value
+
 export class ValueExpression extends Expression {
   constructor(value, type) {
     assertType(type, LiteralType)
@@ -45,6 +48,10 @@ export class ValueExpression extends Expression {
 
   evaluate() {
     return this
+  }
+
+  compileLambda(argSpecs) {
+    return constantFunc(this.value)
   }
 
   isTerminal() {

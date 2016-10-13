@@ -1,6 +1,8 @@
 import { TypeEnv } from '../core/env'
-import { assertType } from '../core/assert'
+import { List } from '../core/container'
+import { TypedVariable } from '../core/typed-variable'
 import { TermVariable, TypeVariable } from '../core/variable'
+import { assertType, assertListContent } from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
@@ -101,6 +103,40 @@ export class TermLambdaExpression extends Expression {
 
   evaluate() {
     return this
+  }
+
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, TypedVariable)
+
+    return this.compileLambda(List())
+  }
+
+  compileLambda(argSpecs) {
+    assertListContent(argSpecs, TypedVariable)
+
+    const { argVar, argType, bodyExpr } = this
+
+    const compiledType = argType.compileType()
+
+    const inArgSpecs = argSpecs.push([argVar, compiledType])
+
+    if(bodyExpr instanceof TermLambdaExpression) {
+      return bodyExpr.compileLambda(inArgSpecs)
+    } else {
+      return bodyExpr.compileBody(inArgSpecs)
+    }
+  }
+
+  compileApplication(argSpecs, argFuncs) {
+    assertListContent(argSpecs, TypedVariable)
+    assertListContent(argFuncs, Function)
+
+    const compiledFunc = this.compileLambda(List())
+
+    return (...args) => {
+      const inArgs = argFuncs.map(argFunc => argFunc(args))
+      return compiledFunc(inArgs)
+    }
   }
 
   isTerminal() {

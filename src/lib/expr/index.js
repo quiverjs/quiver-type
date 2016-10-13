@@ -2,7 +2,7 @@ export { Expression } from './expression'
 
 export { ValueExpression } from './value'
 
-export { FunctionExpression } from './function'
+export { BodyExpression } from './body'
 
 export { VariableExpression } from './variable'
 

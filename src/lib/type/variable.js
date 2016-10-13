@@ -51,6 +51,10 @@ export class VariableType extends Type {
       throw new Error('kind of type variable is not bound in kindEnv')
   }
 
+  compileType() {
+    throw new Error('Variable Type cannot be compiled')
+  }
+
   isTerminal() {
     return false
   }

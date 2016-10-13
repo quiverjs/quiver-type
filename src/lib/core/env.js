@@ -38,4 +38,7 @@ const EnvClass = (Key, Value) =>
   }
 
 export const TypeEnv = EnvClass(TermVariable, Type)
+
 export const KindEnv = EnvClass(TypeVariable, Kind)
+
+export const emptyEnv = new TypeEnv()

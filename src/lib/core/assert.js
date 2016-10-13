@@ -15,3 +15,11 @@ export const assertList = (list, message) => {
     throw new TypeError(errMessage)
   }
 }
+
+export const assertListContent = (list, ElementType, message) => {
+  assertList(list)
+
+  for(const element of list) {
+    assertType(element, ElementType, message)
+  }
+}

@@ -10,7 +10,7 @@ export class LiteralType extends Type {
   // constructor :: (Any -> Bool) -> Exception
   constructor(typeChecker) {
     assertFunction(typeChecker)
-    
+
     super()
 
     this[$typeChecker] = typeChecker

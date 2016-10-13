@@ -67,6 +67,10 @@ export class ForAllType extends Type {
     return new ArrowKind(typeKind, bodyType.typeKind(env))
   }
 
+  compileType() {
+    throw new Error('ForAll Type cannot be compiled')
+  }
+
   isTerminal() {
     return true
   }

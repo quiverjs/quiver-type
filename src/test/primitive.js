@@ -7,7 +7,7 @@ import {
 import {
   ValueExpression,
   VariableExpression,
-  FunctionExpression,
+  BodyExpression,
   TypedVariableExpression
 } from '../lib/expr'
 
@@ -15,19 +15,9 @@ import {
   LiteralType
 } from '../lib/type'
 
-const equals = function(result, expected, message) {
-  return this.ok(result.equals(expected), message)
-}
-
-const assertNumber = num => {
-  if(typeof(num) !== 'number')
-    throw new TypeError('argument must be number')
-}
-
-const assertString = str => {
-  if(typeof(str) !== 'string')
-    throw new TypeError('argument must be string')
-}
+import {
+  assertNumber, assertString, equals
+} from './util'
 
 test('primitive type test', assert => {
   assert.test('value expr', assert => {
@@ -99,7 +89,7 @@ test('primitive type test', assert => {
       return new ValueExpression(result, NumberType)
     }
 
-    const plusExpr = new FunctionExpression(
+    const plusExpr = new BodyExpression(
       argExprs, NumberType, doPlus)
 
     assert::equals(plusExpr.freeTermVariables(),

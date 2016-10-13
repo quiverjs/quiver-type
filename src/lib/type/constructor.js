@@ -2,6 +2,8 @@ import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertList, assertType, assertFunction } from '../core/assert'
 
+import { typeKind } from '../kind/type'
+
 import { Type } from './type'
 
 const $argTypes = Symbol('@argTypes')
@@ -64,7 +66,7 @@ export class TypeConstructor extends Type {
   }
 
   typeKind(env) {
-    throw new Error('Not implemented')
+    return typeKind
   }
 
   isTerminal() {

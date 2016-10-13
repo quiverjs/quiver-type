@@ -1,6 +1,8 @@
 import { TypeEnv } from '../core/env'
-import { assertType } from '../core/assert'
+import { List } from '../core/container'
+import { TypedVariable } from '../core/typed-variable'
 import { TermVariable, TypeVariable } from '../core/variable'
+import { assertType, assertListContent } from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
@@ -101,6 +103,23 @@ export class TermApplicationExpression extends Expression {
       return new TermApplicationExpression(newLeftExpr, newRightExpr)
 
     }
+  }
+
+  compileBody(argSpecs) {
+    this.compileApplication(argSpecs, List())
+  }
+
+  compileApplication(argSpecs, argFuncs) {
+    assertListContent(argSpecs, TypedVariable)
+    assertListContent(argFuncs, Function)
+
+    const { leftExpr, rightExpr } = this
+
+    const argFunc = rightExpr.compileBody(argSpecs)
+
+    const inArgFuncs = argFuncs.push(argFunc)
+
+    return leftExpr.compileApplication(argSpecs, inArgFuncs)
   }
 
   isTerminal() {
