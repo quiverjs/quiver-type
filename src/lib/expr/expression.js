@@ -34,12 +34,12 @@ export class Expression {
     throw new Error('not implemented')
   }
 
-  // compileBody :: List TypedVariable -> Function
+  // compileBody :: List ArgSpec -> Function
   compileBody(argSpecs) {
     throw new Error('not implemented')
   }
 
-  // compileExpr :: List TypedVariable -> Function
+  // compileExpr :: List ArgSpec -> Function
   compileLambda(argSpecs) {
     throw new Error('not implemented')
   }

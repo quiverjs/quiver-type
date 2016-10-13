@@ -1,6 +1,6 @@
 import { TypeEnv } from '../core/env'
 import { List } from '../core/container'
-import { TypedVariable } from '../core/typed-variable'
+import { ArgSpec } from '../compiled/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 import { assertType, assertListContent } from '../core/assert'
 
@@ -106,19 +106,19 @@ export class TermLambdaExpression extends Expression {
   }
 
   compileBody(argSpecs) {
-    assertListContent(argSpecs, TypedVariable)
+    assertListContent(argSpecs, ArgSpec)
 
     return this.compileLambda(List())
   }
 
   compileLambda(argSpecs) {
-    assertListContent(argSpecs, TypedVariable)
+    assertListContent(argSpecs, ArgSpec)
 
     const { argVar, argType, bodyExpr } = this
 
     const compiledType = argType.compileType()
 
-    const inArgSpecs = argSpecs.push([argVar, compiledType])
+    const inArgSpecs = argSpecs.push(new ArgSpec(argVar, compiledType))
 
     if(bodyExpr instanceof TermLambdaExpression) {
       return bodyExpr.compileLambda(inArgSpecs)
@@ -128,7 +128,7 @@ export class TermLambdaExpression extends Expression {
   }
 
   compileApplication(argSpecs, argFuncs) {
-    assertListContent(argSpecs, TypedVariable)
+    assertListContent(argSpecs, ArgSpec)
     assertListContent(argFuncs, Function)
 
     const compiledFunc = this.compileLambda(List())

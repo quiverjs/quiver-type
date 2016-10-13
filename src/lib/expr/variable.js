@@ -1,7 +1,7 @@
 import { TypeEnv } from '../core/env'
 import { Set } from '../core/container'
 import { TermVariable } from '../core/variable'
-import { TypedVariable } from '../core/typed-variable'
+import { ArgSpec } from '../compiled/arg-spec'
 import { assertType, assertListContent } from '../core/assert'
 
 import { Expression } from './expression'
@@ -77,7 +77,7 @@ export class VariableExpression extends Expression {
   }
 
   compileBody(argSpecs) {
-    assertListContent(argSpecs, TypedVariable)
+    assertListContent(argSpecs, ArgSpec)
     const { termVar } = this
 
     const argIndex = findArgIndex(argSpecs, termVar)
