@@ -50,7 +50,7 @@ export class ValueExpression extends Expression {
     return this
   }
 
-  compileLambda(argSpecs) {
+  compileBody(argSpecs) {
     return constantFunc(this.value)
   }
 

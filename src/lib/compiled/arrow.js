@@ -5,6 +5,7 @@ import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { CompiledType } from './type'
+import { CompiledFunction } from './function'
 
 const $argTypes = Symbol('@argTypes')
 const $returnType = Symbol('@returnType')
@@ -52,22 +53,27 @@ export class CompiledArrowType extends CompiledType {
     return this[$returnType]
   }
 
-  typeCheck(func) {
-    assertFunction(func)
-    const funcType = func.type
+  typeCheck(compiledFunction) {
+    assertType(compiledFunction, CompiledFunction)
 
-    this.srcType.typeCheck(funcType)
+    this.srcType.typeCheck(compiledFunction.srcType)
   }
 
-  call(func, ...args) {
+  call(compiledFunction, ...args) {
+    this.typeCheck(compiledFunction)
+
+    return this.directCall(compiledFunction.func, ...args)
+  }
+
+  directCall(func, ...args) {
     const { argTypes, returnType } = this
-    const argsLength = argTypes.length
+    const argsLength = argTypes.size
 
     if(args.length !== argsLength)
       throw new TypeError('arguments size mismatch')
 
     for(let i=0; i<argsLength; i++) {
-      argTypes[i].typeCheck(args[i])
+      argTypes.get(i).typeCheck(args[i])
     }
 
     const result = func(...args)

@@ -16,4 +16,8 @@ export class CompiledType {
   typeCheck(object) {
     throw new Error('not implemented')
   }
+
+  call(fn, ...args) {
+    throw new Error('not implemented')
+  }
 }

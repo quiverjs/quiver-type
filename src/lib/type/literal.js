@@ -1,6 +1,7 @@
 import { assertType, assertFunction } from '../core/assert'
 
 import { typeKind } from '../kind/type'
+import { CompiledLiteralType } from '../compiled/literal'
 
 import { Type } from './type'
 
@@ -44,6 +45,10 @@ export class LiteralType extends Type {
 
   isTerminal() {
     return true
+  }
+
+  compileType() {
+    return new CompiledLiteralType(this)
   }
 
   typeCheckObject(object) {

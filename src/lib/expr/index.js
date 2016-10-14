@@ -4,6 +4,8 @@ export { ValueExpression } from './value'
 
 export { BodyExpression } from './body'
 
+export { CompilableExpression } from './compilable'
+
 export { VariableExpression } from './variable'
 
 export { TypedVariableExpression } from './typed-variable'

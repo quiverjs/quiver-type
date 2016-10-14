@@ -17,13 +17,11 @@ import {
 } from '../lib/type'
 
 import {
-  assertNumber, assertString, equals, equalsType
+  assertNumber, assertString, equals, equalsType,
+  NumberType, StringType
 } from './util'
 
 test('term lambda test', assert => {
-  const NumberType = new LiteralType(assertNumber)
-  const StringType = new LiteralType(assertString)
-
   assert.test('identity test', assert => {
     const xVar = new TermVariable('x')
 
@@ -70,10 +68,6 @@ test('term lambda test', assert => {
     assert.throws(() => {
       new TermApplicationExpression(idNumLambda, idNumLambda)
     }, 'type check should reject accept lambda argument')
-
-    assert.throws(() => {
-      new TermLambdaExpression(xVar, StringType, idNumExpr)
-    }, 'function expr should type check lambda bound arg type')
 
     assert.end()
   })

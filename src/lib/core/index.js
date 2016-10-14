@@ -7,7 +7,7 @@ export {
 } from './container'
 
 export {
-  TypeEnv, KindEnv
+  TypeEnv, KindEnv, emptyEnv
 } from './env'
 
 export {

@@ -1,7 +1,8 @@
 import { TypeEnv } from '../core/env'
 import { Set } from '../core/container'
-import { assertType } from '../core/assert'
+import { ArgSpec } from '../compiled/arg-spec'
 import { TermVariable } from '../core/variable'
+import { assertType, assertListContent } from '../core/assert'
 
 import { Type } from '../type/type'
 
@@ -9,6 +10,27 @@ import { Expression } from './expression'
 
 const $termVar = Symbol('@termVar')
 const $varType = Symbol('@varType')
+
+const findArgIndex = (argSpecs, termVar) => {
+  let index = -1
+  const argSize = argSpecs.size
+
+  for(let i=0; i<argSize; i++) {
+    const [argVar] = argSpecs.get(i)
+    if(argVar === termVar) {
+      index = i
+    }
+  }
+
+  if(index === -1)
+    throw new Error(`term variable ${termVar} not found in argSpecs.`)
+
+  return index
+}
+
+const argPicker = index =>
+  (...args) =>
+    args[index]
 
 export class TypedVariableExpression extends Expression {
   constructor(termVar, varType) {
@@ -67,6 +89,16 @@ export class TypedVariableExpression extends Expression {
       return this
 
     return new TypedVariableExpression(termVar, newVarType)
+  }
+
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+    const { termVar, varType } = this
+
+    const argIndex = findArgIndex(argSpecs, termVar)
+    varType.typeCheck(argSpecs.get(argIndex).compiledType.srcType)
+
+    return argPicker(argIndex)
   }
 
   evaluate() {

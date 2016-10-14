@@ -14,6 +14,12 @@ const $argExprs = Symbol('@argExprs')
 const $returnType = Symbol('@returnType')
 const $compiler = Symbol('@compiler')
 
+const argSpecsToEnv = argSpecs =>
+  argSpecs.reduce((env, argSpec) => {
+    const { termVar, compiledType } = argSpec
+    return env.set(termVar, compiledType.srcType)
+  }, emptyEnv)
+
 export class CompilableExpression extends Expression {
   // Compiler :: Function (List Type -> Function)
   // constructor :: List Expression -> Type -> Compiler -> ()
@@ -89,21 +95,24 @@ export class CompilableExpression extends Expression {
     const argExtractors = argExprs.map(
       expr => expr.compileBody(argSpecs))
 
-    const argCompiledTypes = argExprs.map(
-      expr => expr.exprType(emptyEnv).compileType())
+    const typeEnv = argSpecsToEnv(argSpecs)
 
-    const compiledBody = compiler(argCompiledTypes)
+    const argCompiledTypes = argExprs.map(
+      expr => expr.exprType(typeEnv).compileType())
+
+    const compiledBody = compiler(...argCompiledTypes)
+    assertType(compiledBody, Function)
 
     return (...args) => {
       const inArgs = argExtractors.map(
-        extractArgs => extractArgs(args))
+        extractArgs => extractArgs(...args))
 
-      return compiledBody(inArgs)
+      return compiledBody(...inArgs)
     }
   }
 
   evaluate() {
-    throw new Error('CompilableExpression cannot be evaluated')
+    return this
   }
 
   isTerminal() {

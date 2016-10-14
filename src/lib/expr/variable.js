@@ -13,7 +13,7 @@ const findArgIndex = (argSpecs, termVar) => {
   const argSize = argSpecs.size
 
   for(let i=0; i<argSize; i++) {
-    const [argVar] = argSpecs.get(i)
+    const argVar = argSpecs.get(i).termVar
     if(argVar === termVar) {
       index = i
     }

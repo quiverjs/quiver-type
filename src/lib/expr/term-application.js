@@ -13,6 +13,17 @@ import { TermLambdaExpression } from './term-lambda'
 const $leftExpr = Symbol('@leftExpr')
 const $rightExpr = Symbol('@rightExpr')
 
+const compileExprApplication = (expr, argExtractors) => {
+  const compiledBody = expr.compileBody(List())
+
+  return (...args) => {
+    const inArgs = argExtractors.map(
+      extractArg => extractArg(args))
+
+    return compiledBody(...inArgs)
+  }
+}
+
 export class TermApplicationExpression extends Expression {
   constructor(leftExpr, rightExpr) {
     assertType(leftExpr, Expression)
@@ -109,17 +120,22 @@ export class TermApplicationExpression extends Expression {
     this.compileApplication(argSpecs, List())
   }
 
-  compileApplication(argSpecs, argFuncs) {
+  compileApplication(argSpecs, argExtractors) {
     assertListContent(argSpecs, ArgSpec)
-    assertListContent(argFuncs, Function)
+    assertListContent(argExtractors, Function)
 
     const { leftExpr, rightExpr } = this
 
-    const argFunc = rightExpr.compileBody(argSpecs)
+    const argExtractor = rightExpr.compileBody(argSpecs)
 
-    const inArgFuncs = argFuncs.push(argFunc)
+    const inArgExtractors = argExtractors.unshift(argExtractor)
 
-    return leftExpr.compileApplication(argSpecs, inArgFuncs)
+    if(leftExpr instanceof TermApplicationExpression) {
+      return leftExpr.compileApplication(argSpecs, inArgExtractors)
+
+    } else {
+      return compileExprApplication(leftExpr, inArgExtractors)
+    }
   }
 
   isTerminal() {
