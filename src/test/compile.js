@@ -149,4 +149,36 @@ test('expression compilation test', assert => {
 
     assert.end()
   })
+
+  assert.test('partial application', assert => {
+    const xVar = new TermVariable('x')
+    const yVar = new TermVariable('y')
+    const zVar = new TermVariable('z')
+
+    const addExpr = new CompilableExpression(
+      List([
+        new VariableExpression(xVar),
+        new VariableExpression(yVar)
+      ]),
+      NumberType,
+      (xCompiledType, yCompiledType) =>
+        (x, y) => x+y)
+
+    const addLambda = new TermLambdaExpression(
+      xVar, NumberType,
+      new TermLambdaExpression(
+        yVar, NumberType, addExpr))
+
+    const adderLambda = new TermLambdaExpression(
+      zVar, NumberType,
+      new TermApplicationExpression(addLambda,
+        new TypedVariableExpression(zVar, NumberType)))
+
+    const compiledAdder = adderLambda.compileExpr()
+
+    const fiveAdder = compiledAdder.func(5)
+    assert.equals(fiveAdder(2), 7)
+
+    assert.end()
+  })
 })
