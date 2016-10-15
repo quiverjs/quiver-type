@@ -56,17 +56,17 @@ export class VariableExpression extends Expression {
     return Set([this.termVar])
   }
 
-  exprType(env) {
-    assertType(env, TypeEnv)
+  exprType() {
+    return this.varType
+  }
 
-    const { termVar, varType } = this
+  validateVarType(termVar, type) {
+    assertType(termVar, TermVariable)
+    assertType(type, Type)
 
-    const type = env.get(termVar)
-    if(!type) return varType
-
-    varType.typeCheck(type)
-
-    return type
+    if(this.termVar === termVar) {
+      this.varType.typeCheck(type)
+    }
   }
 
   bindTerm(termVar, expr) {
@@ -76,7 +76,7 @@ export class VariableExpression extends Expression {
     if(this.termVar !== termVar)
       return this
 
-    const exprType = expr.exprType(new TypeEnv())
+    const exprType = expr.exprType()
     this.varType.typeCheck(exprType)
 
     return expr

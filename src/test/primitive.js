@@ -40,12 +40,7 @@ test('primitive type test', assert => {
 
     assert.ok(varExpr.freeTermVariables().equals(Set([x])))
 
-    const typeEnv = new TypeEnv()
-
-    const typeEnv2 = typeEnv
-      .set(x, NumberType)
-
-    assert.equal(varExpr.exprType(typeEnv2), NumberType)
+    assert.equal(varExpr.exprType(), NumberType)
 
     assert.equal(varExpr.evaluate(), varExpr)
     assert.equal(varExpr.bindTerm(y, valueExpr), varExpr)

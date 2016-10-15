@@ -53,12 +53,14 @@ export class CompilableExpression extends Expression {
       argExpr => argExpr.freeTermVariables())
   }
 
-  exprType(env) {
-    for(const expr of this.argExprs) {
-      expr.exprType(env)
-    }
-
+  exprType() {
     return this.returnType
+  }
+
+  validateVarType(termVar, type) {
+    for(const expr of this.argExprs) {
+      expr.validateVarType(termVar, type)
+    }
   }
 
   bindTerm(termVar, expr) {
@@ -98,7 +100,7 @@ export class CompilableExpression extends Expression {
     const typeEnv = argSpecsToEnv(argSpecs)
 
     const argCompiledTypes = argExprs.map(
-      expr => expr.exprType(typeEnv).compileType())
+      expr => expr.exprType().compileType())
 
     const compiledBody = compiler(...argCompiledTypes)
     assertType(compiledBody, Function)

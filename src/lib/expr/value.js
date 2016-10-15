@@ -34,8 +34,12 @@ export class ValueExpression extends Expression {
     return Set()
   }
 
-  exprType(env) {
+  exprType() {
     return this.type
+  }
+
+  validateVarType(termVar, type) {
+    // no op
   }
 
   bindTerm() {

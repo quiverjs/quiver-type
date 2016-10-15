@@ -17,7 +17,7 @@ export const equals = function(result, expected, message) {
 }
 
 export const equalsType = function(result, expectedType) {
-  expectedType.typeCheck(result.exprType(emptyEnv))
+  expectedType.typeCheck(result.exprType())
 }
 
 export const NumberType = new LiteralType(assertNumber)

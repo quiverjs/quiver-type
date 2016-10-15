@@ -44,12 +44,14 @@ export class BodyExpression extends Expression {
       argExpr => argExpr.freeTermVariables())
   }
 
-  exprType(env) {
-    for(const expr of this.argExprs) {
-      expr.exprType(env)
-    }
-
+  exprType() {
     return this.returnType
+  }
+
+  validateVarType(termVar, type) {
+    for(const expr of this.argExprs) {
+      expr.validateVarType(termVar, type)
+    }
   }
 
   bindTerm(termVar, expr) {

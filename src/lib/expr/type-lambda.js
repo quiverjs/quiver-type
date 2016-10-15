@@ -8,6 +8,7 @@ import { Expression } from './expression'
 
 const $typeVar = Symbol('@typeVar')
 const $bodyExpr = Symbol('@bodyExpr')
+const $type = Symbol('@type')
 
 export class TypeLambdaExpression extends Expression {
   // constructor :: TypeVariable -> Expression -> ()
@@ -15,10 +16,13 @@ export class TypeLambdaExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(bodyExpr, Expression)
 
+    const type = new ForAllType(typeVar, bodyExpr.exprType())
+
     super()
 
     this[$typeVar] = typeVar
     this[$bodyExpr] = bodyExpr
+    this[$type] = type
   }
 
   get typeVar() {
@@ -34,9 +38,16 @@ export class TypeLambdaExpression extends Expression {
   }
 
   // Type of type lambda is Forall a. t
-  exprType(env) {
-    const { typeVar, bodyExpr } = this
-    return new ForAllType(typeVar, bodyExpr.getType(env))
+  exprType() {
+    return this[$type]
+  }
+
+  validateVarType(termVar, type) {
+    assertType(termVar, TermVariable)
+    assertType(type, Type)
+
+    const { bodyExpr } = this
+    bodyExpr.validateVarType(termVar, type)
   }
 
   bindType(targetTypeVar, type) {

@@ -10,9 +10,14 @@ export class Expression {
     throw new Error('not implemented')
   }
 
-  // exprType :: Map TermVariable Type -> Type
+  // exprType :: () -> Type
   // Get the type of the expression for type checking
-  exprType(env) {
+  exprType() {
+    throw new Error('not implemented')
+  }
+
+  // validateVarType :: TermVariable -> Type -> Exception
+  validateVarType(termVar, type) {
     throw new Error('not implemented')
   }
 

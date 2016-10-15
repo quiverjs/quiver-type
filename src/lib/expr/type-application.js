@@ -8,96 +8,97 @@ import { ForAllType } from '../type/forall'
 import { Expression } from './expression'
 import { TypeLambdaExpression } from './type-lambda'
 
-const $expr = Symbol('@expr')
-const $type = Symbol('@type')
+const $leftExpr = Symbol('@leftExpr')
+const $rightType = Symbol('@rightType')
+const $selfType = Symbol('@selfType')
 
 export class TypeApplicationExpression extends Expression {
   // constructor :: Expr -> Type -> ()
-  constructor(expr, type) {
-    assertType(expr, Expression)
-    assertType(type, Type)
+  constructor(leftExpr, rightType) {
+    assertType(leftExpr, TypeLambdaExpression)
+    assertType(rightType, Type)
 
-    const exprType = expr.exprType(new TypeEnv())
-
-    assertType(exprType, ForAllType,
-      'applied expression must have forall type')
+    const selfType = leftExpr.exprType().applyType(rightType)
 
     super()
 
-    this[$expr] = expr
-    this[$type] = type
+    this[$leftExpr] = leftExpr
+    this[$rightType] = rightType
+    this[$selfType] = selfType
   }
 
-  get expr() {
-    return this[$expr]
+  get leftExpr() {
+    return this[$leftExpr]
   }
 
-  get type() {
-    return this[$type]
+  get rightType() {
+    return this[$rightType]
   }
 
   freeTermVariables() {
-    return this.expr.freeTermVariables()
+    return this.leftExpr.freeTermVariables()
   }
 
-  exprType(env) {
-    assertType(env, TypeEnv)
+  exprType() {
+    return this[$selfType]
+  }
 
-    const { expr, type } = this
+  validateVarType(termVar, type) {
+    assertType(termVar, TermVariable)
+    assertType(type, Type)
 
-    // exprType should be ForAllType
-    const exprType = expr.exprType(env)
+    const { leftExpr, rightType } = this
 
-    assertType(exprType, ForAllType,
-      'applied expression must have forall type')
-
-    // Type of type lambda application is from (Forall a. e) to ([a->T] e)
-    return exprType.applyType(type)
+    try {
+      leftExpr.validateVarType(termVar, type)
+    } catch(err) {
+      leftExpr.applyType(rightType).validateVarType(termVar, type)
+    }
   }
 
   bindTerm(termVar, targetExpr) {
     assertType(termVar, TermVariable)
     assertType(targetExpr, Expression)
 
-    const { expr, type } = this
+    const { leftExpr, rightType } = this
 
     const newExpr = expr.bindTerm(termVar, targetExpr)
 
-    if(newExpr === expr)
+    if(newExpr === leftExpr)
       return this
 
-    return new TypeApplicationExpression(newExpr, type)
+    return new TypeApplicationExpression(newExpr, rightType)
   }
 
   bindType(typeVar, targetType) {
     assertType(typeVar, TypeVariable)
     assertType(targetType, Type)
 
-    const { expr, type } = this
+    const { leftExpr, rightType } = this
 
-    const newExpr = expr.bindType(typeVar, targetType)
-    const newType = type.bindType(typeVar, targetType)
+    const newExpr = leftExpr.bindType(typeVar, targetType)
+    const newType = rightType.bindType(typeVar, targetType)
 
-    if((newExpr === expr) && (newType === type))
+    if((newExpr === leftExpr) && (newType === rightType))
       return this
 
     return new TypeApplicationExpression(newExpr, newType)
   }
 
   evaluate() {
-    const { expr, type } = this
+    const { leftExpr, rightType } = this
 
-    const newExpr = expr.reduce
+    const newExpr = leftExpr.evaluate()
 
     // Only reduce the type application if type argument is terminal,
     // i.e. when type argument has no free type variable.
-    if((newExpr instanceof TypeLambdaExpression) && type.isTerminal()) {
-      return newExpr.applyType(type).evaluate()
+    if((newExpr instanceof TypeLambdaExpression) && rightType.isTerminal()) {
+      return newExpr.applyType(rightType).evaluate()
     }
 
-    if(newExpr === expr) return this
+    if(newExpr === leftExpr) return this
 
-    return new TypeApplicationExpression(newExpr, type)
+    return new TypeApplicationExpression(newExpr, rightType)
   }
 
   isTerminal() {

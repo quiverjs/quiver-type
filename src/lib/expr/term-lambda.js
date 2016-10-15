@@ -13,6 +13,7 @@ import { Expression } from './expression'
 const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
 const $bodyExpr = Symbol('@bodyExpr')
+const $type = Symbol('@type')
 
 const closureWrap = (body, closureSize, expr) =>
   (...closureArgs) => {
@@ -33,11 +34,15 @@ export class TermLambdaExpression extends Expression {
     assertType(argType, Type)
     assertType(bodyExpr, Expression)
 
+    bodyExpr.validateVarType(argVar, argType)
+    const type = new ArrowType(argType, bodyExpr.exprType())
+
     super()
 
     this[$argVar] = argVar
     this[$argType] = argType
     this[$bodyExpr] = bodyExpr
+    this[$type] = type
   }
 
   get argVar() {
@@ -59,15 +64,19 @@ export class TermLambdaExpression extends Expression {
       .delete(argVar)
   }
 
-  exprType(env) {
-    assertType(env, TypeEnv)
+  exprType() {
+    return this[$type]
+  }
 
-    const { argVar, argType, bodyExpr } = this
+  validateVarType(termVar, type) {
+    assertType(termVar, TermVariable)
+    assertType(type, Type)
 
-    const inEnv = env.set(argVar, argType)
-    const bodyType = bodyExpr.exprType(inEnv)
+    const { argVar, bodyExpr } = this
 
-    return new ArrowType(argType, bodyType)
+    if(termVar === argVar) return
+
+    bodyExpr.validateVarType(termVar, type)
   }
 
   // bindTerm :: TermVariable -> Expression
@@ -149,7 +158,7 @@ export class TermLambdaExpression extends Expression {
     assertType(expr, Expression)
 
     const { argVar, argType, bodyExpr } = this
-    argType.typeCheck(expr.exprType(new TypeEnv()))
+    argType.typeCheck(expr.exprType())
 
     return bodyExpr.bindTerm(argVar, expr)
   }

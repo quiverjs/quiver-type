@@ -11,6 +11,7 @@ import { ArrowType } from '../type/arrow'
 import { Expression } from './expression'
 import { TermLambdaExpression } from './term-lambda'
 
+const $type = Symbol('@type')
 const $leftExpr = Symbol('@leftExpr')
 const $rightExpr = Symbol('@rightExpr')
 
@@ -54,20 +55,24 @@ export class TermApplicationExpression extends Expression {
 
     const env = new TypeEnv()
 
-    const leftType = leftExpr.exprType(env)
+    const leftType = leftExpr.exprType()
 
     assertType(leftType, ArrowType,
       'type of leftExpr must be arrow type')
 
     const argType = leftType.leftType
-    const rightType = rightExpr.exprType(env)
+    const rightType = rightExpr.exprType()
 
     argType.typeCheck(rightType)
+
+    // Term application reduces the left type from (a -> b) to b
+    const selfType = leftType.rightType
 
     super()
 
     this[$leftExpr] = leftExpr
     this[$rightExpr] = rightExpr
+    this[$type] = selfType
   }
 
   get leftExpr() {
@@ -78,9 +83,18 @@ export class TermApplicationExpression extends Expression {
     return this[$rightExpr]
   }
 
-  exprType(env) {
-    // Term application reduces the left type from (a -> b) to b
-    return this.leftExpr.exprType(env).rightType
+  exprType() {
+    return this[$type]
+  }
+
+  validateVarType(termVar, type) {
+    assertType(termVar, TermVariable)
+    assertType(type, Type)
+
+    const { leftExpr, rightExpr } = this
+
+    leftExpr.validateVarType(termVar, type)
+    rightExpr.validateVarType(termVar, type)
   }
 
   freeTermVariables() {
@@ -170,6 +184,6 @@ export class TermApplicationExpression extends Expression {
   }
 
   isPartial() {
-    return this.exprType(emptyEnv) instanceof ArrowType
+    return this.exprType() instanceof ArrowType
   }
 }
