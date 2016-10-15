@@ -102,18 +102,29 @@ export class TermLambdaExpression extends Expression {
   }
 
   compileExpr() {
-    const func = this.compileBody(List())
+    const func = this.compileBody(List())()
 
     return new CompiledFunction(this, func)
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileBody(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
 
-    return this.compileLambda(List())
+    const closureSize = closureSpecs.size
+    const innerBody = this.compileLambda(closureSpecs, List())
+
+    return (...closureArgs) => {
+      if(closureArgs.length !== closureSize)
+        throw new Error('closure args length mismatch')
+
+      return (...inArgs) => {
+        return innerBody(...closureArgs, ...inArgs)
+      }
+    }
   }
 
-  compileLambda(argSpecs) {
+  compileLambda(closureSpecs, argSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
     assertListContent(argSpecs, ArgSpec)
 
     const { argVar, argType, bodyExpr } = this
@@ -123,9 +134,9 @@ export class TermLambdaExpression extends Expression {
     const inArgSpecs = argSpecs.push(new ArgSpec(argVar, compiledType))
 
     if(bodyExpr instanceof TermLambdaExpression) {
-      return bodyExpr.compileLambda(inArgSpecs)
+      return bodyExpr.compileLambda(closureSpecs, inArgSpecs)
     } else {
-      return bodyExpr.compileBody(inArgSpecs)
+      return bodyExpr.compileBody(closureSpecs.concat(inArgSpecs))
     }
   }
 

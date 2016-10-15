@@ -13,14 +13,16 @@ import { TermLambdaExpression } from './term-lambda'
 const $leftExpr = Symbol('@leftExpr')
 const $rightExpr = Symbol('@rightExpr')
 
-const compileExprApplication = (expr, argExtractors) => {
-  const compiledBody = expr.compileBody(List())
+const compileExprApplication = (expr, closureSpecs, argExtractors) => {
+  const compiledBody = expr.compileBody(closureSpecs)
 
   return (...args) => {
-    const inArgs = argExtractors.map(
-      extractArg => extractArg(args))
+    const closure = compiledBody(...args)
 
-    return compiledBody(...inArgs)
+    const inArgs = argExtractors.map(
+      extractArg => extractArg(...args))
+
+    return closure(...inArgs)
   }
 }
 
@@ -55,9 +57,9 @@ export class TermApplicationExpression extends Expression {
     return this[$rightExpr]
   }
 
-  getType(env) {
+  exprType(env) {
     // Term application reduces the left type from (a -> b) to b
-    return this.leftExpr.getType(env).rightType
+    return this.leftExpr.exprType(env).rightType
   }
 
   freeTermVariables() {
@@ -117,24 +119,24 @@ export class TermApplicationExpression extends Expression {
   }
 
   compileBody(argSpecs) {
-    this.compileApplication(argSpecs, List())
+    return this.compileApplication(argSpecs, List())
   }
 
-  compileApplication(argSpecs, argExtractors) {
-    assertListContent(argSpecs, ArgSpec)
+  compileApplication(closureSpecs, argExtractors) {
+    assertListContent(closureSpecs, ArgSpec)
     assertListContent(argExtractors, Function)
 
     const { leftExpr, rightExpr } = this
 
-    const argExtractor = rightExpr.compileBody(argSpecs)
+    const argExtractor = rightExpr.compileBody(closureSpecs)
 
     const inArgExtractors = argExtractors.unshift(argExtractor)
 
     if(leftExpr instanceof TermApplicationExpression) {
-      return leftExpr.compileApplication(argSpecs, inArgExtractors)
+      return leftExpr.compileApplication(closureSpecs, inArgExtractors)
 
     } else {
-      return compileExprApplication(leftExpr, inArgExtractors)
+      return compileExprApplication(leftExpr, closureSpecs, inArgExtractors)
     }
   }
 
