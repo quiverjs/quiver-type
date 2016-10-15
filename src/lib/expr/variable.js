@@ -1,12 +1,15 @@
 import { TypeEnv } from '../core/env'
 import { Set } from '../core/container'
-import { TermVariable } from '../core/variable'
 import { ArgSpec } from '../compiled/arg-spec'
+import { TermVariable } from '../core/variable'
 import { assertType, assertListContent } from '../core/assert'
+
+import { Type } from '../type/type'
 
 import { Expression } from './expression'
 
 const $termVar = Symbol('@termVar')
+const $varType = Symbol('@varType')
 
 const findArgIndex = (argSpecs, termVar) => {
   let index = -1
@@ -26,20 +29,27 @@ const findArgIndex = (argSpecs, termVar) => {
 }
 
 const argPicker = index =>
-  (...args) =>
-    args[index]
+  (...args) => {
+    return args[index]
+  }
 
 export class VariableExpression extends Expression {
-  constructor(termVar) {
+  constructor(termVar, varType) {
     assertType(termVar, TermVariable)
+    assertType(varType, Type)
 
     super()
 
     this[$termVar] = termVar
+    this[$varType] = varType
   }
 
   get termVar() {
     return this[$termVar]
+  }
+
+  get varType() {
+    return this[$varType]
   }
 
   freeTermVariables() {
@@ -49,10 +59,12 @@ export class VariableExpression extends Expression {
   exprType(env) {
     assertType(env, TypeEnv)
 
-    const type = env.get(this.termVar)
+    const { termVar, varType } = this
 
-    if(!type)
-      throw new Error('type of term variable is not bound in typeEnv')
+    const type = env.get(termVar)
+    if(!type) return varType
+
+    varType.typeCheck(type)
 
     return type
   }
@@ -61,27 +73,37 @@ export class VariableExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(expr, Expression)
 
-    if(this.termVar === termVar) {
-      return expr
-    } else {
+    if(this.termVar !== termVar)
       return this
-    }
+
+    const exprType = expr.exprType(new TypeEnv())
+    this.varType.typeCheck(exprType)
+
+    return expr
   }
 
   bindType(typeVar, type) {
-    return this
-  }
+    const { termVar, varType } = this
 
-  evaluate() {
-    return this
+    const newVarType = varType.bindType(typeVar, type)
+    if(newVarType === varType)
+      return this
+
+    return new VariableExpression(termVar, newVarType)
   }
 
   compileBody(argSpecs) {
     assertListContent(argSpecs, ArgSpec)
-    const { termVar } = this
+    const { termVar, varType } = this
 
     const argIndex = findArgIndex(argSpecs, termVar)
+    varType.typeCheck(argSpecs.get(argIndex).compiledType.srcType)
+
     return argPicker(argIndex)
+  }
+
+  evaluate() {
+    return this
   }
 
   isTerminal() {

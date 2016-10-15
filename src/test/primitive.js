@@ -7,8 +7,7 @@ import {
 import {
   ValueExpression,
   VariableExpression,
-  BodyExpression,
-  TypedVariableExpression
+  BodyExpression
 } from '../lib/expr'
 
 import {
@@ -37,15 +36,11 @@ test('primitive type test', assert => {
     const x = new TermVariable('x')
     const y = new TermVariable('y')
 
-    const varExpr = new VariableExpression(x)
+    const varExpr = new VariableExpression(x, NumberType)
 
     assert.ok(varExpr.freeTermVariables().equals(Set([x])))
 
     const typeEnv = new TypeEnv()
-
-    assert.throws(() => {
-      varExpr.exprType(typeEnv)
-    })
 
     const typeEnv2 = typeEnv
       .set(x, NumberType)
@@ -74,8 +69,8 @@ test('primitive type test', assert => {
     const yVar = new TermVariable('y')
 
     const argExprs = List([
-      new TypedVariableExpression(xVar, NumberType),
-      new TypedVariableExpression(yVar, NumberType)
+      new VariableExpression(xVar, NumberType),
+      new VariableExpression(yVar, NumberType)
     ])
 
     const doPlus = (xExpr, yExpr) => {

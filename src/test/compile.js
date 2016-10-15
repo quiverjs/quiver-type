@@ -6,10 +6,9 @@ import {
 
 import {
   ValueExpression,
-  VariableExpression,
-  TypedVariableExpression,
-  TermLambdaExpression,
   CompilableExpression,
+  VariableExpression,
+  TermLambdaExpression,
   TermApplicationExpression
 } from '../lib/expr'
 
@@ -39,7 +38,7 @@ test('expression compilation test', assert => {
   assert.test('variable expression', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
-    const varExpr = new VariableExpression(xVar)
+    const varExpr = new VariableExpression(xVar, NumberType)
 
     assert.throws(() => varExpr::compileExpr(List()))
 
@@ -55,13 +54,20 @@ test('expression compilation test', assert => {
     assert.throws(() => yxLambda.call('foo', 'bar'),
       'should type check arguments before calling compiled function')
 
+    assert.throws(() => yxLambda.call(1),
+      'should check argument size')
+
+    assert.throws(() => yxLambda.call(1, 2, 3),
+      'should check argument size')
+
     const func2 = yxLambda::compileExpr(List())
     assert.equals(func2.call(3, 4), 4)
 
     const yLambda = new TermLambdaExpression(
       yVar, NumberType, varExpr)
 
-    assert.throws(() => yLambda::compileExpr(List()))
+    assert.throws(() => yLambda::compileExpr(List()),
+      'should not able to compile expression with free variable')
 
     const xyLambda = new TermLambdaExpression(
       xVar, NumberType, yLambda)
@@ -83,8 +89,8 @@ test('expression compilation test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const xVarExpr = new VariableExpression(xVar)
-    const yVarExpr = new VariableExpression(yVar)
+    const xVarExpr = new VariableExpression(xVar, NumberType)
+    const yVarExpr = new VariableExpression(yVar, NumberType)
 
     const addExpr = new CompilableExpression(
       List([xVarExpr, yVarExpr]), NumberType,
@@ -118,8 +124,8 @@ test('expression compilation test', assert => {
 
     const addExpr = new CompilableExpression(
       List([
-        new VariableExpression(xVar),
-        new VariableExpression(yVar)
+        new VariableExpression(xVar, NumberType),
+        new VariableExpression(yVar, NumberType)
       ]),
       NumberType,
       (xCompiledType, yCompiledType) =>
@@ -134,7 +140,7 @@ test('expression compilation test', assert => {
       zVar, NumberType,
       new TermApplicationExpression(
         new TermApplicationExpression(addLambda,
-          new TypedVariableExpression(zVar, NumberType)),
+          new VariableExpression(zVar, NumberType)),
         new ValueExpression(5, NumberType)))
 
     const compiledFunction = addFiveLambda::compileExpr()
@@ -151,8 +157,8 @@ test('expression compilation test', assert => {
 
     const addExpr = new CompilableExpression(
       List([
-        new VariableExpression(xVar),
-        new VariableExpression(yVar)
+        new VariableExpression(xVar, NumberType),
+        new VariableExpression(yVar, NumberType)
       ]),
       NumberType,
       (xCompiledType, yCompiledType) =>
@@ -166,17 +172,18 @@ test('expression compilation test', assert => {
     const adderLambda = new TermLambdaExpression(
       zVar, NumberType,
       new TermApplicationExpression(addLambda,
-        new TypedVariableExpression(zVar, NumberType)))
+        new VariableExpression(zVar, NumberType)))
 
     const compiledAdder = adderLambda::compileExpr()
 
     const fiveAdder = compiledAdder.func(5)
-    
+
     assert.equals(fiveAdder.call(2), 7)
     assert.equals(fiveAdder.call(1), 6)
     assert.equals(fiveAdder.call(-2), 3)
 
     assert.throws(() => fiveAdder.call('foo'))
+    assert.throws(() => fiveAdder.call(2, 3))
 
     assert.end()
   })

@@ -7,7 +7,7 @@ import {
 import {
   ValueExpression,
   BodyExpression,
-  TypedVariableExpression,
+  VariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
 } from '../lib/expr'
@@ -26,7 +26,7 @@ test('term lambda test', assert => {
     const xVar = new TermVariable('x')
 
     const idNumExpr = new BodyExpression(
-      List([new TypedVariableExpression(xVar, NumberType)]),
+      List([new VariableExpression(xVar, NumberType)]),
       NumberType,
       x => x)
 
@@ -98,8 +98,8 @@ test('term lambda test', assert => {
 
     const plusExpr = new BodyExpression(
       List([
-        new TypedVariableExpression(xVar, NumberType),
-        new TypedVariableExpression(yVar, NumberType)
+        new VariableExpression(xVar, NumberType),
+        new VariableExpression(yVar, NumberType)
       ]),
       NumberType,
       (xExpr, yExpr) => {
