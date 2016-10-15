@@ -1,4 +1,3 @@
-import { TypeEnv } from '../core/env'
 import { assertType } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 

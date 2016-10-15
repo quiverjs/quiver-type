@@ -1,4 +1,3 @@
-import { TypeEnv } from '../core/env'
 import { Set } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
 import { TermVariable } from '../core/variable'

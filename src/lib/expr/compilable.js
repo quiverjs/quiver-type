@@ -1,4 +1,3 @@
-import { emptyEnv } from '../core/env'
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
@@ -13,12 +12,6 @@ import { Expression } from './expression'
 const $argExprs = Symbol('@argExprs')
 const $returnType = Symbol('@returnType')
 const $compiler = Symbol('@compiler')
-
-const argSpecsToEnv = argSpecs =>
-  argSpecs.reduce((env, argSpec) => {
-    const { termVar, compiledType } = argSpec
-    return env.set(termVar, compiledType.srcType)
-  }, emptyEnv)
 
 export class CompilableExpression extends Expression {
   // Compiler :: Function (List Type -> Function)
@@ -96,8 +89,6 @@ export class CompilableExpression extends Expression {
 
     const argExtractors = argExprs.map(
       expr => expr.compileBody(argSpecs))
-
-    const typeEnv = argSpecsToEnv(argSpecs)
 
     const argCompiledTypes = argExprs.map(
       expr => expr.exprType().compileType())

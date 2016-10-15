@@ -1,5 +1,3 @@
-import { emptyEnv } from '../lib/core/env'
-
 import { LiteralType } from '../lib/type'
 
 export const assertNumber = num => {

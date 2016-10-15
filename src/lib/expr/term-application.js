@@ -1,6 +1,5 @@
 import { List } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
-import { TypeEnv, emptyEnv } from '../core/env'
 import { CompiledFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import { assertType, assertListContent } from '../core/assert'
@@ -52,8 +51,6 @@ export class TermApplicationExpression extends Expression {
   constructor(leftExpr, rightExpr) {
     assertType(leftExpr, Expression)
     assertType(rightExpr, Expression)
-
-    const env = new TypeEnv()
 
     const leftType = leftExpr.exprType()
 

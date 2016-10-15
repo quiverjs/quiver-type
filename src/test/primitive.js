@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  TermVariable, TypeEnv, Set, List
+  TermVariable, Set, List
 } from '../lib/core'
 
 import {

@@ -56,7 +56,7 @@ export class ArrowType extends Type {
     return new ArrowType(newLeftType, newRightType)
   }
 
-  typeKind(env) {
+  typeKind() {
     return typeKind
   }
 

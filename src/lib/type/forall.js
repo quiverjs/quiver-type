@@ -8,17 +8,21 @@ import { Type } from './type'
 import { VariableType } from './variable'
 
 const $typeVar = Symbol('@typeVar')
-const $bodyType = Symbol('@type')
+const $bodyType = Symbol('@bodyType')
+const $kind = Symbol('@kind')
 
 export class ForAllType extends Type {
   constructor(typeVar, bodyType) {
     assertType(typeVar, TypeVariable)
     assertType(bodyType, Type)
 
+    const kind = new ArrowKind(typeKind, bodyType.typeKind())
+
     super()
 
     this[$typeVar] = typeVar
     this[$bodyType] = bodyType
+    this[$kind] = kind
   }
 
   get typeVar() {
@@ -61,10 +65,8 @@ export class ForAllType extends Type {
     return new ForAllType(this.typeVar, newBodyType)
   }
 
-  typeKind(env) {
-    const { bodyType } = this
-
-    return new ArrowKind(typeKind, bodyType.typeKind(env))
+  typeKind() {
+    return this[$kind]
   }
 
   compileType() {

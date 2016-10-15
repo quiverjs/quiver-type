@@ -1,4 +1,3 @@
-import { TypeEnv } from '../core/env'
 import { List } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
 import { CompiledFunction } from '../compiled/function'

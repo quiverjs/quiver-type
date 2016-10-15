@@ -65,7 +65,7 @@ export class TypeConstructor extends Type {
     return new TypeConstructor(newArgTypes, func)
   }
 
-  typeKind(env) {
+  typeKind() {
     return typeKind
   }
 

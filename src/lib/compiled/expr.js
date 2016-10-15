@@ -1,4 +1,3 @@
-import { emptyEnv } from '../core/env'
 import { assertType } from '../core/assert'
 import { Expression } from '../expr/expression'
 
@@ -13,7 +12,7 @@ export class CompiledExpression {
 
     assertType(srcExpr, Expression)
 
-    const srcType = srcExpr.exprType(emptyEnv)
+    const srcType = srcExpr.exprType()
     const compiledType = srcType.compileType()
 
     this[$srcExpr] = srcExpr

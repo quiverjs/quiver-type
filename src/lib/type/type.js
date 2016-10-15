@@ -19,8 +19,8 @@ export class Type {
     throw new Error('Not implemented')
   }
 
-  // typeKind :: Map TypeVariable Kind -> Kind
-  typeKind(env) {
+  // typeKind :: () -> Kind
+  typeKind() {
     throw new Error('Not implemented')
   }
 

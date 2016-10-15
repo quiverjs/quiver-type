@@ -1,18 +1,22 @@
-import { TypeVariable } from '../core/variable'
+import { Kind } from '../kind/kind'
 import { assertType } from '../core/assert'
+import { TypeVariable } from '../core/variable'
 
 import { Type } from './type'
 
 const $typeVar = Symbol('@typeVar')
+const $kind = Symbol('@kind')
 
 export class VariableType extends Type {
-  constructor(typeVar) {
-    assertType(typeVar, TypeVariable,
-      'typeVar must be TypeVariable')
+  constructor(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+
+    assertType(kind, Kind)
 
     super()
 
     this[$typeVar] = typeVar
+    this[$kind] = kind
   }
 
   get typeVar() {
@@ -44,11 +48,8 @@ export class VariableType extends Type {
       throw new TypeError('target type variable does not match')
   }
 
-  typeKind(env) {
-    const kind = env.get(this.typeVar)
-
-    if(!kind)
-      throw new Error('kind of type variable is not bound in kindEnv')
+  typeKind() {
+    return this[$kind]
   }
 
   compileType() {
