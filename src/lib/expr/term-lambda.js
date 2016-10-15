@@ -14,6 +14,18 @@ const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
 const $bodyExpr = Symbol('@bodyExpr')
 
+const closureWrap = (body, closureSize, expr) =>
+  (...closureArgs) => {
+    if(closureArgs.length !== closureSize)
+      throw new Error('closure args length mismatch')
+
+    const func = (...inArgs) => {
+      return body(...closureArgs, ...inArgs)
+    }
+
+    return new CompiledFunction(expr, func)
+  }
+
 export class TermLambdaExpression extends Expression {
   // constructor :: TermVariable -> Type -> Expression -> ()
   constructor(argVar, argType, bodyExpr) {
@@ -101,26 +113,13 @@ export class TermLambdaExpression extends Expression {
     return this
   }
 
-  compileExpr() {
-    const func = this.compileBody(List())()
-
-    return new CompiledFunction(this, func)
-  }
-
   compileBody(closureSpecs) {
     assertListContent(closureSpecs, ArgSpec)
 
     const closureSize = closureSpecs.size
     const innerBody = this.compileLambda(closureSpecs, List())
 
-    return (...closureArgs) => {
-      if(closureArgs.length !== closureSize)
-        throw new Error('closure args length mismatch')
-
-      return (...inArgs) => {
-        return innerBody(...closureArgs, ...inArgs)
-      }
-    }
+    return closureWrap(innerBody, closureSize, this)
   }
 
   compileLambda(closureSpecs, argSpecs) {

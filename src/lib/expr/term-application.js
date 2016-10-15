@@ -1,6 +1,7 @@
 import { List } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
 import { TypeEnv, emptyEnv } from '../core/env'
+import { CompiledFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import { assertType, assertListContent } from '../core/assert'
 
@@ -22,16 +23,16 @@ const compileExprApplication = (expr, closureSpecs, argExtractors) => {
     const inArgs = argExtractors.map(
       extractArg => extractArg(...args))
 
-    return closure(...inArgs)
+    return closure.call(...inArgs)
   }
 }
 
 const partialWrap = (closure, partialArgs) =>
   (...restArgs) => {
-    return closure(...partialArgs, ...restArgs)
+    return closure.call(...partialArgs, ...restArgs)
   }
 
-const compilePartialExprApplication = (expr, closureSpecs, argExtractors) => {
+const compilePartialExprApplication = (expr, closureSpecs, argExtractors, partialExpr) => {
   const compiledBody = expr.compileBody(closureSpecs)
 
   return (...args) => {
@@ -40,7 +41,9 @@ const compilePartialExprApplication = (expr, closureSpecs, argExtractors) => {
     const partialArgs = argExtractors.map(
       extractArg => extractArg(...args))
 
-    return partialWrap(closure, partialArgs)
+    const partialFunc = partialWrap(closure, partialArgs)
+
+    return new CompiledFunction(partialExpr, partialFunc)
   }
 }
 
@@ -137,10 +140,11 @@ export class TermApplicationExpression extends Expression {
   }
 
   compileBody(argSpecs) {
-    return this.compileApplication(argSpecs, List(), this.isPartial())
+    const partialExpr = this.isPartial() ? this : null
+    return this.compileApplication(argSpecs, List(), partialExpr)
   }
 
-  compileApplication(closureSpecs, argExtractors, isPartial) {
+  compileApplication(closureSpecs, argExtractors, partialExpr) {
     assertListContent(closureSpecs, ArgSpec)
     assertListContent(argExtractors, Function)
 
@@ -151,10 +155,10 @@ export class TermApplicationExpression extends Expression {
     const inArgExtractors = argExtractors.unshift(argExtractor)
 
     if(leftExpr instanceof TermApplicationExpression) {
-      return leftExpr.compileApplication(closureSpecs, inArgExtractors, isPartial)
+      return leftExpr.compileApplication(closureSpecs, inArgExtractors, partialExpr)
 
-    } else if(isPartial) {
-      return compilePartialExprApplication(leftExpr, closureSpecs, inArgExtractors)
+    } else if(partialExpr) {
+      return compilePartialExprApplication(leftExpr, closureSpecs, inArgExtractors, partialExpr)
 
     } else {
       return compileExprApplication(leftExpr, closureSpecs, inArgExtractors)

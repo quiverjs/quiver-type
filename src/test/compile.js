@@ -22,7 +22,7 @@ import {
   NumberType, StringType
 } from './util'
 
-const rawCompile = function() {
+const compileExpr = function() {
   return this.compileBody(List())()
 }
 
@@ -41,46 +41,40 @@ test('expression compilation test', assert => {
     const yVar = new TermVariable('y')
     const varExpr = new VariableExpression(xVar)
 
-    assert.throws(() => varExpr::rawCompile(List()))
+    assert.throws(() => varExpr::compileExpr(List()))
 
     const xLambda = new TermLambdaExpression(
       xVar, NumberType, varExpr)
 
-    const func1 = xLambda::rawCompile(List())
-    assert.equals(func1(2), 2)
+    const func1 = xLambda::compileExpr(List())
+    assert.equals(func1.call(2), 2)
 
     const yxLambda = new TermLambdaExpression(
       yVar, NumberType, xLambda)
 
-    const func2 = yxLambda::rawCompile(List())
-    assert.equals(func2(3, 4), 4)
+    assert.throws(() => yxLambda.call('foo', 'bar'),
+      'should type check arguments before calling compiled function')
+
+    const func2 = yxLambda::compileExpr(List())
+    assert.equals(func2.call(3, 4), 4)
 
     const yLambda = new TermLambdaExpression(
       yVar, NumberType, varExpr)
 
-    assert.throws(() => yLambda::rawCompile(List()))
+    assert.throws(() => yLambda::compileExpr(List()))
 
     const xyLambda = new TermLambdaExpression(
       xVar, NumberType, yLambda)
 
-    const func3 = xyLambda::rawCompile(List())
-    assert.equals(func3(1, 2), 1)
+    const func3 = xyLambda::compileExpr(List())
+    assert.equals(func3.call(1, 2), 1)
 
     const xyxLambda = new TermLambdaExpression(
       xVar, NumberType, yxLambda)
 
-    const func4 = xyxLambda::rawCompile(List())
+    const func4 = xyxLambda::compileExpr(List())
 
-    assert.equals(func4(2, 3, 4), 4)
-
-    assert.equals(func2('foo', 'bar'), 'bar',
-      'compiled function do not type check implicitly')
-
-    const compiledFunction = yxLambda.compileExpr()
-
-    assert.equals(compiledFunction.call(1, 2), 2)
-    assert.throws(() => compiledFunction.call('foo', 'bar'),
-      'should type check arguments before calling compiled function')
+    assert.equals(func4.call(2, 3, 4), 4)
 
     assert.end()
   })
@@ -108,7 +102,7 @@ test('expression compilation test', assert => {
       new TermLambdaExpression(
         yVar, NumberType, addExpr))
 
-    const compiledFunction = addLambda.compileExpr()
+    const compiledFunction = addLambda::compileExpr()
 
     assert.equals(compiledFunction.call(1, 2), 3)
 
@@ -143,7 +137,7 @@ test('expression compilation test', assert => {
           new TypedVariableExpression(zVar, NumberType)),
         new ValueExpression(5, NumberType)))
 
-    const compiledFunction = addFiveLambda.compileExpr()
+    const compiledFunction = addFiveLambda::compileExpr()
 
     assert.equals(compiledFunction.call(2), 7)
 
@@ -174,10 +168,15 @@ test('expression compilation test', assert => {
       new TermApplicationExpression(addLambda,
         new TypedVariableExpression(zVar, NumberType)))
 
-    const compiledAdder = adderLambda.compileExpr()
+    const compiledAdder = adderLambda::compileExpr()
 
     const fiveAdder = compiledAdder.func(5)
-    assert.equals(fiveAdder(2), 7)
+    
+    assert.equals(fiveAdder.call(2), 7)
+    assert.equals(fiveAdder.call(1), 6)
+    assert.equals(fiveAdder.call(-2), 3)
+
+    assert.throws(() => fiveAdder.call('foo'))
 
     assert.end()
   })
