@@ -2,7 +2,9 @@ import { List } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
 import { CompiledFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
-import { assertType, assertListContent } from '../core/assert'
+import {
+  assertType, assertListContent, assertNoError
+} from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
@@ -33,7 +35,8 @@ export class TermLambdaExpression extends Expression {
     assertType(argType, Type)
     assertType(bodyExpr, Expression)
 
-    bodyExpr.validateVarType(argVar, argType)
+    assertNoError(bodyExpr.validateVarType(argVar, argType))
+
     const type = new ArrowType(argType, bodyExpr.exprType())
 
     super()
@@ -75,7 +78,7 @@ export class TermLambdaExpression extends Expression {
 
     if(termVar === argVar) return
 
-    bodyExpr.validateVarType(termVar, type)
+    return bodyExpr.validateVarType(termVar, type)
   }
 
   // bindTerm :: TermVariable -> Expression
@@ -157,7 +160,7 @@ export class TermLambdaExpression extends Expression {
     assertType(expr, Expression)
 
     const { argVar, argType, bodyExpr } = this
-    argType.typeCheck(expr.exprType())
+    assertNoError(argType.typeCheck(expr.exprType()))
 
     return bodyExpr.bindTerm(argVar, expr)
   }

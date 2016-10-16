@@ -53,11 +53,10 @@ export class TypeApplicationExpression extends Expression {
 
     const { leftExpr, rightType } = this
 
-    try {
-      leftExpr.validateVarType(termVar, type)
-    } catch(err) {
-      leftExpr.applyType(rightType).validateVarType(termVar, type)
-    }
+    const err = leftExpr.validateVarType(termVar, type)
+    if(!err) return null
+
+    return leftExpr.applyType(rightType).validateVarType(termVar, type)
   }
 
   bindTerm(termVar, targetExpr) {

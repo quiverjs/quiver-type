@@ -21,6 +21,6 @@ export class CompiledLiteralType extends CompiledType {
   }
 
   typeCheck(object) {
-    this.typeChecker(object)
+    return this.typeChecker(object)
   }
 }

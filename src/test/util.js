@@ -2,12 +2,12 @@ import { LiteralType } from 'lib/type'
 
 export const assertNumber = num => {
   if(typeof(num) !== 'number')
-    throw new TypeError('argument must be number')
+    return new TypeError('argument must be number')
 }
 
 export const assertString = str => {
   if(typeof(str) !== 'string')
-    throw new TypeError('argument must be string')
+    return new TypeError('argument must be string')
 }
 
 export const equals = function(result, expected, message) {

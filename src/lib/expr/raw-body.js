@@ -1,7 +1,8 @@
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
 import {
-  assertListContent, assertType, assertFunction
+  assertListContent, assertType,
+  assertFunction, assertNoError
 } from '../core/assert'
 
 import { Type } from '../type/type'
@@ -50,8 +51,11 @@ export class RawBodyExpression extends Expression {
 
   validateVarType(termVar, type) {
     for(const expr of this.argExprs) {
-      expr.validateVarType(termVar, type)
+      const err = expr.validateVarType(termVar, type)
+      if(err) return err
     }
+
+    return null
   }
 
   bindTerm(termVar, expr) {
@@ -90,7 +94,7 @@ export class RawBodyExpression extends Expression {
     const resultExpr = func(...argExprs)
 
     assertType(resultExpr, Expression)
-    returnType.typeCheck(resultExpr.exprType())
+    assertNoError(returnType.typeCheck(resultExpr.exprType()))
 
     return resultExpr
   }

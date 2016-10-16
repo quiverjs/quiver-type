@@ -28,11 +28,11 @@ export class LiteralType extends Type {
   typeCheck(type) {
     assertType(type, Type)
 
-    assertType(type, LiteralType,
-      'target type must be ConstantType')
+    if(!(type instanceof LiteralType))
+      return new TypeError('target type must be ConstantType')
 
     if(type.typeChecker !== this.typeChecker)
-      throw new TypeError('target type is different constant type')
+      return new TypeError('target type is different constant type')
   }
 
   bindType(typeVar, type) {

@@ -1,7 +1,9 @@
 import { Set } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
 import { TermVariable } from '../core/variable'
-import { assertType, assertListContent } from '../core/assert'
+import {
+  assertType, assertListContent, assertNoError
+} from '../core/assert'
 
 import { Type } from '../type/type'
 
@@ -12,19 +14,23 @@ const $varType = Symbol('@varType')
 
 const findArgIndex = (argSpecs, termVar) => {
   let index = -1
+  let foundArgSpec = null
+
   const argSize = argSpecs.size
 
   for(let i=0; i<argSize; i++) {
-    const argVar = argSpecs.get(i).termVar
+    const argSpec = argSpecs.get(i)
+    const argVar = argSpec.termVar
     if(argVar === termVar) {
       index = i
+      foundArgSpec = argSpec
     }
   }
 
   if(index === -1)
     throw new Error(`term variable ${termVar} not found in argSpecs.`)
 
-  return index
+  return [index, foundArgSpec]
 }
 
 const argPicker = index =>
@@ -63,9 +69,10 @@ export class VariableExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(type, Type)
 
-    if(this.termVar === termVar) {
-      this.varType.typeCheck(type)
-    }
+    if(this.termVar !== termVar)
+      return null
+
+    return this.varType.typeCheck(type)
   }
 
   bindTerm(termVar, expr) {
@@ -76,7 +83,7 @@ export class VariableExpression extends Expression {
       return this
 
     const exprType = expr.exprType()
-    this.varType.typeCheck(exprType)
+    assertNoError(this.varType.typeCheck(exprType))
 
     return expr
   }
@@ -95,8 +102,9 @@ export class VariableExpression extends Expression {
     assertListContent(argSpecs, ArgSpec)
     const { termVar, varType } = this
 
-    const argIndex = findArgIndex(argSpecs, termVar)
-    varType.typeCheck(argSpecs.get(argIndex).compiledType.srcType)
+    const [argIndex, argSpec] = findArgIndex(argSpecs, termVar)
+
+    assertNoError(varType.typeCheck(argSpec.compiledType.srcType))
 
     return argPicker(argIndex)
   }

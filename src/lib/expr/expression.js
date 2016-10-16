@@ -16,7 +16,7 @@ export class Expression {
     throw new Error('not implemented')
   }
 
-  // validateVarType :: TermVariable -> Type -> Exception
+  // validateVarType :: TermVariable -> Type -> Maybe Error
   validateVarType(termVar, type) {
     throw new Error('not implemented')
   }

@@ -1,6 +1,6 @@
 import { Kind } from '../kind/kind'
-import { assertType } from '../core/assert'
 import { TypeVariable } from '../core/variable'
+import { assertType, assertNoError } from '../core/assert'
 
 import { Type } from './type'
 
@@ -10,7 +10,6 @@ const $kind = Symbol('@kind')
 export class VariableType extends Type {
   constructor(typeVar, kind) {
     assertType(typeVar, TypeVariable)
-
     assertType(kind, Kind)
 
     super()
@@ -34,7 +33,7 @@ export class VariableType extends Type {
     if(typeVar !== this.typeVar)
       return this
 
-    this[$kind].kindCheck(type.typeKind())
+    assertNoError(this[$kind].kindCheck(type.typeKind()))
 
     return type
   }
@@ -43,11 +42,11 @@ export class VariableType extends Type {
     assertType(targetType, Type)
 
     if(!(targetType instanceof VariableType))
-      throw new TypeError('target type must be VariableType')
+      return new TypeError('target type must be VariableType')
 
     // Without unification, only same type variable matches
     if(targetType.typeVar !== this.typeVar)
-      throw new TypeError('target type variable does not match')
+      return new TypeError('target type variable does not match')
   }
 
   typeKind() {

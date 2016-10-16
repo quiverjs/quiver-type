@@ -37,8 +37,10 @@ export class ArrowType extends Type {
   typeCheck(targetType) {
     assertType(targetType, ArrowType)
 
-    this.leftType.typeCheck(targetType.leftType)
-    this.rightType.typeCheck(targetType.rightType)
+    const err = this.leftType.typeCheck(targetType.leftType)
+    if(err) return err
+
+    return this.rightType.typeCheck(targetType.rightType)
   }
 
   bindType(typeVar, type) {

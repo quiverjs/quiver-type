@@ -12,7 +12,7 @@ export class CompiledType {
     return this[$srcType]
   }
 
-  // typeCheck :: Object -> Bool
+  // typeCheck :: Object -> Maybe Error
   typeCheck(object) {
     throw new Error('not implemented')
   }

@@ -23,3 +23,7 @@ export const assertListContent = (list, ElementType, message) => {
     assertType(element, ElementType, message)
   }
 }
+
+export const assertNoError = err => {
+  if(err) throw err
+}

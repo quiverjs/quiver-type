@@ -9,7 +9,7 @@ export class Type {
     throw new Error('Not implemented')
   }
 
-  // typeCheck :: Type -> Exception
+  // typeCheck :: Type -> Maybe Error
   typeCheck(targetType) {
     throw new Error('Not implemented')
   }

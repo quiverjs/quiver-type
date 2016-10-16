@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertType, assertNoError } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
@@ -42,7 +42,10 @@ export class ForAllType extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, ForAllType)
+    assertType(targetType, Type)
+
+    if(!(targetType instanceof ForAllType))
+      return new Error('target type must be ForAllType')
 
     const { argTVar, argKind, bodyType } = this
 
@@ -53,7 +56,7 @@ export class ForAllType extends Type {
     const innerType = targetType.applyType(
       new VariableType(argTVar, argKind))
 
-    bodyType.typeCheck(innerType)
+    return bodyType.typeCheck(innerType)
   }
 
   bindType(typeVar, type) {
@@ -91,7 +94,7 @@ export class ForAllType extends Type {
 
     const { argTVar, argKind, bodyType } = this
 
-    argKind.kindCheck(targetType.typeKind())
+    assertNoError(argKind.kindCheck(targetType.typeKind()))
 
     return bodyType.bindType(argTVar, targetType)
   }

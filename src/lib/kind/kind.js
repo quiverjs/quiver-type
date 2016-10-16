@@ -4,6 +4,7 @@ export class Kind {
       throw new TypeError('abstract class Kind cannot be instantiated')
   }
 
+  // kindCheck :: Kind -> Maybe Error
   kindCheck(kind) {
     throw new Error('not implemented')
   }

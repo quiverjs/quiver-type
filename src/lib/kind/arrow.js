@@ -32,7 +32,9 @@ export class ArrowKind extends Kind {
 
     const { leftKind, rightKind } = this
 
-    leftKind.kindCheck(targetKind.leftKind)
-    rightKind.kindCheck(targetKind.rightKind)
+    const err = leftKind.kindCheck(targetKind.leftKind)
+    if(err) return err
+
+    return rightKind.kindCheck(targetKind.rightKind)
   }
 }

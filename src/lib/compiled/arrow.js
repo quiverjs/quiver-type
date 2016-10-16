@@ -1,5 +1,5 @@
 import { List } from '../core/container'
-import { assertType } from '../core/assert'
+import { assertType, assertNoError } from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
@@ -56,12 +56,12 @@ export class CompiledArrowType extends CompiledType {
   typeCheck(compiledFunction) {
     assertType(compiledFunction, CompiledFunction)
 
-    this.srcType.typeCheck(compiledFunction.srcType)
+    return this.srcType.typeCheck(compiledFunction.srcType)
   }
 
   call(compiledFunction, ...args) {
-    this.typeCheck(compiledFunction)
-
+    assertNoError(this.typeCheck(compiledFunction))
+    
     return this.directCall(compiledFunction.func, ...args)
   }
 
@@ -73,12 +73,12 @@ export class CompiledArrowType extends CompiledType {
       throw new TypeError('arguments size mismatch')
 
     for(let i=0; i<argsLength; i++) {
-      argTypes.get(i).typeCheck(args[i])
+      assertNoError(argTypes.get(i).typeCheck(args[i]))
     }
 
     const result = func(...args)
 
-    returnType.typeCheck(result)
+    assertNoError(returnType.typeCheck(result))
 
     return result
   }

@@ -1,5 +1,5 @@
 import { Set } from '../core/container'
-import { assertType } from '../core/assert'
+import { assertType, assertNoError } from '../core/assert'
 
 import { LiteralType } from '../type/literal'
 
@@ -14,7 +14,7 @@ const constantFunc = value =>
 export class ValueExpression extends Expression {
   constructor(value, type) {
     assertType(type, LiteralType)
-    type.typeCheckObject(value)
+    assertNoError(type.typeCheckObject(value))
 
     super()
 

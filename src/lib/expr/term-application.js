@@ -2,7 +2,9 @@ import { List } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
 import { CompiledFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
-import { assertType, assertListContent } from '../core/assert'
+import {
+  assertType, assertListContent, assertNoError 
+} from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
@@ -60,7 +62,7 @@ export class TermApplicationExpression extends Expression {
     const argType = leftType.leftType
     const rightType = rightExpr.exprType()
 
-    argType.typeCheck(rightType)
+    assertNoError(argType.typeCheck(rightType))
 
     // Term application reduces the left type from (a -> b) to b
     const selfType = leftType.rightType
@@ -90,8 +92,10 @@ export class TermApplicationExpression extends Expression {
 
     const { leftExpr, rightExpr } = this
 
-    leftExpr.validateVarType(termVar, type)
-    rightExpr.validateVarType(termVar, type)
+    const err = leftExpr.validateVarType(termVar, type)
+    if(err) return err
+
+    return rightExpr.validateVarType(termVar, type)
   }
 
   freeTermVariables() {

@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertType, assertNoError } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -52,7 +52,7 @@ export class TypeLambdaExpression extends Expression {
   }
 
   validateVarType(termVar, type) {
-    this.bodyExpr.validateVarType(termVar, type)
+    return this.bodyExpr.validateVarType(termVar, type)
   }
 
   bindType(targetTypeVar, type) {
@@ -103,7 +103,7 @@ export class TypeLambdaExpression extends Expression {
     assertType(type, Type)
 
     const { argTVar, argKind, bodyExpr } = this
-    argKind.kindCheck(type.typeKind())
+    assertNoError(argKind.kindCheck(type.typeKind()))
 
     return bodyExpr.bindType(argTVar, type)
   }

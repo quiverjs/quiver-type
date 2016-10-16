@@ -52,8 +52,11 @@ export class BodyExpression extends Expression {
 
   validateVarType(termVar, type) {
     for(const expr of this.argExprs) {
-      expr.validateVarType(termVar, type)
+      const err = expr.validateVarType(termVar, type)
+      if(err) return err
     }
+
+    return null
   }
 
   bindTerm(termVar, expr) {
