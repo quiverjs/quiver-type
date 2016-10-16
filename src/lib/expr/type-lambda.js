@@ -4,29 +4,38 @@ import { TermVariable, TypeVariable } from '../core/variable'
 import { Type } from '../type/type'
 import { ForAllType } from '../type/forall'
 
+import { Kind } from '../kind/kind'
+
 import { Expression } from './expression'
 
-const $typeVar = Symbol('@typeVar')
+const $argTVar = Symbol('@argTVar')
+const $argKind = Symbol('@argKind')
 const $bodyExpr = Symbol('@bodyExpr')
 const $type = Symbol('@type')
 
 export class TypeLambdaExpression extends Expression {
   // constructor :: TypeVariable -> Expression -> ()
-  constructor(typeVar, bodyExpr) {
-    assertType(typeVar, TypeVariable)
+  constructor(argTVar, argKind, bodyExpr) {
+    assertType(argTVar, TypeVariable)
+    assertType(argKind, Kind)
     assertType(bodyExpr, Expression)
 
-    const type = new ForAllType(typeVar, bodyExpr.exprType())
+    const type = new ForAllType(argTVar, argKind, bodyExpr.exprType())
 
     super()
 
-    this[$typeVar] = typeVar
+    this[$argTVar] = argTVar
+    this[$argKind] = argKind
     this[$bodyExpr] = bodyExpr
     this[$type] = type
   }
 
-  get typeVar() {
-    return this[$typeVar]
+  get argTVar() {
+    return this[$argTVar]
+  }
+
+  get argKind() {
+    return this[$argKind]
   }
 
   get bodyExpr() {
@@ -43,20 +52,16 @@ export class TypeLambdaExpression extends Expression {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
-
-    const { bodyExpr } = this
-    bodyExpr.validateVarType(termVar, type)
+    this.bodyExpr.validateVarType(termVar, type)
   }
 
   bindType(targetTypeVar, type) {
     assertType(targetTypeVar, TypeVariable)
     assertType(type, Type)
 
-    const { typeVar, bodyExpr } = this
+    const { argTVar, argKind, bodyExpr } = this
 
-    if(targetTypeVar === typeVar)
+    if(targetTypeVar === argTVar)
       return this
 
     const newBodyExpr = bodyExpr.bindType(targetTypeVar, type)
@@ -64,32 +69,32 @@ export class TypeLambdaExpression extends Expression {
     if(newBodyExpr === bodyExpr)
       return this
 
-    return new TypeLambdaExpression(typeVar, newBodyExpr)
+    return new TypeLambdaExpression(argTVar, argKind, newBodyExpr)
   }
 
   bindTerm(termVar, expr) {
     assertType(termVar, TermVariable)
     assertType(expr, Expression)
 
-    const { typeVar, bodyExpr } = this
+    const { argTVar, argKind, bodyExpr } = this
 
     const newBodyExpr = bodyExpr.bindTerm(termVar, expr)
 
     if(newBodyExpr === bodyExpr)
       return this
 
-    return new TypeLambdaExpression(typeVar, newBodyExpr)
+    return new TypeLambdaExpression(argTVar, argKind, newBodyExpr)
   }
 
   evaluate() {
-    const { typeVar, bodyExpr } = this
+    const { argTVar, argKind, bodyExpr } = this
 
     const newBodyExpr = bodyExpr.evaluate()
 
     if(newBodyExpr === bodyExpr)
       return this
 
-    return new TypeLambdaExpression(typeVar, newBodyExpr)
+    return new TypeLambdaExpression(argTVar, argKind, newBodyExpr)
   }
 
   // applyType :: Type -> Expr
@@ -97,8 +102,10 @@ export class TypeLambdaExpression extends Expression {
   applyType(type) {
     assertType(type, Type)
 
-    const { typeVar, bodyExpr } = this
-    return bodyExpr.bindType(typeVar, type)
+    const { argTVar, argKind, bodyExpr } = this
+    argKind.kindCheck(type.typeKind())
+
+    return bodyExpr.bindType(argTVar, type)
   }
 
   isTerminal() {

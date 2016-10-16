@@ -31,10 +31,12 @@ export class VariableType extends Type {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    if(typeVar === this.typeVar)
-      return type
+    if(typeVar !== this.typeVar)
+      return this
 
-    return this
+    this[$kind].kindCheck(type.typeKind())
+
+    return type
   }
 
   typeCheck(targetType) {
