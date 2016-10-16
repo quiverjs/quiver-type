@@ -4,7 +4,7 @@ export { ValueExpression } from './value'
 
 export { BodyExpression } from './body'
 
-export { CompilableExpression } from './compilable'
+export { RawBodyExpression } from './raw-body'
 
 export { VariableExpression } from './variable'
 

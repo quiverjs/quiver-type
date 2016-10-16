@@ -6,7 +6,7 @@ import {
 
 import {
   ValueExpression,
-  CompilableExpression,
+  BodyExpression,
   VariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
@@ -92,7 +92,7 @@ test('expression compilation test', assert => {
     const xVarExpr = new VariableExpression(xVar, NumberType)
     const yVarExpr = new VariableExpression(yVar, NumberType)
 
-    const addExpr = new CompilableExpression(
+    const addExpr = new BodyExpression(
       List([xVarExpr, yVarExpr]), NumberType,
       (xCompiledType, yCompiledType) => {
         assert.equals(xCompiledType.srcType, NumberType)
@@ -122,7 +122,7 @@ test('expression compilation test', assert => {
     const yVar = new TermVariable('y')
     const zVar = new TermVariable('z')
 
-    const addExpr = new CompilableExpression(
+    const addExpr = new BodyExpression(
       List([
         new VariableExpression(xVar, NumberType),
         new VariableExpression(yVar, NumberType)
@@ -155,7 +155,7 @@ test('expression compilation test', assert => {
     const yVar = new TermVariable('y')
     const zVar = new TermVariable('z')
 
-    const addExpr = new CompilableExpression(
+    const addExpr = new BodyExpression(
       List([
         new VariableExpression(xVar, NumberType),
         new VariableExpression(yVar, NumberType)

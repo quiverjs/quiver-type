@@ -7,7 +7,7 @@ import {
 import {
   ValueExpression,
   VariableExpression,
-  BodyExpression
+  RawBodyExpression
 } from '../lib/expr'
 
 import {
@@ -79,7 +79,7 @@ test('primitive type test', assert => {
       return new ValueExpression(result, NumberType)
     }
 
-    const plusExpr = new BodyExpression(
+    const plusExpr = new RawBodyExpression(
       argExprs, NumberType, doPlus)
 
     assert::equals(plusExpr.freeTermVariables(),

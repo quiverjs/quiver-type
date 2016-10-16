@@ -1,5 +1,6 @@
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
+import { ArgSpec } from '../compiled/arg-spec'
 import {
   assertListContent, assertType, assertFunction
 } from '../core/assert'
@@ -10,21 +11,22 @@ import { Expression } from './expression'
 
 const $argExprs = Symbol('@argExprs')
 const $returnType = Symbol('@returnType')
-const $func = Symbol('@func')
+const $compiler = Symbol('@compiler')
 
 export class BodyExpression extends Expression {
-  // constructor :: List Expression -> Type -> Function -> ()
-  constructor(argExprs, returnType, func) {
+  // Compiler :: Function (List Type -> Function)
+  // constructor :: List Expression -> Type -> Compiler -> ()
+  constructor(argExprs, returnType, compiler) {
     assertListContent(argExprs, Expression)
 
     assertType(returnType, Type)
-    assertFunction(func)
+    assertFunction(compiler)
 
     super()
 
     this[$argExprs] = argExprs
     this[$returnType] = returnType
-    this[$func] = func
+    this[$compiler] = compiler
   }
 
   get argExprs() {
@@ -35,8 +37,8 @@ export class BodyExpression extends Expression {
     return this[$returnType]
   }
 
-  get func() {
-    return this[$func]
+  get compiler() {
+    return this[$compiler]
   }
 
   freeTermVariables() {
@@ -55,44 +57,55 @@ export class BodyExpression extends Expression {
   }
 
   bindTerm(termVar, expr) {
-    const { argExprs, returnType, func } = this
+    const { argExprs, returnType, compiler } = this
 
     const [newArgExprs, exprModified] = argExprs::mapUnique(
       argExpr => argExpr.bindTerm(termVar, expr))
 
     if(exprModified) {
-      return new BodyExpression(newArgExprs, returnType, func)
+      return new BodyExpression(newArgExprs, returnType, compiler)
     } else {
       return this
     }
   }
 
   bindType(typeVar, type) {
-    const { argExprs, returnType, func } = this
+    const { argExprs, returnType, compiler } = this
 
     const [newArgExprs, exprModified] = argExprs::mapUnique(
       argExpr => argExpr.bindType(typeVar, type))
 
     if(exprModified) {
-      return new BodyExpression(newArgExprs, returnType, func)
+      return new BodyExpression(newArgExprs, returnType, compiler)
     } else {
       return this
     }
   }
 
-  evaluate() {
-    const { argExprs, returnType, func } = this
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
 
-    for(const argExpr of argExprs) {
-      if(!argExpr.isTerminal()) return this
+    const { argExprs, compiler } = this
+
+    const argExtractors = argExprs.map(
+      expr => expr.compileBody(argSpecs))
+
+    const argCompiledTypes = argExprs.map(
+      expr => expr.exprType().compileType())
+
+    const compiledBody = compiler(...argCompiledTypes)
+    assertType(compiledBody, Function)
+
+    return (...args) => {
+      const inArgs = argExtractors.map(
+        extractArgs => extractArgs(...args))
+
+      return compiledBody(...inArgs)
     }
+  }
 
-    const resultExpr = func(...argExprs)
-
-    assertType(resultExpr, Expression)
-    returnType.typeCheck(resultExpr.exprType())
-
-    return resultExpr
+  evaluate() {
+    return this
   }
 
   isTerminal() {

@@ -6,7 +6,7 @@ import {
 
 import {
   ValueExpression,
-  BodyExpression,
+  RawBodyExpression,
   VariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
@@ -25,7 +25,7 @@ test('term lambda test', assert => {
   assert.test('identity test', assert => {
     const xVar = new TermVariable('x')
 
-    const idNumExpr = new BodyExpression(
+    const idNumExpr = new RawBodyExpression(
       List([new VariableExpression(xVar, NumberType)]),
       NumberType,
       x => x)
@@ -96,7 +96,7 @@ test('term lambda test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const plusExpr = new BodyExpression(
+    const plusExpr = new RawBodyExpression(
       List([
         new VariableExpression(xVar, NumberType),
         new VariableExpression(yVar, NumberType)
