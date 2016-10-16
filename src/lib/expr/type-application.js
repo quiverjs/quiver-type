@@ -3,6 +3,7 @@ import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { ForAllType } from '../type/forall'
+import { ArrowKind } from '../kind/arrow'
 
 import { Expression } from './expression'
 import { TypeLambdaExpression } from './type-lambda'
@@ -14,10 +15,15 @@ const $selfType = Symbol('@selfType')
 export class TypeApplicationExpression extends Expression {
   // constructor :: Expr -> Type -> ()
   constructor(leftExpr, rightType) {
-    assertType(leftExpr, TypeLambdaExpression)
+    assertType(leftExpr, Expression)
     assertType(rightType, Type)
 
-    const selfType = leftExpr.exprType().applyType(rightType)
+    const leftType = leftExpr.exprType()
+    const leftKind = leftType.typeKind()
+
+    assertType(leftKind, ArrowKind)
+
+    const selfType = leftType.applyType(rightType)
 
     super()
 
@@ -93,11 +99,13 @@ export class TypeApplicationExpression extends Expression {
     // i.e. when type argument has no free type variable.
     if((newExpr instanceof TypeLambdaExpression) && rightType.isTerminal()) {
       return newExpr.applyType(rightType).evaluate()
+
+    } else if(newExpr === leftExpr) {
+      return this
+
+    } else {
+      return new TypeApplicationExpression(newExpr, rightType)
     }
-
-    if(newExpr === leftExpr) return this
-
-    return new TypeApplicationExpression(newExpr, rightType)
   }
 
   isTerminal() {

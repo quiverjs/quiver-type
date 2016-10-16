@@ -81,8 +81,8 @@ export class ForAllType extends Type {
   applyType(targetType) {
     assertType(targetType, Type)
 
-    const { typeVar, type } = this
+    const { typeVar, bodyType } = this
 
-    return type.bindType(typeVar, targetType)
+    return bodyType.bindType(typeVar, targetType)
   }
 }
