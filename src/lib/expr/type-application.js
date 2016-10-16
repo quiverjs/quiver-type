@@ -2,7 +2,6 @@ import { assertType } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
-import { ForAllType } from '../type/forall'
 import { ArrowKind } from '../kind/arrow'
 
 import { Expression } from './expression'
@@ -67,7 +66,7 @@ export class TypeApplicationExpression extends Expression {
 
     const { leftExpr, rightType } = this
 
-    const newExpr = expr.bindTerm(termVar, targetExpr)
+    const newExpr = leftExpr.bindTerm(termVar, targetExpr)
 
     if(newExpr === leftExpr)
       return this

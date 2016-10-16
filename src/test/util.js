@@ -1,4 +1,4 @@
-import { LiteralType } from '../lib/type'
+import { LiteralType } from 'lib/type'
 
 export const assertNumber = num => {
   if(typeof(num) !== 'number')

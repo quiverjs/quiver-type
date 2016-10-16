@@ -1,3 +1,2 @@
-import './primitive'
-import './lambda'
+import './eval'
 import './compile'

@@ -2,26 +2,25 @@ import test from 'tape'
 
 import {
   TermVariable, Set, List
-} from '../lib/core'
+} from 'lib/core'
 
 import {
   ValueExpression,
   VariableExpression,
   RawBodyExpression
-} from '../lib/expr'
+} from 'lib/expr'
 
 import {
   LiteralType
-} from '../lib/type'
+} from 'lib/type'
 
 import {
   assertNumber, assertString, equals
-} from './util'
+} from '../util'
 
 test('primitive type test', assert => {
   assert.test('value expr', assert => {
     const NumberType = new LiteralType(assertNumber)
-    const StringType = new LiteralType(assertString)
 
     const valueExpr = new ValueExpression(8, NumberType)
 

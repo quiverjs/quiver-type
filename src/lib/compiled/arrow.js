@@ -1,5 +1,5 @@
 import { List } from '../core/container'
-import { assertType, assertFunction } from '../core/assert'
+import { assertType } from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'

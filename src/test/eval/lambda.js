@@ -2,7 +2,7 @@ import test from 'tape'
 
 import {
   TermVariable, Set, List
-} from '../lib/core'
+} from 'lib/core'
 
 import {
   ValueExpression,
@@ -10,16 +10,14 @@ import {
   VariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
-} from '../lib/expr'
+} from 'lib/expr'
+
+import { ArrowType } from 'lib/type'
 
 import {
-  LiteralType, ArrowType
-} from '../lib/type'
-
-import {
-  assertNumber, assertString, equals, equalsType,
+  equals, equalsType,
   NumberType, StringType
-} from './util'
+} from '../util'
 
 test('term lambda test', assert => {
   assert.test('identity test', assert => {
