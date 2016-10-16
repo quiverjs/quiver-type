@@ -1,6 +1,7 @@
 import { assertType } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
+import { Kind } from '../kind/kind'
 import { typeKind } from '../kind/type'
 import { CompiledArrowType } from '../compiled/arrow'
 
@@ -37,10 +38,24 @@ export class ArrowType extends Type {
   typeCheck(targetType) {
     assertType(targetType, ArrowType)
 
-    const err = this.leftType.typeCheck(targetType.leftType)
+    const { leftType, rightType } = this
+
+    const err = leftType.typeCheck(targetType.leftType)
     if(err) return err
 
-    return this.rightType.typeCheck(targetType.rightType)
+    return rightType.typeCheck(targetType.rightType)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { leftType, rightType } = this
+    
+    const err = leftType.validateTVarKind(typeVar, kind)
+    if(err) return err
+
+    return leftType.validateTVarKind(typeVar, kind)
   }
 
   bindType(typeVar, type) {

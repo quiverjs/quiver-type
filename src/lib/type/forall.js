@@ -19,6 +19,8 @@ export class ForAllType extends Type {
     assertType(argKind, Kind)
     assertType(bodyType, Type)
 
+    assertNoError(bodyType.validateTVarKind(argTVar, argKind))
+
     const kind = new ArrowKind(typeKind, bodyType.typeKind())
 
     super()
@@ -57,6 +59,18 @@ export class ForAllType extends Type {
       new VariableType(argTVar, argKind))
 
     return bodyType.typeCheck(innerType)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { argTVar, argKind, bodyType } = this
+
+    if(argTVar === typeVar)
+      return null
+
+    return bodyType.validateTVarKind(typeVar, kind)
   }
 
   bindType(typeVar, type) {

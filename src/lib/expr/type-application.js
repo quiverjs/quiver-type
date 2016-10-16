@@ -2,6 +2,7 @@ import { assertType } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
+import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
 
 import { Expression } from './expression'
@@ -19,8 +20,10 @@ export class TypeApplicationExpression extends Expression {
 
     const leftType = leftExpr.exprType()
     const leftKind = leftType.typeKind()
+    const rightKind = rightType.typeKind()
 
     assertType(leftKind, ArrowKind)
+    assertNoError(leftKind.leftKind.kindCheck(rightKind))
 
     const selfType = leftType.applyType(rightType)
 
@@ -56,7 +59,21 @@ export class TypeApplicationExpression extends Expression {
     const err = leftExpr.validateVarType(termVar, type)
     if(!err) return null
 
-    return leftExpr.applyType(rightType).validateVarType(termVar, type)
+    const leftType = leftExpr.applyType(rightType)
+    return leftType.validateVarType(termVar, type)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { leftExpr, rightType } = this
+
+    const err = leftExpr.validateTVarKind(termVar, type)
+    if(!err) return null
+
+    const leftType = leftExpr.applyType(rightType)
+    return leftType.validateTVarKind(termVar, type)
   }
 
   bindTerm(termVar, targetExpr) {

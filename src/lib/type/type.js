@@ -14,6 +14,11 @@ export class Type {
     throw new Error('Not implemented')
   }
 
+  // validateTVarKind :: TypeVariable -> Kind -> MaybeError
+  validateTVarKind(typeVar, kind) {
+    throw new Error('not implemented')
+  }
+
   // bindType :: TypeVariable -> Type -> Type
   bindType(typeVar, type) {
     throw new Error('Not implemented')

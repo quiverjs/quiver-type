@@ -21,6 +21,11 @@ export class Expression {
     throw new Error('not implemented')
   }
 
+  // validateTVarKind :: TypeVariable -> Kind -> MaybeError
+  validateTVarKind(typeVar, kind) {
+    throw new Error('not implemented')
+  }
+
   // bindTermVariable :: TermVariable -> Expression -> Expression
   // Bind unbound term variable to new expression
   bindTerm(termVar, expr) {

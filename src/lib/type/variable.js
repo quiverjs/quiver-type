@@ -22,6 +22,10 @@ export class VariableType extends Type {
     return this[$typeVar]
   }
 
+  get kind() {
+    return this[$kind]
+  }
+
   freeTypeVariables() {
     return Set([this.typeVar])
   }
@@ -47,6 +51,16 @@ export class VariableType extends Type {
     // Without unification, only same type variable matches
     if(targetType.typeVar !== this.typeVar)
       return new TypeError('target type variable does not match')
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    if(this.typeVar !== typeVar)
+      return null
+
+    return this.kind.kindCheck(kind)
   }
 
   typeKind() {

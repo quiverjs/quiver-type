@@ -6,6 +6,7 @@ import {
   assertType, assertListContent, assertNoError
 } from '../core/assert'
 
+import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
@@ -76,9 +77,22 @@ export class TermLambdaExpression extends Expression {
 
     const { argVar, bodyExpr } = this
 
-    if(termVar === argVar) return
+    if(termVar === argVar)
+      return null
 
     return bodyExpr.validateVarType(termVar, type)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { argType, bodyExpr } = this
+
+    const err = argType.validateTVarKind(typeVar, kind)
+    if(err) return err
+
+    return bodyExpr.validateTVarKind(typeVar, kind)
   }
 
   // bindTerm :: TermVariable -> Expression

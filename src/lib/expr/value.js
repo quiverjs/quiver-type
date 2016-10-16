@@ -42,6 +42,10 @@ export class ValueExpression extends Expression {
     // no op
   }
 
+  validateTVarKind(typeVar, kind) {
+    // no op
+  }
+
   bindTerm() {
     return this
   }

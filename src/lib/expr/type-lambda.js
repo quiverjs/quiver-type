@@ -20,6 +20,8 @@ export class TypeLambdaExpression extends Expression {
     assertType(argKind, Kind)
     assertType(bodyExpr, Expression)
 
+    assertNoError(bodyExpr.validateTVarKind(argTVar, argKind))
+
     const type = new ForAllType(argTVar, argKind, bodyExpr.exprType())
 
     super()
@@ -53,6 +55,18 @@ export class TypeLambdaExpression extends Expression {
 
   validateVarType(termVar, type) {
     return this.bodyExpr.validateVarType(termVar, type)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { argTVar, bodyExpr } = this
+
+    if(argTVar === typeVar)
+      return null
+
+    return bodyExpr.validateTVarKind(typeVar, kind)
   }
 
   bindType(targetTypeVar, type) {

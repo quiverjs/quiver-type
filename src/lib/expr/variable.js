@@ -1,11 +1,12 @@
 import { Set } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
-import { TermVariable } from '../core/variable'
+import { TermVariable, TypeVariable } from '../core/variable'
 import {
   assertType, assertListContent, assertNoError
 } from '../core/assert'
 
 import { Type } from '../type/type'
+import { Kind } from '../kind/kind'
 
 import { Expression } from './expression'
 
@@ -73,6 +74,14 @@ export class VariableExpression extends Expression {
       return null
 
     return this.varType.typeCheck(type)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { varType } = this
+    return varType.validateTVarKind(typeVar, kind)
   }
 
   bindTerm(termVar, expr) {

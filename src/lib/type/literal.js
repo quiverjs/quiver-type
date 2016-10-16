@@ -35,6 +35,10 @@ export class LiteralType extends Type {
       return new TypeError('target type is different constant type')
   }
 
+  validateTVarKind(typeVar, kind) {
+    return null
+  }
+
   bindType(typeVar, type) {
     return this
   }

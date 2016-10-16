@@ -3,9 +3,10 @@ import { ArgSpec } from '../compiled/arg-spec'
 import { CompiledFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertType, assertListContent, assertNoError 
+  assertType, assertListContent, assertNoError
 } from '../core/assert'
 
+import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
@@ -96,6 +97,18 @@ export class TermApplicationExpression extends Expression {
     if(err) return err
 
     return rightExpr.validateVarType(termVar, type)
+  }
+
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    const { leftExpr, rightExpr } = this
+
+    const err = leftExpr.validateVarType(typeVar, kind)
+    if(err) return err
+
+    return rightExpr.validateVarType(typeVar, kind)
   }
 
   freeTermVariables() {

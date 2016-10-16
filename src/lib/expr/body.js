@@ -1,11 +1,14 @@
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
 import { ArgSpec } from '../compiled/arg-spec'
+import { TermVariable, TypeVariable } from '../core/variable'
+
 import {
   assertListContent, assertType, assertFunction
 } from '../core/assert'
 
 import { Type } from '../type/type'
+import { Kind } from '../kind/kind'
 
 import { Expression } from './expression'
 
@@ -51,6 +54,9 @@ export class BodyExpression extends Expression {
   }
 
   validateVarType(termVar, type) {
+    assertType(termVar, TermVariable)
+    assertType(type, Type)
+
     for(const expr of this.argExprs) {
       const err = expr.validateVarType(termVar, type)
       if(err) return err
@@ -59,7 +65,22 @@ export class BodyExpression extends Expression {
     return null
   }
 
+  validateTVarKind(typeVar, kind) {
+    assertType(typeVar, TypeVariable)
+    assertType(kind, Kind)
+
+    for(const expr of this.argExprs) {
+      const err = expr.validateTVarKind(termVar, type)
+      if(err) return err
+    }
+
+    return null
+  }
+
   bindTerm(termVar, expr) {
+    assertType(termVar, TermVariable)
+    assertType(expr, Expression)
+
     const { argExprs, returnType, compiler } = this
 
     const [newArgExprs, exprModified] = argExprs::mapUnique(
@@ -73,6 +94,9 @@ export class BodyExpression extends Expression {
   }
 
   bindType(typeVar, type) {
+    assertType(typeVar, TypeVariable)
+    assertType(type, Type)
+
     const { argExprs, returnType, compiler } = this
 
     const [newArgExprs, exprModified] = argExprs::mapUnique(

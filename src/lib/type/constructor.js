@@ -43,6 +43,10 @@ export class TypeConstructor extends Type {
     throw new Error('Not implemented')
   }
 
+  validateTVarKind(typeVar, kind) {
+    throw new Error('Not implemented')
+  }
+
   bindType(typeVar, type) {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
