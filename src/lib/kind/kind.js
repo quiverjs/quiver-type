@@ -8,4 +8,9 @@ export class Kind {
   kindCheck(kind) {
     throw new Error('not implemented')
   }
+
+  // formatKind :: () -> String
+  formatKind() {
+    throw new Error('not implemented')
+  }
 }

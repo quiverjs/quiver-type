@@ -21,7 +21,7 @@ import {
 
 test('primitive type test', assert => {
   assert.test('value expr', assert => {
-    const NumberType = new LiteralType(assertNumber)
+    const NumberType = new LiteralType('Number', assertNumber)
 
     const valueExpr = new ValueExpression(8, NumberType)
 
@@ -57,8 +57,8 @@ test('primitive type test', assert => {
   })
 
   assert.test('function expr', assert => {
-    const NumberType = new LiteralType(assertNumber)
-    const StringType = new LiteralType(assertString)
+    const NumberType = new LiteralType('Number', assertNumber)
+    const StringType = new LiteralType('String', assertString)
 
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')

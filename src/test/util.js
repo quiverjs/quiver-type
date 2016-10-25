@@ -18,5 +18,5 @@ export const equalsType = function(result, expectedType) {
   expectedType.typeCheck(result.exprType())
 }
 
-export const NumberType = new LiteralType(assertNumber)
-export const StringType = new LiteralType(assertString)
+export const NumberType = new LiteralType('Number', assertNumber)
+export const StringType = new LiteralType('String', assertString)

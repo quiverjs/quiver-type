@@ -65,4 +65,10 @@ export class ValueExpression extends Expression {
   isTerminal() {
     return true
   }
+
+  formatExpr() {
+    const { value } = this
+    
+    return ['value', value]
+  }
 }

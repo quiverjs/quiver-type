@@ -125,4 +125,14 @@ export class TypeLambdaExpression extends Expression {
   isTerminal() {
     return false
   }
+
+  formatExpr() {
+    const { argTVar, argKind, bodyExpr } = this
+
+    const argTVarRep = argTVar.name
+    const argKindRep = argKind.formatKind()
+    const bodyRep = bodyExpr.formatExpr()
+
+    return ['type-lambda', [argTVarRep, argKindRep], bodyRep]
+  }
 }

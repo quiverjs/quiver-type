@@ -1,20 +1,27 @@
-import { assertType, assertFunction } from '../core/assert'
+import { assertType, assertFunction, assertString } from '../core/assert'
 
 import { typeKind } from '../kind/type'
 import { CompiledLiteralType } from '../compiled/literal'
 
 import { Type } from './type'
 
+const $name = Symbol('@name')
 const $typeChecker = Symbol('@typeChecker')
 
 export class LiteralType extends Type {
   // constructor :: (Any -> Bool) -> Exception
-  constructor(typeChecker) {
+  constructor(name, typeChecker) {
+    assertString(name)
     assertFunction(typeChecker)
 
     super()
 
+    this[$name] = name
     this[$typeChecker] = typeChecker
+  }
+
+  get typeName() {
+    return this[$name]
   }
 
   get typeChecker() {
@@ -57,5 +64,11 @@ export class LiteralType extends Type {
 
   typeCheckObject(object) {
     return this.typeChecker(object)
+  }
+
+  formatType() {
+    const { typeName } = this
+
+    return ['type', typeName]
   }
 }

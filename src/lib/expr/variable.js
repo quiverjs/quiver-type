@@ -125,4 +125,11 @@ export class VariableExpression extends Expression {
   isTerminal() {
     return false
   }
+
+  formatExpr() {
+    const { termVar } = this
+    const varRep = termVar.name
+
+    return ['var', varRep]
+  }
 }

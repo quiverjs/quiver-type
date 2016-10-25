@@ -1,3 +1,5 @@
+import { formatExpr } from './util'
+
 export class Expression {
   constructor() {
     if(this.constructor === Expression)
@@ -54,5 +56,14 @@ export class Expression {
   // so that lambda application can proceed with call by value
   isTerminal() {
     throw new Error('not implemented')
+  }
+
+  // formatExpr :: () -> List Object
+  formatExpr() {
+    throw new Error('not impemented')
+  }
+
+  inspect() {
+    return formatExpr(this)
   }
 }

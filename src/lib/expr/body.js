@@ -138,4 +138,13 @@ export class BodyExpression extends Expression {
   isTerminal() {
     return false
   }
+
+  formatExpr() {
+    const { argExprs, returnType } = this
+
+    const argExprsRep = [...argExprs.map(expr => expr.formatExpr())]
+    const returnTypeRep = returnType.formatType()
+
+    return ['body-compiler', argExprsRep, returnTypeRep]
+  }
 }

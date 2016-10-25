@@ -200,4 +200,13 @@ export class TermApplicationExpression extends Expression {
   isPartial() {
     return this.exprType() instanceof ArrowType
   }
+
+  formatExpr() {
+    const { leftExpr, rightExpr } = this
+
+    const leftRep = leftExpr.formatExpr()
+    const rightRep = rightExpr.formatExpr(0)
+
+    return ['app', leftRep, rightRep]
+  }
 }

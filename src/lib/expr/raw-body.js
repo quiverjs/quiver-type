@@ -78,7 +78,7 @@ export class RawBodyExpression extends Expression {
   bindTerm(termVar, expr) {
     assertType(termVar, TermVariable)
     assertType(expr, Expression)
-    
+
     const { argExprs, returnType, func } = this
 
     const [newArgExprs, exprModified] = argExprs::mapUnique(
@@ -124,5 +124,14 @@ export class RawBodyExpression extends Expression {
 
   isTerminal() {
     return false
+  }
+
+  formatExpr() {
+    const { argExprs, returnType } = this
+
+    const argExprsRep = [...argExprs.map(expr => expr.formatExpr())]
+    const returnTypeRep = returnType.formatType()
+
+    return ['raw-body', argExprsRep, returnTypeRep]
   }
 }

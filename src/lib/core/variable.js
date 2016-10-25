@@ -3,7 +3,7 @@ import { assertString } from 'quiver-util/assert'
 const $name = Symbol('@name')
 
 const idgen = () =>
-  Math.random().toString(36).substr(2, 6)
+  Math.random().toString(16).substr(2, 4)
 
 class Variable {
   constructor(name) {

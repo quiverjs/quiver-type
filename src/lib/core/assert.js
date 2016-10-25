@@ -1,6 +1,6 @@
 import immutable from 'immutable'
 
-export { assertFunction } from 'quiver-util/assert'
+export { assertFunction, assertString } from 'quiver-util/assert'
 
 export const assertType = (object, type, message) => {
   if(!(object instanceof type)) {

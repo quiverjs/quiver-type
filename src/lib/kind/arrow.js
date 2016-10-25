@@ -37,4 +37,13 @@ export class ArrowKind extends Kind {
 
     return rightKind.kindCheck(targetKind.rightKind)
   }
+
+  formatKind() {
+    const { leftKind, rightKind } = this
+
+    const leftRep = leftKind.formatKind()
+    const rightRep = rightKind.formatKind()
+
+    return ['arrow-kind', leftRep, rightRep]
+  }
 }

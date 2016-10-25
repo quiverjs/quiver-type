@@ -126,4 +126,13 @@ export class TypeApplicationExpression extends Expression {
   isTerminal() {
     return false
   }
+
+  formatExpr() {
+    const { leftExpr, rightType } = this
+
+    const leftRep = leftExpr.formatExpr()
+    const rightRep = rightType.formatType()
+
+    return ['type-app', leftRep, rightRep]
+  }
 }

@@ -178,4 +178,14 @@ export class TermLambdaExpression extends Expression {
 
     return bodyExpr.bindTerm(argVar, expr)
   }
+
+  formatExpr() {
+    const { argVar, argType, bodyExpr } = this
+
+    const varRep = argVar.name
+    const argTypeRep = argType.formatType()
+    const bodyRep = bodyExpr.formatExpr()
+
+    return ['lambda', [varRep, argTypeRep], bodyRep]
+  }
 }

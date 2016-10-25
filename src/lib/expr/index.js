@@ -16,4 +16,4 @@ export { TypeLambdaExpression } from './type-lambda'
 
 export { TypeApplicationExpression } from './type-application'
 
-export { compileExpr } from './util'
+export { compileExpr, formatExpr } from './util'

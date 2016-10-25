@@ -9,6 +9,10 @@ export class TypeKind extends Kind {
     assertType(targetKind, TypeKind,
       'target kind must be *')
   }
+
+  formatKind() {
+    return ['kind', '*']
+  }
 }
 
 export const typeKind = new TypeKind()

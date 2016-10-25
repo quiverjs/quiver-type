@@ -40,4 +40,9 @@ export class Type {
   isTerminal() {
     throw new Error('Not implemented')
   }
+
+  // formatType :: () -> String
+  formatType() {
+    throw new Error('Not implemented')
+  }
 }

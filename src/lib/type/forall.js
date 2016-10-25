@@ -112,4 +112,14 @@ export class ForAllType extends Type {
 
     return bodyType.bindType(argTVar, targetType)
   }
+
+  formatType() {
+    const { argTVar, argKind, bodyType } = this
+
+    const argTVarRep = argTVar.name
+    const argKindRep = argKind.formatType()
+    const bodyTypeRep = bodyType.formatType()
+
+    return ['for-all', [argTVarRep, argKindRep], bodyTypeRep]
+  }
 }

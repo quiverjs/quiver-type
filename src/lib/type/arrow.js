@@ -86,4 +86,13 @@ export class ArrowType extends Type {
 
     return leftType.isTerminal() && rightType.isTerminal()
   }
+
+  formatType() {
+    const { leftType, rightType } = this
+
+    const leftRep = leftType.formatType()
+    const rightRep = rightType.formatType()
+
+    return ['arrow', leftType, rightType]
+  }
 }

@@ -74,4 +74,11 @@ export class VariableType extends Type {
   isTerminal() {
     return false
   }
+
+  formatType() {
+    const { typeVar } = this
+    const typeVarRep = typeVar.name
+
+    return ['tvar', typeVarRep]
+  }
 }
