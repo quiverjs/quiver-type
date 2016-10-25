@@ -1,2 +1,5 @@
-import './eval'
-import './compile'
+import './primitive'
+import './body'
+import './lambda'
+import './term-application'
+import './type-lambda'

@@ -5,11 +5,11 @@ import {
 } from 'lib/core'
 
 import {
+  compileExpr,
   VariableExpression,
   TermLambdaExpression,
   TypeLambdaExpression,
-  TypeApplicationExpression,
-  compileExpr
+  TypeApplicationExpression
 } from 'lib/expr'
 
 import {
@@ -24,7 +24,7 @@ import {
 
 import {
   NumberType, StringType
-} from '../util'
+} from './util'
 
 test('type lambda test', assert => {
   assert.test('identity test', assert => {

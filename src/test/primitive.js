@@ -5,9 +5,10 @@ import {
 } from 'lib/core'
 
 import {
+  compileExpr,
   ValueExpression,
-  VariableExpression,
-  RawBodyExpression
+  RawBodyExpression,
+  VariableExpression
 } from 'lib/expr'
 
 import {
@@ -15,8 +16,8 @@ import {
 } from 'lib/type'
 
 import {
-  assertNumber, assertString, equals
-} from '../util'
+  NumberType, assertNumber, assertString, equals
+} from './util'
 
 test('primitive type test', assert => {
   assert.test('value expr', assert => {
@@ -119,6 +120,23 @@ test('primitive type test', assert => {
 
     assert.ok(resultExpr instanceof ValueExpression)
     assert.equal(resultExpr.value, 5)
+
+    assert.end()
+  })
+
+  assert.test('compile constant expression', assert => {
+    const valueExpr = new ValueExpression(8, NumberType)
+    const compiled = compileExpr(valueExpr)
+
+    assert.equals(compiled, 8)
+    assert.end()
+  })
+
+  assert.test('compile variable expression', assert => {
+    const xVar = new TermVariable('x')
+    const varExpr = new VariableExpression(xVar, NumberType)
+
+    assert.throws(() => compileExpr(varExpr))
 
     assert.end()
   })

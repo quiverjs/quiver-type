@@ -11,7 +11,7 @@ import {
   compileExpr
 } from 'lib/expr'
 
-import { NumberType } from '../util'
+import { NumberType } from './util'
 
 test('expression compilation test', assert => {
   assert.test('body expression', assert => {
