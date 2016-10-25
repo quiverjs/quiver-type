@@ -51,11 +51,11 @@ export class ArrowType extends Type {
     assertType(kind, Kind)
 
     const { leftType, rightType } = this
-    
+
     const err = leftType.validateTVarKind(typeVar, kind)
     if(err) return err
 
-    return leftType.validateTVarKind(typeVar, kind)
+    return rightType.validateTVarKind(typeVar, kind)
   }
 
   bindType(typeVar, type) {

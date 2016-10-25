@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertType, assertNoError } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -69,11 +69,11 @@ export class TypeApplicationExpression extends Expression {
 
     const { leftExpr, rightType } = this
 
-    const err = leftExpr.validateTVarKind(termVar, type)
+    const err = leftExpr.validateTVarKind(typeVar, kind)
     if(!err) return null
 
-    const leftType = leftExpr.applyType(rightType)
-    return leftType.validateTVarKind(termVar, type)
+    const leftType = leftExpr.applyType(rightType).exprType()
+    return leftType.validateTVarKind(typeVar, kind)
   }
 
   bindTerm(termVar, targetExpr) {

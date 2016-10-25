@@ -8,6 +8,7 @@ import {
   VariableExpression,
   TermLambdaExpression,
   TypeLambdaExpression,
+  TypeApplicationExpression,
   compileExpr
 } from 'lib/expr'
 
@@ -53,8 +54,55 @@ test('type lambda test', assert => {
     const typeLambda = new TypeLambdaExpression(
       aTVar, typeKind, idLambda)
 
-    const tLambdaType = typeLambda.exprType()
-    assert.ok(tLambdaType instanceof ForAllType)
+    typeLambda.exprType().typeCheck(
+      new ForAllType(aTVar, typeKind,
+        new ArrowType(aType, aType)
+      ))
+
+    assert.ok(typeLambda.exprType() instanceof ForAllType)
+
+    const numTypeApp = new TypeApplicationExpression(
+      typeLambda, NumberType)
+
+    numTypeApp.exprType().typeCheck(
+      new ArrowType(NumberType, NumberType))
+
+    const numIdLambda = numTypeApp.evaluate()
+    numIdLambda.exprType().typeCheck(
+      new ArrowType(NumberType, NumberType))
+
+    assert.ok(numIdLambda instanceof TermLambdaExpression)
+
+    const numIdFunc = compileExpr(numIdLambda)
+    assert.equals(numIdFunc.call(8), 8)
+
+    assert.throws(() => numIdFunc.call('foo'))
+
+    const bTVar = new TypeVariable('b')
+    const bType = new VariableType(bTVar, typeKind)
+
+    const bTypeApp = new TypeApplicationExpression(
+      typeLambda, bType)
+
+    bTypeApp.exprType().typeCheck(new ArrowType(bType, bType))
+
+    assert.equals(bTypeApp.evaluate(), bTypeApp,
+      'type application applied to non terminal type should not be evaluated')
+
+    const stringTypeApp = new TypeApplicationExpression(
+      new TypeLambdaExpression(bTVar, typeKind, bTypeApp),
+      StringType)
+
+    stringTypeApp.exprType().typeCheck(
+      new ArrowType(StringType, StringType))
+
+    const stringIdLambda = stringTypeApp.evaluate()
+    assert.ok(stringIdLambda instanceof TermLambdaExpression)
+
+    const stringIdFunc = compileExpr(stringIdLambda)
+
+    assert.equals(stringIdFunc.call('foo'), 'foo')
+    assert.throws(() => stringIdFunc.call(9))
 
     assert.end()
   })

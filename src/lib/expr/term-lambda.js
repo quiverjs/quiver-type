@@ -125,7 +125,7 @@ export class TermLambdaExpression extends Expression {
     assertType(type, Type)
 
     const { argVar, argType, bodyExpr } = this
-    const newArgType = argType.bindType(typeVar, type.getType())
+    const newArgType = argType.bindType(typeVar, type)
     const newBodyExpr = bodyExpr.bindType(typeVar, type)
 
     if((newArgType === argType) && (newBodyExpr === bodyExpr))
