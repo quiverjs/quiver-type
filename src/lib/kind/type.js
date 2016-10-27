@@ -6,6 +6,8 @@ export class TypeKind extends Kind {
   kindCheck(targetKind) {
     assertType(targetKind, Kind)
 
+    // console.trace('kindCheck', this.formatKind(), targetKind.formatKind())
+
     assertType(targetKind, TypeKind,
       'target kind must be *')
   }

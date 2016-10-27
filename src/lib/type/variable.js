@@ -1,8 +1,11 @@
-import { Kind } from '../kind/kind'
 import { TypeVariable } from '../core/variable'
 import { assertType, assertNoError } from '../core/assert'
 
+import { Kind } from '../kind/kind'
+import { ArrowKind } from '../kind/arrow'
+
 import { Type } from './type'
+import { ApplicationType } from './application'
 
 const $typeVar = Symbol('@typeVar')
 const $kind = Symbol('@kind')
@@ -69,6 +72,17 @@ export class VariableType extends Type {
 
   compileType() {
     throw new Error('Variable Type cannot be compiled')
+  }
+
+  applyType(targetType) {
+    const selfKind = this.kind
+
+    if(!(selfKind instanceof ArrowKind))
+      throw new TypeError('type of non-arrow kind cannot be applied to other type')
+
+    assertNoError(selfKind.leftKind.kindCheck(targetType.typeKind()))
+
+    return new ApplicationType(this, targetType)
   }
 
   isTerminal() {

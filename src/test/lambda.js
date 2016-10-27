@@ -16,7 +16,7 @@ import {
 import { ArrowType } from 'lib/type'
 
 import {
-  equals, equalsType,
+  equals, exprTypeEquals,
   NumberType, StringType
 } from './util'
 
@@ -117,7 +117,7 @@ test('term lambda test', assert => {
     assert::equals(plusLambda.freeTermVariables(), Set())
 
     const plusType = new ArrowType(NumberType, new ArrowType(NumberType, NumberType))
-    assert::equalsType(plusLambda, plusType)
+    assert::exprTypeEquals(plusLambda, plusType)
 
     const arg1 = new ValueExpression(2, NumberType)
     const plusTwoLambda = new TermApplicationExpression(
@@ -125,7 +125,7 @@ test('term lambda test', assert => {
     ).evaluate()
 
     const plusTwoType = new ArrowType(NumberType, NumberType)
-    assert::equalsType(plusTwoLambda, plusTwoType)
+    assert::exprTypeEquals(plusTwoLambda, plusTwoType)
 
     const arg2 = new ValueExpression(3, NumberType)
     const result1 = new TermApplicationExpression(

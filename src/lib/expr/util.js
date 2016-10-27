@@ -8,7 +8,7 @@ import { Expression } from './expression'
 export const compileExpr = expr => {
   assertType(expr, Expression)
 
-  return expr.compileBody(List())()
+  return expr.evaluate().compileBody(List())()
 }
 
 export const formatExpr = expr => {

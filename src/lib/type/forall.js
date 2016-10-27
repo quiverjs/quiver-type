@@ -65,7 +65,7 @@ export class ForAllType extends Type {
     assertType(typeVar, TypeVariable)
     assertType(kind, Kind)
 
-    const { argTVar, argKind, bodyType } = this
+    const { argTVar, bodyType } = this
 
     if(argTVar === typeVar)
       return null

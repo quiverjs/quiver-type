@@ -1,25 +1,37 @@
-import { assertType } from '../core/assert'
 import { TypeVariable } from '../core/variable'
+import { assertType, assertNoError } from '../core/assert'
 
 import { Kind } from '../kind/kind'
-import { typeKind } from '../kind/type'
-import { CompiledArrowType } from '../compiled/arrow'
+import { ArrowKind } from '../kind/arrow'
 
 import { Type } from './type'
 
 const $leftType = Symbol('@leftType')
 const $rightType = Symbol('@rightType')
+const $selfKind = Symbol('@selfKind')
 
-export class ArrowType extends Type {
-  // constructor :: Type -> Type -> ()
+export class ApplicationType extends Type {
   constructor(leftType, rightType) {
     assertType(leftType, Type)
     assertType(rightType, Type)
+
+    const leftKind = leftType.typeKind()
+    const rightKind = rightType.typeKind()
+
+    // console.log('leftKind:', leftKind.formatKind())
+    // console.log('rightKind:', rightKind.formatKind())
+    // console.log('leftKind.leftKind:', leftKind.leftKind.formatKind())
+
+    assertType(leftKind, ArrowKind)
+    assertNoError(leftKind.leftKind.kindCheck(rightKind))
+
+    const selfKind = leftKind.rightKind
 
     super()
 
     this[$leftType] = leftType
     this[$rightType] = rightType
+    this[$selfKind] = selfKind
   }
 
   get leftType() {
@@ -30,16 +42,20 @@ export class ArrowType extends Type {
     return this[$rightType]
   }
 
+  typeKind() {
+    return this[$selfKind]
+  }
+
   freeTypeVariables() {
     return this.leftType.freeTypeVariables()
-      .union(this.rightType.freeTypeVariables())
+      .union(this.rightType.freeTermVariables())
   }
 
   typeCheck(targetType) {
     assertType(targetType, Type)
 
-    if(!(targetType instanceof ArrowType))
-      return new TypeError('target type must be ArrowType')
+    if(!(targetType instanceof ApplicationType))
+      return new TypeError('target type must be instance of ApplicationType')
 
     const { leftType, rightType } = this
 
@@ -73,21 +89,26 @@ export class ArrowType extends Type {
     if((newLeftType === leftType) && (newRightType === rightType))
       return this
 
-    return new ArrowType(newLeftType, newRightType)
+    return new ApplicationType(newLeftType, newRightType)
   }
 
-  typeKind() {
-    return typeKind
+  applyType(targetType) {
+    const selfKind = this.typeKind()
+
+    if(!(selfKind instanceof ArrowKind))
+      throw new TypeError('type of non-arrow kind cannot be applied to other type')
+
+    assertNoError(selfKind.leftKind.kindCheck(targetType.typeKind()))
+
+    return new ApplicationType(this, targetType)
   }
 
   compileType() {
-    return new CompiledArrowType(this)
+    throw new Error('ApplicationType cannot be compiled')
   }
 
   isTerminal() {
-    const { leftType, rightType } = this
-
-    return leftType.isTerminal() && rightType.isTerminal()
+    return false
   }
 
   formatType() {
@@ -96,6 +117,6 @@ export class ArrowType extends Type {
     const leftRep = leftType.formatType()
     const rightRep = rightType.formatType()
 
-    return ['arrow-type', leftRep, rightRep]
+    return ['app-type', leftRep, rightRep]
   }
 }

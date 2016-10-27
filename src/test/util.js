@@ -14,8 +14,14 @@ export const equals = function(result, expected, message) {
   return this.ok(result.equals(expected), message)
 }
 
-export const equalsType = function(result, expectedType) {
-  expectedType.typeCheck(result.exprType())
+export const exprTypeEquals = function(expr, expectedType, message) {
+  const err = expectedType.typeCheck(expr.exprType())
+  this.notOk(err, message)
+}
+
+export const typeKindEquals = function(type, expectedKind, message) {
+  const err = expectedKind.kindCheck(type.typeKind())
+  this.notOk(err, message)
 }
 
 export const NumberType = new LiteralType('Number', assertNumber)
