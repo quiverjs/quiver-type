@@ -21,7 +21,7 @@ export class ForAllType extends Type {
 
     assertNoError(bodyType.validateTVarKind(argTVar, argKind))
 
-    const kind = new ArrowKind(typeKind, bodyType.typeKind())
+    const kind = new ArrowKind(argKind, bodyType.typeKind())
 
     super()
 
@@ -117,7 +117,7 @@ export class ForAllType extends Type {
     const { argTVar, argKind, bodyType } = this
 
     const argTVarRep = argTVar.name
-    const argKindRep = argKind.formatType()
+    const argKindRep = argKind.formatKind()
     const bodyTypeRep = bodyType.formatType()
 
     return ['for-all', [argTVarRep, argKindRep], bodyTypeRep]

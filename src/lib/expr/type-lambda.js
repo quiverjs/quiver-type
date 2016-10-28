@@ -123,7 +123,7 @@ export class TypeLambdaExpression extends Expression {
   }
 
   isTerminal() {
-    return false
+    return true
   }
 
   formatExpr() {

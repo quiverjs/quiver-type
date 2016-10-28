@@ -18,10 +18,6 @@ export class ApplicationType extends Type {
     const leftKind = leftType.typeKind()
     const rightKind = rightType.typeKind()
 
-    // console.log('leftKind:', leftKind.formatKind())
-    // console.log('rightKind:', rightKind.formatKind())
-    // console.log('leftKind.leftKind:', leftKind.leftKind.formatKind())
-
     assertType(leftKind, ArrowKind)
     assertNoError(leftKind.leftKind.kindCheck(rightKind))
 

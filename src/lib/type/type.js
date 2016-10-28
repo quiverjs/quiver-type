@@ -1,3 +1,5 @@
+import { formatLisp } from '../core/util'
+
 export class Type {
   constructor() {
     if(this.constructor === Type)
@@ -44,5 +46,9 @@ export class Type {
   // formatType :: () -> String
   formatType() {
     throw new Error('Not implemented')
+  }
+
+  inspect() {
+    return formatLisp(this.formatType())
   }
 }

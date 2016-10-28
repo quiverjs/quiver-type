@@ -1,4 +1,4 @@
-import { formatExpr } from './util'
+import { formatLisp } from '../core/util'
 
 export class Expression {
   constructor() {
@@ -64,6 +64,6 @@ export class Expression {
   }
 
   inspect() {
-    return formatExpr(this)
+    return formatLisp(this.formatExpr())
   }
 }

@@ -1,3 +1,5 @@
+import { inspect } from 'util'
+
 export const mapUnique = function(mapper) {
   let modified = false
 
@@ -11,4 +13,18 @@ export const mapUnique = function(mapper) {
   })
 
   return [mappedList, modified]
+}
+
+export const formatLisp = list => {
+  const str = inspect(list, {
+    depth: 10,
+    breakLength: 80
+  })
+
+  const lispStr = str
+    .replace(/[\,\'\"]/g, '')
+    .replace(/\[\ /g, '(')
+    .replace(/\ \]/g, ')')
+
+  return lispStr
 }

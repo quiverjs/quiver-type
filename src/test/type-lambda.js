@@ -166,29 +166,19 @@ test('type lambda test', assert => {
     assert.throws(() => firstNumFunc.call('foo', 1))
     assert.throws(() => firstNumFunc.call(1, 2))
 
-    // second = forall a b . lambda x: a, y: b . y
-    const polySecond = new TypeLambdaExpression(
-      aTVar, typeKind,
-      new TypeLambdaExpression(
-        bTVar, typeKind,
-        new TermLambdaExpression(
-          xVar, new VariableType(aTVar, typeKind),
-          new TermLambdaExpression(
-            yVar, new VariableType(bTVar, typeKind),
-            new VariableExpression(yVar, bType)))))
-
     const cType = new VariableType(cTVar, twoArrowKind)
     const dType = new VariableType(dTVar, typeKind)
 
-    // sameType = TLambda c :: * -> * -> *, d :: * .
+    // sameType = TLambda c :: * -> * -> * .
     //               lambda z : c .
-    //                  z [d] [d]
+    //                  TLambda d :: * .
+    //                      z [d] [d]
     const sameTypeLambda = new TypeLambdaExpression(
       cTVar, twoArrowKind,
-      new TypeLambdaExpression(
-        dTVar, typeKind,
-        new TermLambdaExpression(
-          zVar, cType,
+      new TermLambdaExpression(
+        zVar, cType,
+        new TypeLambdaExpression(
+          dTVar, typeKind,
           new TypeApplicationExpression(
             new TypeApplicationExpression(
               new VariableExpression(
@@ -196,19 +186,30 @@ test('type lambda test', assert => {
               dType),
             dType))))
 
-    // const apply1 = new TypeApplicationExpression(
-    //   sameTypeLambda,
-    //   polyFirst.exprType())
-    //
-    // console.log(apply1)
+    // true :: a -> a -> a
+    // true = sameType [forall a b . a] first
+    const polyTrue = new TermApplicationExpression(
+      new TypeApplicationExpression(
+        sameTypeLambda,
+        polyFirst.exprType()),
+      polyFirst)
+      .evaluate()
 
-    // const polyTrue = new TermApplicationExpression(
-    //   new TypeApplicationExpression(
-    //     new TypeApplicationExpression(
-    //       sameTypeLambda,
-    //       polyFirst.exprType()),
-    //     NumberType),
-    //   polyFirst)
+    assert.ok(polyTrue instanceof TypeLambdaExpression)
+    assert::exprTypeEquals(polyTrue, new ForAllType(
+      dTVar, typeKind,
+      new ArrowType(dType, new ArrowType(dType, dType))))
+
+    const numTrue = new TypeApplicationExpression(
+      polyTrue, NumberType)
+      .evaluate()
+
+    assert.ok(numTrue instanceof TermLambdaExpression)
+    assert::exprTypeEquals(numTrue, new ArrowType(
+      NumberType, new ArrowType(NumberType, NumberType)))
+
+    const trueFn = compileExpr(numTrue)
+    assert.equals(trueFn.call(1, 2), 1)
 
     assert.end()
   })
