@@ -61,7 +61,7 @@ export class CompiledArrowType extends CompiledType {
 
   call(compiledFunction, ...args) {
     assertNoError(this.typeCheck(compiledFunction))
-    
+
     return this.directCall(compiledFunction.func, ...args)
   }
 

@@ -6,6 +6,7 @@ import {
 
 import {
   compileExpr,
+  BodyExpression,
   ValueExpression,
   RawBodyExpression,
   VariableExpression,
@@ -14,6 +15,7 @@ import {
 } from 'lib/expr'
 
 import { ArrowType } from 'lib/type'
+import { wrapFunction } from 'lib/util'
 
 import {
   equals, exprTypeEquals,
@@ -189,6 +191,54 @@ test('term lambda test', assert => {
     const func4 = compileExpr(xyxLambda)
 
     assert.equals(func4.call(2, 3, 4), 4)
+
+    assert.end()
+  })
+
+  assert.test('higher order function', assert => {
+    const fVar = new TermVariable('f')
+    const xVar = new TermVariable('x')
+    const yVar = new TermVariable('y')
+
+    const fType = new ArrowType(NumberType, NumberType)
+
+    const applyLambda = new TermLambdaExpression(
+      fVar, fType,
+      new TermLambdaExpression(
+        xVar, NumberType,
+        new TermApplicationExpression(
+          new VariableExpression(fVar, fType),
+          new VariableExpression(xVar, NumberType))))
+
+    const plusTwoLambda = new TermLambdaExpression(
+      yVar, NumberType,
+      new BodyExpression(
+        List([
+          new VariableExpression(yVar, NumberType)
+        ]),
+        NumberType,
+        yType =>
+          y => y + 2
+      ))
+
+    const applyFunc = compileExpr(applyLambda)
+    const plusTwoFunc = compileExpr(plusTwoLambda)
+
+    assert.equals(plusTwoFunc.call(3), 5)
+    assert.equals(applyFunc.call(plusTwoFunc, 3), 5)
+
+    assert.throws(() => applyFunc.call(x => x+2, 3),
+      'should not accept raw function')
+
+    const wrappedFunc = wrapFunction(
+      x => x + 3,
+      [NumberType], NumberType)
+
+    assert.equals(wrappedFunc.call(2), 5)
+    assert.equals(applyFunc.call(wrappedFunc, 2), 5)
+
+    assert.throws(() => applyFunc.call(plusTwoFunc))
+    assert.throws(() => applyFunc.call(plusTwoFunc, 'foo'))
 
     assert.end()
   })

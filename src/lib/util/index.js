@@ -1,0 +1,1 @@
+export { wrapFunction } from './wrap'
