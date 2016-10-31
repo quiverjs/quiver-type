@@ -135,10 +135,6 @@ export class BodyExpression extends Expression {
     return this
   }
 
-  isTerminal() {
-    return false
-  }
-
   formatExpr() {
     const { argExprs, returnType } = this
 

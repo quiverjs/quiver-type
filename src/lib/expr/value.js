@@ -62,13 +62,9 @@ export class ValueExpression extends Expression {
     return constantFunc(this.value)
   }
 
-  isTerminal() {
-    return true
-  }
-
   formatExpr() {
     const { value } = this
-    
+
     return ['value', value]
   }
 }

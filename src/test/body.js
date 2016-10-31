@@ -7,9 +7,10 @@ import {
 import {
   BodyExpression,
   VariableExpression,
-  TermLambdaExpression,
-  compileExpr
+  TermLambdaExpression
 } from 'lib/expr'
+
+import { compileExpr } from 'lib/util'
 
 import { NumberType } from './util'
 

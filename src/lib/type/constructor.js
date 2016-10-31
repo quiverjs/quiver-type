@@ -72,15 +72,4 @@ export class TypeConstructor extends Type {
   typeKind() {
     return typeKind
   }
-
-  isTerminal() {
-    const { argTypes } = this
-
-    for(const argType of argTypes) {
-      if(!argType.isTerminal())
-        return false
-    }
-
-    return true
-  }
 }

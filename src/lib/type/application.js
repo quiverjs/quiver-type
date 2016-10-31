@@ -103,10 +103,6 @@ export class ApplicationType extends Type {
     throw new Error('ApplicationType cannot be compiled')
   }
 
-  isTerminal() {
-    return false
-  }
-
   formatType() {
     const { leftType, rightType } = this
 

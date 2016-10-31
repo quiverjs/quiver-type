@@ -36,13 +36,6 @@ export class Type {
     throw new Error('Not implemented')
   }
 
-  // isTerminal :: Bool
-  // Terminal type allows type application to proceed,
-  // similar to eager evaluation in term lambda application.
-  isTerminal() {
-    throw new Error('Not implemented')
-  }
-
   // formatType :: () -> String
   formatType() {
     throw new Error('Not implemented')

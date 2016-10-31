@@ -164,10 +164,6 @@ export class TermLambdaExpression extends Expression {
     }
   }
 
-  isTerminal() {
-    return true
-  }
-
   // applyExpr :: Expression -> Expression
   // Term application to the lambda expression
   applyExpr(expr) {

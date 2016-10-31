@@ -5,7 +5,6 @@ import {
 } from 'lib/core'
 
 import {
-  compileExpr,
   BodyExpression,
   ValueExpression,
   RawBodyExpression,
@@ -15,7 +14,7 @@ import {
 } from 'lib/expr'
 
 import { ArrowType } from 'lib/type'
-import { wrapFunction } from 'lib/util'
+import { wrapFunction, compileExpr } from 'lib/util'
 
 import {
   equals, exprTypeEquals,

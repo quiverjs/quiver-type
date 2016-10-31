@@ -5,7 +5,6 @@ import {
 } from 'lib/core'
 
 import {
-  compileExpr,
   ValueExpression,
   RawBodyExpression,
   VariableExpression
@@ -14,6 +13,8 @@ import {
 import {
   LiteralType
 } from 'lib/type'
+
+import { compileExpr } from 'lib/util'
 
 import {
   NumberType, assertNumber, assertString, equals

@@ -122,10 +122,6 @@ export class TypeLambdaExpression extends Expression {
     return bodyExpr.bindType(argTVar, type)
   }
 
-  isTerminal() {
-    return true
-  }
-
   formatExpr() {
     const { argTVar, argKind, bodyExpr } = this
 

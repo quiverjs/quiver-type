@@ -5,7 +5,6 @@ import {
 } from 'lib/core'
 
 import {
-  compileExpr,
   VariableExpression,
   TermLambdaExpression,
   TypeLambdaExpression,
@@ -22,6 +21,8 @@ import {
 import {
   typeKind, ArrowKind
 } from 'lib/kind'
+
+import { compileExpr } from 'lib/util'
 
 import {
   NumberType, StringType, exprTypeEquals, typeKindEquals

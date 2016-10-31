@@ -1,3 +1,4 @@
+import { Set } from '../core/container'
 import { assertType, assertFunction, assertString } from '../core/assert'
 
 import { typeKind } from '../kind/type'
@@ -52,10 +53,6 @@ export class LiteralType extends Type {
 
   typeKind() {
     return typeKind
-  }
-
-  isTerminal() {
-    return true
   }
 
   compileType() {

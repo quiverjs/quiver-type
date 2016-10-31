@@ -84,12 +84,6 @@ export class ArrowType extends Type {
     return new CompiledArrowType(this)
   }
 
-  isTerminal() {
-    const { leftType, rightType } = this
-
-    return leftType.isTerminal() && rightType.isTerminal()
-  }
-
   formatType() {
     const { leftType, rightType } = this
 

@@ -122,10 +122,6 @@ export class VariableExpression extends Expression {
     return this
   }
 
-  isTerminal() {
-    return false
-  }
-
   formatExpr() {
     const { termVar } = this
     const varRep = termVar.name

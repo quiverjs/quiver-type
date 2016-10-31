@@ -1,3 +1,4 @@
+import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertType, assertNoError } from '../core/assert'
 
@@ -83,10 +84,6 @@ export class VariableType extends Type {
     assertNoError(selfKind.leftKind.kindCheck(targetType.typeKind()))
 
     return new ApplicationType(this, targetType)
-  }
-
-  isTerminal() {
-    return false
   }
 
   formatType() {

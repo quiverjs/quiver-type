@@ -5,13 +5,14 @@ import {
 } from 'lib/core'
 
 import {
-  compileExpr,
   BodyExpression,
   ValueExpression,
   VariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
 } from 'lib/expr'
+
+import { compileExpr } from 'lib/util'
 
 import { NumberType } from './util'
 

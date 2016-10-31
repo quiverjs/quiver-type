@@ -43,6 +43,13 @@ export class ForAllType extends Type {
     return this[$bodyType]
   }
 
+  freeTypeVariables() {
+    const { argTVar, bodyType } = this
+
+    return bodyType.freeTypeVariables()
+      .delete(argTVar)
+  }
+
   typeCheck(targetType) {
     assertType(targetType, Type)
 
@@ -96,10 +103,6 @@ export class ForAllType extends Type {
 
   compileType() {
     throw new Error('ForAllType cannot be compiled')
-  }
-
-  isTerminal() {
-    return true
   }
 
   // applyType :: Type -> Type

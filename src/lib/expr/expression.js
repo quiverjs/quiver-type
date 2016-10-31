@@ -51,13 +51,6 @@ export class Expression {
     throw new Error('not implemented')
   }
 
-  // isTerminal :: () -> Bool
-  // Used to signal that the expression is terminal
-  // so that lambda application can proceed with call by value
-  isTerminal() {
-    throw new Error('not implemented')
-  }
-
   // formatExpr :: () -> List Object
   formatExpr() {
     throw new Error('not impemented')

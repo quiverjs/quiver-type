@@ -5,6 +5,8 @@ import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
 
+import { isTerminalType } from '../util/terminal'
+
 import { Expression } from './expression'
 import { TypeLambdaExpression } from './type-lambda'
 
@@ -112,7 +114,9 @@ export class TypeApplicationExpression extends Expression {
 
     // Only reduce the type application if type argument is terminal,
     // i.e. when type argument has no free type variable.
-    if((newExpr instanceof TypeLambdaExpression) && rightType.isTerminal()) {
+    if((newExpr instanceof TypeLambdaExpression) &&
+       isTerminalType(rightType))
+    {
       return newExpr.applyType(rightType).evaluate()
 
     } else if(newExpr === leftExpr) {
@@ -121,10 +125,6 @@ export class TypeApplicationExpression extends Expression {
     } else {
       return new TypeApplicationExpression(newExpr, rightType)
     }
-  }
-
-  isTerminal() {
-    return false
   }
 
   formatExpr() {

@@ -9,6 +9,8 @@ import {
 import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 
+import { isTerminalExpr } from '../util/terminal'
+
 import { Expression } from './expression'
 
 const $argExprs = Symbol('@argExprs')
@@ -111,7 +113,7 @@ export class RawBodyExpression extends Expression {
     const { argExprs, returnType, func } = this
 
     for(const argExpr of argExprs) {
-      if(!argExpr.isTerminal()) return this
+      if(!isTerminalExpr(argExpr)) return this
     }
 
     const resultExpr = func(...argExprs)
@@ -120,10 +122,6 @@ export class RawBodyExpression extends Expression {
     assertNoError(returnType.typeCheck(resultExpr.exprType()))
 
     return resultExpr
-  }
-
-  isTerminal() {
-    return false
   }
 
   formatExpr() {

@@ -9,6 +9,7 @@ import {
 import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
+import { isTerminalExpr } from '../util/terminal'
 
 import { Expression } from './expression'
 import { TermLambdaExpression } from './term-lambda'
@@ -154,7 +155,7 @@ export class TermApplicationExpression extends Expression {
     const newRightExpr = rightExpr.evaluate()
 
     if((newLeftExpr instanceof TermLambdaExpression) &&
-        newRightExpr.isTerminal())
+       isTerminalExpr(newRightExpr))
     {
       return newLeftExpr.applyExpr(newRightExpr).evaluate()
 
@@ -191,10 +192,6 @@ export class TermApplicationExpression extends Expression {
     } else {
       return compileExprApplication(leftExpr, closureSpecs, inArgExtractors)
     }
-  }
-
-  isTerminal() {
-    return false
   }
 
   isPartial() {
