@@ -2,7 +2,7 @@ import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertList, assertType, assertFunction } from '../core/assert'
 
-import { typeKind } from '../kind/type'
+import { unitKind } from '../kind/unit'
 
 import { Type } from './type'
 
@@ -70,6 +70,6 @@ export class TypeConstructor extends Type {
   }
 
   typeKind() {
-    return typeKind
+    return unitKind
   }
 }

@@ -2,7 +2,7 @@ import { assertType } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
-import { typeKind } from '../kind/type'
+import { unitKind } from '../kind/unit'
 import { CompiledArrowType } from '../compiled/arrow'
 
 import { Type } from './type'
@@ -77,7 +77,7 @@ export class ArrowType extends Type {
   }
 
   typeKind() {
-    return typeKind
+    return unitKind
   }
 
   compileType() {

@@ -1,7 +1,7 @@
 import { Set } from '../core/container'
 import { assertType, assertFunction, assertString } from '../core/assert'
 
-import { typeKind } from '../kind/type'
+import { unitKind } from '../kind/unit'
 import { CompiledLiteralType } from '../compiled/literal'
 
 import { Type } from './type'
@@ -52,7 +52,7 @@ export class LiteralType extends Type {
   }
 
   typeKind() {
-    return typeKind
+    return unitKind
   }
 
   compileType() {

@@ -2,7 +2,6 @@ import { assertType, assertNoError } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
-import { typeKind } from '../kind/type'
 import { ArrowKind } from '../kind/arrow'
 
 import { Type } from './type'

@@ -2,19 +2,19 @@ import { assertType } from '../core/assert'
 
 import { Kind } from './kind'
 
-export class TypeKind extends Kind {
+export class UnitKind extends Kind {
   kindCheck(targetKind) {
     assertType(targetKind, Kind)
 
     // console.trace('kindCheck', this.formatKind(), targetKind.formatKind())
 
-    assertType(targetKind, TypeKind,
+    assertType(targetKind, UnitKind,
       'target kind must be *')
   }
 
   formatKind() {
-    return ['kind', '*']
+    return ['unit-kind']
   }
 }
 
-export const typeKind = new TypeKind()
+export const unitKind = new UnitKind()

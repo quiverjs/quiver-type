@@ -19,7 +19,7 @@ import {
 } from 'lib/type'
 
 import {
-  typeKind, ArrowKind
+  unitKind, ArrowKind
 } from 'lib/kind'
 
 import { compileExpr } from 'lib/util'
@@ -33,7 +33,7 @@ test('type lambda test', assert => {
     const xVar = new TermVariable('x')
     const aTVar = new TypeVariable('a')
 
-    const aType = new VariableType(aTVar, typeKind)
+    const aType = new VariableType(aTVar, unitKind)
     assert.throws(() => aType.compileType())
 
     assert.equals(aType.bindType(aTVar, NumberType), NumberType)
@@ -54,10 +54,10 @@ test('type lambda test', assert => {
     assert.throws(() => compileExpr(idLambdaType))
 
     const typeLambda = new TypeLambdaExpression(
-      aTVar, typeKind, idLambda)
+      aTVar, unitKind, idLambda)
 
     assert::exprTypeEquals(typeLambda,
-      new ForAllType(aTVar, typeKind,
+      new ForAllType(aTVar, unitKind,
         new ArrowType(aType, aType)))
 
     assert.ok(typeLambda.exprType() instanceof ForAllType)
@@ -80,7 +80,7 @@ test('type lambda test', assert => {
     assert.throws(() => numIdFunc.call('foo'))
 
     const bTVar = new TypeVariable('b')
-    const bType = new VariableType(bTVar, typeKind)
+    const bType = new VariableType(bTVar, unitKind)
 
     const bTypeApp = new TypeApplicationExpression(
       typeLambda, bType)
@@ -91,7 +91,7 @@ test('type lambda test', assert => {
       'type application applied to non terminal type should not be evaluated')
 
     const stringTypeApp = new TypeApplicationExpression(
-      new TypeLambdaExpression(bTVar, typeKind, bTypeApp),
+      new TypeLambdaExpression(bTVar, unitKind, bTypeApp),
       StringType)
 
     assert::exprTypeEquals(stringTypeApp,
@@ -118,37 +118,37 @@ test('type lambda test', assert => {
     const cTVar = new TypeVariable('c')
     const dTVar = new TypeVariable('d')
 
-    const aType = new VariableType(aTVar, typeKind)
-    const bType = new VariableType(bTVar, typeKind)
+    const aType = new VariableType(aTVar, unitKind)
+    const bType = new VariableType(bTVar, unitKind)
 
-    assert.ok(new TypeLambdaExpression(aTVar, typeKind,
+    assert.ok(new TypeLambdaExpression(aTVar, unitKind,
       new VariableExpression(xVar,
-        new VariableType(aTVar, typeKind))))
+        new VariableType(aTVar, unitKind))))
 
     assert.throws(() =>
-      new TypeLambdaExpression(aTVar, typeKind,
+      new TypeLambdaExpression(aTVar, unitKind,
         new VariableExpression(xVar,
           new VariableType(aTVar,
-            new ArrowKind(typeKind, typeKind)))),
+            new ArrowKind(unitKind, unitKind)))),
       'should not construct if type variable have mismatch kind in body')
 
     // first = forall a b . lambda x: a, y: b . x
-    const polyFirst = new TypeLambdaExpression(aTVar, typeKind,
-      new TypeLambdaExpression(bTVar, typeKind,
+    const polyFirst = new TypeLambdaExpression(aTVar, unitKind,
+      new TypeLambdaExpression(bTVar, unitKind,
         new TermLambdaExpression(xVar, aType,
           new TermLambdaExpression(yVar, bType,
             new VariableExpression(xVar, aType)))))
 
     // first :: forall a b . a -> b -> a
     assert::exprTypeEquals(polyFirst,
-      new ForAllType(aTVar, typeKind,
-        new ForAllType(bTVar, typeKind,
+      new ForAllType(aTVar, unitKind,
+        new ForAllType(bTVar, unitKind,
           new ArrowType(aType,
             new ArrowType(bType, aType)))))
 
     // * -> * -> *
-    const twoArrowKind = new ArrowKind(typeKind,
-      new ArrowKind(typeKind, typeKind))
+    const twoArrowKind = new ArrowKind(unitKind,
+      new ArrowKind(unitKind, unitKind))
 
     // first ::: * -> * -> *
     assert::typeKindEquals(polyFirst.exprType(), twoArrowKind)
@@ -168,7 +168,7 @@ test('type lambda test', assert => {
     assert.throws(() => firstNumFunc.call(1, 2))
 
     const cType = new VariableType(cTVar, twoArrowKind)
-    const dType = new VariableType(dTVar, typeKind)
+    const dType = new VariableType(dTVar, unitKind)
 
     // sameType = TLambda c :: * -> * -> * .
     //               lambda z : c .
@@ -179,7 +179,7 @@ test('type lambda test', assert => {
       new TermLambdaExpression(
         zVar, cType,
         new TypeLambdaExpression(
-          dTVar, typeKind,
+          dTVar, unitKind,
           new TypeApplicationExpression(
             new TypeApplicationExpression(
               new VariableExpression(
@@ -198,7 +198,7 @@ test('type lambda test', assert => {
 
     assert.ok(polyTrue instanceof TypeLambdaExpression)
     assert::exprTypeEquals(polyTrue, new ForAllType(
-      dTVar, typeKind,
+      dTVar, unitKind,
       new ArrowType(dType, new ArrowType(dType, dType))))
 
     const numTrue = new TypeApplicationExpression(

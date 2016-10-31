@@ -1,5 +1,5 @@
 export { Kind } from './kind'
 
-export { TypeKind, typeKind } from './type'
+export { UnitKind, unitKind } from './unit'
 
 export { ArrowKind } from './arrow'
