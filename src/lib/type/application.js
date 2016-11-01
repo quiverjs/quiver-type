@@ -4,6 +4,8 @@ import { assertType, assertNoError } from '../core/assert'
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
 
+import { isTerminalType } from '../util/terminal'
+
 import { Type } from './type'
 
 const $leftType = Symbol('@leftType')
@@ -20,6 +22,13 @@ export class ApplicationType extends Type {
 
     assertType(leftKind, ArrowKind)
     assertNoError(leftKind.leftKind.kindCheck(rightKind))
+
+    if(isTerminalType(leftType) &&
+       isTerminalType(rightType) &&
+       leftType.applyType)
+    {
+      return leftType.applyType(rightType)
+    }
 
     const selfKind = leftKind.rightKind
 
@@ -44,7 +53,7 @@ export class ApplicationType extends Type {
 
   freeTypeVariables() {
     return this.leftType.freeTypeVariables()
-      .union(this.rightType.freeTermVariables())
+      .union(this.rightType.freeTypeVariables())
   }
 
   typeCheck(targetType) {

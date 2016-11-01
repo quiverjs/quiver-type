@@ -2,19 +2,19 @@ import test from 'tape'
 
 import {
   TermVariable, Set, List
-} from 'lib/core'
+} from '../lib/core'
 
 import {
   ValueExpression,
   RawBodyExpression,
   VariableExpression
-} from 'lib/expr'
+} from '../lib/expr'
 
 import {
   LiteralType
-} from 'lib/type'
+} from '../lib/type'
 
-import { compileExpr } from 'lib/util'
+import { compileExpr } from '../lib/util'
 
 import {
   NumberType, assertNumber, assertString, equals

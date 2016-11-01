@@ -2,7 +2,7 @@ import { Set } from '../core/container'
 import { assertType, assertFunction, assertString } from '../core/assert'
 
 import { unitKind } from '../kind/unit'
-import { CompiledLiteralType } from '../compiled/literal'
+import { DynamicCompiledType } from '../compiled/dynamic'
 
 import { Type } from './type'
 
@@ -56,7 +56,8 @@ export class LiteralType extends Type {
   }
 
   compileType() {
-    return new CompiledLiteralType(this)
+    const { typeChecker } = this
+    return new DynamicCompiledType(this, typeChecker)
   }
 
   typeCheckObject(object) {

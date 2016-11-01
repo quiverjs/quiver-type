@@ -2,7 +2,7 @@ import test from 'tape'
 
 import {
   TermVariable, Set, List
-} from 'lib/core'
+} from '../lib/core'
 
 import {
   BodyExpression,
@@ -11,10 +11,10 @@ import {
   VariableExpression,
   TermLambdaExpression,
   TermApplicationExpression
-} from 'lib/expr'
+} from '../lib/expr'
 
-import { ArrowType } from 'lib/type'
-import { wrapFunction, compileExpr } from 'lib/util'
+import { ArrowType } from '../lib/type'
+import { wrapFunction, compileExpr } from '../lib/util'
 
 import {
   equals, exprTypeEquals,

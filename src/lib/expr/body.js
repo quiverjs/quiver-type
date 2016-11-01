@@ -70,7 +70,7 @@ export class BodyExpression extends Expression {
     assertType(kind, Kind)
 
     for(const expr of this.argExprs) {
-      const err = expr.validateTVarKind(termVar, type)
+      const err = expr.validateTVarKind(typeVar, kind)
       if(err) return err
     }
 
@@ -102,8 +102,10 @@ export class BodyExpression extends Expression {
     const [newArgExprs, exprModified] = argExprs::mapUnique(
       argExpr => argExpr.bindType(typeVar, type))
 
-    if(exprModified) {
-      return new BodyExpression(newArgExprs, returnType, compiler)
+    const newReturnType = returnType.bindType(typeVar, type)
+
+    if(exprModified || newReturnType !== returnType) {
+      return new BodyExpression(newArgExprs, newReturnType, compiler)
     } else {
       return this
     }

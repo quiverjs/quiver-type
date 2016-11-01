@@ -8,4 +8,6 @@ export { ArrowType } from './arrow'
 
 export { ForAllType } from './forall'
 
+export { ApplicationType } from './application'
+
 export { TypeConstructor } from './constructor'

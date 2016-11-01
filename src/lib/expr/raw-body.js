@@ -102,7 +102,9 @@ export class RawBodyExpression extends Expression {
     const [newArgExprs, exprModified] = argExprs::mapUnique(
       argExpr => argExpr.bindType(typeVar, type))
 
-    if(exprModified) {
+    const newReturnType = returnType.bindType(typeVar, type)
+
+    if(exprModified || newReturnType !== returnType) {
       return new RawBodyExpression(newArgExprs, returnType, func)
     } else {
       return this

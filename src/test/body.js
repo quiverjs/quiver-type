@@ -2,15 +2,15 @@ import test from 'tape'
 
 import {
   TermVariable, List
-} from 'lib/core'
+} from '../lib/core'
 
 import {
   BodyExpression,
   VariableExpression,
   TermLambdaExpression
-} from 'lib/expr'
+} from '../lib/expr'
 
-import { compileExpr } from 'lib/util'
+import { compileExpr } from '../lib/util'
 
 import { NumberType } from './util'
 

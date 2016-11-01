@@ -2,7 +2,7 @@ import test from 'tape'
 
 import {
   TermVariable, TypeVariable
-} from 'lib/core'
+} from '../lib/core'
 
 import {
   VariableExpression,
@@ -10,19 +10,19 @@ import {
   TypeLambdaExpression,
   TermApplicationExpression,
   TypeApplicationExpression
-} from 'lib/expr'
+} from '../lib/expr'
 
 import {
   ArrowType,
   VariableType,
   ForAllType
-} from 'lib/type'
+} from '../lib/type'
 
 import {
   unitKind, ArrowKind
-} from 'lib/kind'
+} from '../lib/kind'
 
-import { compileExpr } from 'lib/util'
+import { compileExpr } from '../lib/util'
 
 import {
   NumberType, StringType, exprTypeEquals, typeKindEquals

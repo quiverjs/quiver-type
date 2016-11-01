@@ -1,15 +1,13 @@
 import { assertType } from '../core/assert'
 
 import { CompiledType } from './type'
-import { LiteralType } from '../type/literal'
+import { Type } from '../type/type'
 
 const $typeChecker = Symbol('@typeChecker')
 
-export class CompiledLiteralType extends CompiledType {
-  constructor(srcType) {
-    assertType(srcType, LiteralType)
-
-    const { typeChecker } = srcType
+export class DynamicCompiledType extends CompiledType {
+  constructor(srcType, typeChecker) {
+    assertType(srcType, Type)
 
     super(srcType)
 

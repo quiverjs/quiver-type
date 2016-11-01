@@ -1,35 +1,33 @@
 import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
-import { assertList, assertType, assertFunction } from '../core/assert'
+import { assertListContent, assertType, assertFunction } from '../core/assert'
+
+import { DynamicCompiledType } from '../compiled/dynamic'
 
 import { unitKind } from '../kind/unit'
 
 import { Type } from './type'
 
 const $argTypes = Symbol('@argTypes')
-const $func = Symbol('@func')
+const $typeCheckerBuilder = Symbol('@typeCheckerBuilder')
 
 export class TypeConstructor extends Type {
-  constructor(argTypes, func) {
-    assertList(argTypes)
-    assertFunction(func)
+  constructor(argTypes, typeCheckerBuilder) {
+    assertListContent(argTypes, Type)
+    assertFunction(typeCheckerBuilder)
 
     super()
 
-    for(const argType of argTypes) {
-      assertType(argType, Type)
-    }
-
     this[$argTypes] = argTypes
-    this[$func] = func
+    this[$typeCheckerBuilder] = typeCheckerBuilder
   }
 
   get argTypes() {
     return this[$argTypes]
   }
 
-  get func() {
-    return this[$func]
+  get typeCheckerBuilder() {
+    return this[$typeCheckerBuilder]
   }
 
   freeTypeVariables() {
@@ -40,18 +38,41 @@ export class TypeConstructor extends Type {
   }
 
   typeCheck(targetType) {
-    throw new Error('Not implemented')
+    assertType(targetType, Type)
+
+    if(!(targetType instanceof TypeConstructor))
+      return new TypeError('target type must be type constructor')
+
+    const selfArgTypes = this.argTypes
+    const targetArgTypes = targetType.argTypes
+
+    if(selfArgTypes.size !== targetArgTypes.size)
+      return new TypeError('type constructor size mismatch')
+
+    for(const [selfType, targetType] of selfArgTypes.zip(targetArgTypes)) {
+      const err = selfType.typeCheck(targetType)
+      if(err) return err
+    }
+
+    return null
   }
 
   validateTVarKind(typeVar, kind) {
-    throw new Error('Not implemented')
+    const { argTypes } = this
+
+    for(const argType of argTypes) {
+      const err = argType.validateTVarKind(typeVar, kind)
+      if(err) return err
+    }
+
+    return null
   }
 
   bindType(typeVar, type) {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    const { argTypes, func } = this
+    const { argTypes, typeCheckerBuilder } = this
 
     let argTypesChanged = false
 
@@ -66,7 +87,25 @@ export class TypeConstructor extends Type {
 
     if(!argTypesChanged) return this
 
-    return new TypeConstructor(newArgTypes, func)
+    return new TypeConstructor(newArgTypes, typeCheckerBuilder)
+  }
+
+  compileType() {
+    const { argTypes, typeCheckerBuilder } = this
+    const compiledArgTypes = argTypes.map(type => type.compileType())
+
+    const typeChecker = typeCheckerBuilder(compiledArgTypes)
+    assertFunction(typeChecker)
+
+    return new DynamicCompiledType(this, typeChecker)
+  }
+
+  formatType() {
+    const { argTypes } = this
+
+    const argTypeReps = [...argTypes.map(type => type.formatType())]
+
+    return ['type-constructor', argTypeReps]
   }
 
   typeKind() {

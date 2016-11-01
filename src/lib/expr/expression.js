@@ -18,6 +18,11 @@ export class Expression {
     throw new Error('not implemented')
   }
 
+  // exprCheck :: Expression -> Maybe Error
+  exprCheck(targetExpr) {
+    throw new Error('not implemented')
+  }
+
   // validateVarType :: TermVariable -> Type -> Maybe Error
   validateVarType(termVar, type) {
     throw new Error('not implemented')
