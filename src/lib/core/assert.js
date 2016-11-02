@@ -24,6 +24,13 @@ export const assertListContent = (list, ElementType, message) => {
   }
 }
 
+export const assertMap = (map, message) => {
+  if(!immutable.Map.isMap(map)) {
+    const errMessage = message || 'argument must be ImmutableMap'
+    throw new TypeError(errMessage)
+  }
+}
+
 export const assertNoError = err => {
   if(err) throw err
 }

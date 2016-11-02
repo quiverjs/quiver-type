@@ -70,7 +70,7 @@ export class RawBodyExpression extends Expression {
     assertType(kind, Kind)
 
     for(const expr of this.argExprs) {
-      const err = expr.validateTVarKind(termVar, type)
+      const err = expr.validateTVarKind(typeVar, kind)
       if(err) return err
     }
 

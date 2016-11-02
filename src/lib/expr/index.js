@@ -15,3 +15,5 @@ export { TermApplicationExpression } from './term-application'
 export { TypeLambdaExpression } from './type-lambda'
 
 export { TypeApplicationExpression } from './type-application'
+
+export { MatchExpression } from './match'

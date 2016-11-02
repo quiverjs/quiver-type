@@ -1,4 +1,3 @@
-import { List } from '../core/container'
 import { TermVariable } from '../core/variable'
 import { assertFunction, assertType, assertListContent } from '../core/assert'
 

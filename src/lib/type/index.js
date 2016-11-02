@@ -11,3 +11,5 @@ export { ForAllType } from './forall'
 export { ApplicationType } from './application'
 
 export { TypeConstructor } from './constructor'
+
+export { SumType } from './sum'
