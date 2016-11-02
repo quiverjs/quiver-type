@@ -2,6 +2,7 @@ import test from 'tape'
 
 import {
   BodyExpression,
+  ValueExpression,
   VariableExpression,
   TermLambdaExpression,
   TypeLambdaExpression,
@@ -31,7 +32,7 @@ import {
 
 import {
   NumberType, StringType,
-  typeKindEquals
+  exprTypeEquals, typeKindEquals
 } from './util'
 
 test('type constructor test', assert => {
@@ -70,6 +71,7 @@ test('type constructor test', assert => {
     assert.throws(() => ListType.compileType())
 
     const NumberListType = new ApplicationType(ListType, NumberType)
+    const StringListType = new ApplicationType(ListType, StringType)
 
     assert.ok(NumberListType instanceof TypeConstructor,
       'ApplicationType should return applied type if both types are terminal')
@@ -153,11 +155,21 @@ test('type constructor test', assert => {
     assert.throws(() => numToStrListFn.call([1, 2, 3]))
     assert.throws(() => numToStrListFn.call(1))
 
+    const strListExpr = new TermApplicationExpression(
+      numToStrListExpr,
+      new ValueExpression(
+        List([1, 2, 3]),
+        NumberListType))
+
+    assert::exprTypeEquals(strListExpr, StringListType)
+    assert.deepEquals(compileExpr(strListExpr).toArray(),
+      ['1', '2', '3'])
+
     const fmapNumStrFn = compileExpr(fmapNumStr)
 
     const squareStrFn = wrapFunction(
       num => `${num*num}`,
-      [NumberType], StringType)
+      List([NumberType]), StringType)
 
     assert.deepEquals(
       fmapNumStrFn.call(squareStrFn, List([1, 2, 3])).toArray(),

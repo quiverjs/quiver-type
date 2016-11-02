@@ -231,13 +231,24 @@ test('term lambda test', assert => {
 
     const wrappedFunc = wrapFunction(
       x => x + 3,
-      [NumberType], NumberType)
+      List([NumberType]),
+      NumberType)
 
     assert.equals(wrappedFunc.call(2), 5)
     assert.equals(applyFunc.call(wrappedFunc, 2), 5)
 
     assert.throws(() => applyFunc.call(plusTwoFunc))
     assert.throws(() => applyFunc.call(plusTwoFunc, 'foo'))
+
+    const numStrFunc = wrapFunction(
+      x => `${x}`,
+      List([NumberType]),
+      StringType
+    )
+
+    assert.equals(numStrFunc.call(1), '1')
+    assert.throws(() => applyFunc.call(numStrFunc, 1),
+      'should type check function argument of its type')
 
     assert.end()
   })

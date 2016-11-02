@@ -10,11 +10,10 @@ import { Type } from '../type/type'
 
 import { CompiledFunction } from '../compiled/function'
 
-export const wrapFunction = (func, argTypesArray, returnType) => {
+export const wrapFunction = (func, argTypes, returnType) => {
   assertFunction(func)
   assertType(returnType, Type)
 
-  const argTypes = List(argTypesArray)
   assertListContent(argTypes, Type)
 
   const argVars = argTypes.map(argType =>
