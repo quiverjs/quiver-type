@@ -60,32 +60,44 @@ test('sum type test', assert => {
         EitherType, NumberType),
       StringType)
 
-    const NumVariant = new VariantExpression(
+    const numVariantExpr = new VariantExpression(
       EitherNumStr, 'Left',
       new ValueExpression(3, NumberType))
 
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const matchExpr = new MatchExpression(
-      NumVariant,
-      // new VariableExpression(xVar, EitherNumStr),
-      StringType,
-      Map({
-        Left: wrapFunction(
-          x => `num(${x})`,
-          List([NumberType]),
-          StringType)
-          .srcExpr,
-        Right: wrapFunction(
-          x => `str(${x})`,
-          List([StringType]),
-          StringType)
-          .srcExpr
-      }))
+    const matchLambda = new TermLambdaExpression(
+      xVar, EitherNumStr,
+      new MatchExpression(
+        new VariableExpression(xVar, EitherNumStr),
+        StringType,
+        Map({
+          Left: wrapFunction(
+            x => `num(${x})`,
+            List([NumberType]),
+            StringType)
+            .srcExpr,
+          Right: wrapFunction(
+            x => `str(${x})`,
+            List([StringType]),
+            StringType)
+            .srcExpr
+        })))
 
-    console.log(EitherType)
-    console.log(matchExpr)
+    const matchNumExpr = matchLambda.applyExpr(numVariantExpr)
+
+    const compiledEitherNumStr = EitherNumStr.compileType()
+
+    const matchFn = compileExpr(matchLambda)
+
+    const numVariant = compileExpr(numVariantExpr)
+
+    assert.equals(matchFn.call(numVariant), 'num(3)')
+
+    const strVariant = compiledEitherNumStr.construct('Right', 'foo')
+
+    assert.equals(matchFn.call(strVariant), 'str(foo)')
 
     assert.end()
   })

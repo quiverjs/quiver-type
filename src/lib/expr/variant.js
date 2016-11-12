@@ -1,5 +1,5 @@
 import {
-  assertType,
+  assertType, assertListContent,
   assertString, assertNoError
 } from '../core/assert'
 
@@ -7,6 +7,8 @@ import { Type } from '../type/type'
 import { SumType } from '../type/sum'
 
 import { Kind } from '../kind/kind'
+
+import { ArgSpec } from '../compiled/arg-spec'
 
 import { TermVariable, TypeVariable } from '../core/variable'
 
@@ -106,8 +108,18 @@ export class VariantExpression extends Expression {
     }
   }
 
-  compileBody() {
-    throw new Error('not yet implemented')
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+
+    const { sumType, tag, bodyExpr } = this
+
+    const compiledSumType = sumType.compileType()
+    const compiledBody = bodyExpr.compileBody(argSpecs)
+
+    return (...args) => {
+      const value = compiledBody(...args)
+      return compiledSumType.construct(tag, value)
+    }
   }
 
   evaluate() {

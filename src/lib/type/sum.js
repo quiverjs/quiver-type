@@ -13,6 +13,8 @@ import { Kind } from '../kind/kind'
 
 import { unitKind } from '../kind/unit'
 
+import { CompiledSumType } from '../compiled/sum'
+
 import { Type } from './type'
 
 const $typeMap = Symbol('@typeMap')
@@ -99,7 +101,7 @@ export class SumType extends Type {
   }
 
   compileType() {
-    throw new Error('not yet implemented')
+    return new CompiledSumType(this)
   }
 
   formatType() {

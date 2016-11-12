@@ -1,5 +1,6 @@
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
+import { ArgSpec } from '../compiled/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -9,22 +10,25 @@ import { ArrowType } from '../type/arrow'
 import { Kind } from '../kind/kind'
 
 import { Expression } from './expression'
+import { VariantExpression } from './variant'
+import { TermLambdaExpression } from './term-lambda'
 
 import {
-  assertMap, assertType, assertNoError
+  assertMap, assertType,
+  assertListContent, assertNoError
 } from '../core/assert'
 
-const $sumExpr = Symbol('@sumExpr')
+const $variantExpr = Symbol('@variantExpr')
 const $caseExprs = Symbol('@caseExprs')
 const $returnType = Symbol('@returnType')
 
 export class MatchExpression extends Expression {
-  constructor(sumExpr, returnType, caseExprs) {
-    assertType(sumExpr, Expression)
+  constructor(variantExpr, returnType, caseExprs) {
+    assertType(variantExpr, Expression)
     assertType(returnType, Type)
     assertMap(caseExprs)
 
-    const sumType = sumExpr.exprType()
+    const sumType = variantExpr.exprType()
     assertType(sumType, SumType)
 
     const { typeMap } = sumType
@@ -37,7 +41,7 @@ export class MatchExpression extends Expression {
         throw new TypeError('case expressions must match all sum types')
       }
 
-      assertType(caseExpr, Expression)
+      assertType(caseExpr, TermLambdaExpression)
 
       const exprType = caseExpr.exprType()
       assertType(exprType, ArrowType)
@@ -48,13 +52,13 @@ export class MatchExpression extends Expression {
 
     super()
 
-    this[$sumExpr] = sumExpr
+    this[$variantExpr] = variantExpr
     this[$returnType] = returnType
     this[$caseExprs] = caseExprs
   }
 
-  get sumExpr() {
-    return this[$sumExpr]
+  get variantExpr() {
+    return this[$variantExpr]
   }
 
   get caseExprs() {
@@ -66,11 +70,11 @@ export class MatchExpression extends Expression {
   }
 
   freeTermVariables() {
-    const { sumExpr, caseExprs } = this
+    const { variantExpr, caseExprs } = this
 
     return caseExprs::unionMap(
       expr => expr.freeTermVariables())
-      .union(sumExpr.freeTermVariables())
+      .union(variantExpr.freeTermVariables())
   }
 
   exprType() {
@@ -81,28 +85,28 @@ export class MatchExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(type, Type)
 
-    const { sumExpr, caseExprs } = this
+    const { variantExpr, caseExprs } = this
 
-    for(const expr of caseExprs) {
+    for(const expr of caseExprs.values()) {
       const err = expr.validateVarType(termVar, type)
       if(err) return err
     }
 
-    return sumExpr.validateVarType(termVar, type)
+    return variantExpr.validateVarType(termVar, type)
   }
 
   validateTVarKind(typeVar, kind) {
     assertType(typeVar, TypeVariable)
     assertType(kind, Kind)
 
-    const { sumExpr, caseExprs, returnType } = this
+    const { variantExpr, caseExprs, returnType } = this
 
-    for(const expr of caseExprs) {
+    for(const expr of caseExprs.values()) {
       const err = expr.validateTVarKind(typeVar, kind)
       if(err) return err
     }
 
-    const err = sumExpr.validateTVarKind(typeVar, kind)
+    const err = variantExpr.validateTVarKind(typeVar, kind)
     if(err) return err
 
     return returnType.validateTVarKind(typeVar, kind)
@@ -112,15 +116,15 @@ export class MatchExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(expr, Expression)
 
-    const { sumExpr, caseExprs, returnType } = this
+    const { variantExpr, caseExprs, returnType } = this
 
     const [newCaseExprs, exprModified] = caseExprs::mapUnique(
       caseExpr => caseExpr.bindTerm(termVar, expr))
 
-    const newSumExpr = sumExpr.bindTerm(termVar, expr)
+    const newvariantExpr = variantExpr.bindTerm(termVar, expr)
 
-    if(exprModified || newSumExpr !== sumExpr) {
-      return new MatchExpression(newSumExpr, newCaseExprs, returnType)
+    if(exprModified || newvariantExpr !== variantExpr) {
+      return new MatchExpression(newvariantExpr, returnType, newCaseExprs)
     } else {
       return this
     }
@@ -130,13 +134,13 @@ export class MatchExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    const { sumExpr, caseExprs, returnType } = this
+    const { variantExpr, caseExprs, returnType } = this
 
     let exprModified = false
 
-    const newSumExpr = sumExpr.bindType(typeVar, type)
+    const newvariantExpr = variantExpr.bindType(typeVar, type)
 
-    if(newSumExpr !== sumExpr)
+    if(newvariantExpr !== variantExpr)
       exprModified = true
 
     const newCaseExprs = caseExprs.map(expr => {
@@ -153,25 +157,55 @@ export class MatchExpression extends Expression {
       exprModified = true
 
     if(exprModified) {
-      return new MatchExpression(newSumExpr, newCaseExprs, newReturnType)
+      return new MatchExpression(newvariantExpr, newReturnType, newCaseExprs)
 
     } else {
       return this
     }
   }
 
-  compileBody() {
-    throw new Error('not yet implemented')
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+
+    const { variantExpr, caseExprs, returnType } = this
+
+    const compiledVariant = variantExpr.compileBody(argSpecs)
+
+    const compiledCases = caseExprs.map(expr =>
+      expr.compileBody(argSpecs))
+
+    return (...args) => {
+      const variant = compiledVariant(...args)
+
+      const { tag, value } = variant
+      const compiledCase = compiledCases.get(tag)
+
+      if(!compiledCase) {
+        throw new Error('variant value contains unexpected tag')
+      }
+
+      return compiledCase(...args).call(value)
+    }
   }
 
   evaluate() {
-    return this
+    const { variantExpr, caseExprs, returnType } = this
+
+    if(!(variantExpr instanceof VariantExpression))
+      return this
+
+    const { tag, bodyExpr } = variantExpr
+    const caseExpr = caseExprs.get(tag)
+
+    assertType(caseExpr, TermLambdaExpression)
+
+    return caseExpr.applyExpr(bodyExpr)
   }
 
   formatExpr() {
-    const { sumExpr, caseExprs } = this
+    const { variantExpr, caseExprs } = this
 
-    const sumRep = sumExpr.formatExpr()
+    const sumRep = variantExpr.formatExpr()
     const caseReps = caseExprs.map(expr => expr.formatExpr())
 
     return ['match', sumRep, [...caseReps]]
