@@ -7,6 +7,8 @@ import {
 
 import {
   MatchExpression,
+  ValueExpression,
+  VariantExpression,
   VariableExpression,
   TermLambdaExpression,
   TypeLambdaExpression,
@@ -42,6 +44,7 @@ test('sum type test', assert => {
     const aType = new VariableType(aTVar, unitKind)
     const bType = new VariableType(bTVar, unitKind)
 
+    // Either = forall a b. a | b
     const EitherType = new ForAllType(
       aTVar, unitKind,
       new ForAllType(
@@ -51,16 +54,23 @@ test('sum type test', assert => {
           Right: bType
         }))))
 
+    // EitherNumStr = Number | String
     const EitherNumStr = new ApplicationType(
       new ApplicationType(
         EitherType, NumberType),
       StringType)
 
+    const NumVariant = new VariantExpression(
+      EitherNumStr, 'Left',
+      new ValueExpression(3, NumberType))
+
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
     const matchExpr = new MatchExpression(
-      new VariableExpression(xVar, EitherNumStr),
+      NumVariant,
+      // new VariableExpression(xVar, EitherNumStr),
+      StringType,
       Map({
         Left: wrapFunction(
           x => `num(${x})`,
@@ -72,8 +82,7 @@ test('sum type test', assert => {
           List([StringType]),
           StringType)
           .srcExpr
-      }),
-      StringType)
+      }))
 
     console.log(EitherType)
     console.log(matchExpr)

@@ -19,7 +19,7 @@ const $caseExprs = Symbol('@caseExprs')
 const $returnType = Symbol('@returnType')
 
 export class MatchExpression extends Expression {
-  constructor(sumExpr, caseExprs, returnType) {
+  constructor(sumExpr, returnType, caseExprs) {
     assertType(sumExpr, Expression)
     assertType(returnType, Type)
     assertMap(caseExprs)
@@ -31,7 +31,7 @@ export class MatchExpression extends Expression {
     if(typeMap.size !== caseExprs.size)
       throw new TypeError('case expressions must match all sum types')
 
-    for(const [tag, inType] of typeMap) {
+    for(const [tag, caseType] of typeMap) {
       const caseExpr = caseExprs.get(tag)
       if(!caseExpr) {
         throw new TypeError('case expressions must match all sum types')
@@ -42,15 +42,15 @@ export class MatchExpression extends Expression {
       const exprType = caseExpr.exprType()
       assertType(exprType, ArrowType)
 
-      assertNoError(inType.typeCheck(exprType.leftType))
+      assertNoError(caseType.typeCheck(exprType.leftType))
       assertNoError(returnType.typeCheck(exprType.rightType))
     }
 
     super()
 
     this[$sumExpr] = sumExpr
-    this[$caseExprs] = caseExprs
     this[$returnType] = returnType
+    this[$caseExprs] = caseExprs
   }
 
   get sumExpr() {
