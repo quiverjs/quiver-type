@@ -1,4 +1,4 @@
-import { List } from '../core/container'
+import { IList } from '../core/container'
 import { ArgSpec } from '../compiled-term/arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
@@ -142,7 +142,7 @@ export class TermLambdaTerm extends Term {
     assertListContent(closureSpecs, ArgSpec)
 
     const closureSize = closureSpecs.size
-    const innerBody = this.compileLambda(closureSpecs, List())
+    const innerBody = this.compileLambda(closureSpecs, IList())
 
     return closureWrap(innerBody, closureSize, this)
   }

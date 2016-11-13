@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  TermVariable, Set, List
+  TermVariable, ISet, IList
 } from '../lib/core'
 
 import {
@@ -39,7 +39,7 @@ test('primitive type test', assert => {
 
     const varTerm = new VariableTerm(x, NumberType)
 
-    assert.ok(varTerm.freeTermVariables().equals(Set([x])))
+    assert.ok(varTerm.freeTermVariables().equals(ISet([x])))
 
     assert.equal(varTerm.termType(), NumberType)
 
@@ -64,7 +64,7 @@ test('primitive type test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const argTerms = List([
+    const argTerms = IList([
       new VariableTerm(xVar, NumberType),
       new VariableTerm(yVar, NumberType)
     ])
@@ -84,7 +84,7 @@ test('primitive type test', assert => {
       argTerms, NumberType, doPlus)
 
     assert::equals(plusTerm.freeTermVariables(),
-      Set([xVar, yVar]))
+      ISet([xVar, yVar]))
 
     assert.equals(plusTerm.evaluate(), plusTerm)
 
@@ -95,11 +95,11 @@ test('primitive type test', assert => {
     assert.notEqual(plusTerm2, plusTerm)
 
     assert::equals(plusTerm.freeTermVariables(),
-      Set([xVar, yVar]),
+      ISet([xVar, yVar]),
       'original term should not be modified')
 
     assert::equals(plusTerm2.freeTermVariables(),
-      Set([yVar]),
+      ISet([yVar]),
       'new term should only have y not bounded')
 
     assert.equals(plusTerm2.evaluate(), plusTerm2)
@@ -114,7 +114,7 @@ test('primitive type test', assert => {
     const plusTerm3 = plusTerm2.bindTerm(yVar, yArg)
 
     assert::equals(plusTerm3.freeTermVariables(),
-      Set(),
+      ISet(),
       'new term should have all variables bounded')
 
     const resultTerm = plusTerm3.evaluate()

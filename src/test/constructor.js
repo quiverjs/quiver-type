@@ -23,7 +23,7 @@ import {
 } from '../lib/kind'
 
 import {
-  List, TypeVariable, TermVariable
+  IList, TypeVariable, TermVariable
 } from '../lib/core'
 
 import {
@@ -46,7 +46,7 @@ test('type constructor test', assert => {
       const elementCompiledType = compiledTypes.get(0)
 
       return list => {
-        if(!List.isList(list)) {
+        if(!IList.isList(list)) {
           return new TypeError('argument must be ImmutableList')
         }
 
@@ -57,30 +57,30 @@ test('type constructor test', assert => {
       }
     }
 
-    const ListConstructor = new TypeConstructor(
-      List([aType]), listTypeCheckerBuilder)
+    const IListConstructor = new TypeConstructor(
+      IList([aType]), listTypeCheckerBuilder)
 
-    assert::typeKindEquals(ListConstructor, unitKind)
+    assert::typeKindEquals(IListConstructor, unitKind)
 
-    const ListType = new ForAllType(
-      aTVar, unitKind, ListConstructor)
+    const IListType = new ForAllType(
+      aTVar, unitKind, IListConstructor)
 
-    assert::typeKindEquals(ListType, new ArrowKind(unitKind, unitKind))
+    assert::typeKindEquals(IListType, new ArrowKind(unitKind, unitKind))
 
-    assert.throws(() => ListConstructor.compileType())
-    assert.throws(() => ListType.compileType())
+    assert.throws(() => IListConstructor.compileType())
+    assert.throws(() => IListType.compileType())
 
-    const NumberListType = new ApplicationType(ListType, NumberType)
-    const StringListType = new ApplicationType(ListType, StringType)
+    const NumberListType = new ApplicationType(IListType, NumberType)
+    const StringListType = new ApplicationType(IListType, StringType)
 
     assert.ok(NumberListType instanceof TypeConstructor,
       'ApplicationType should return applied type if both types are terminal')
 
     const compiledNumListType = NumberListType.compileType()
 
-    const numberList = List([1, 2, 3])
-    const stringList = List(['foo', 'bar'])
-    const mixedList = List([1, 'foo', 2, {}])
+    const numberList = IList([1, 2, 3])
+    const stringList = IList(['foo', 'bar'])
+    const mixedList = IList([1, 'foo', 2, {}])
 
     assert.notOk(compiledNumListType.typeCheck(numberList))
     assert.ok(compiledNumListType.typeCheck(stringList))
@@ -96,12 +96,12 @@ test('type constructor test', assert => {
     const fType = new ArrowType(bType, cType)
 
     const lVar = new TermVariable('l')
-    const bListType = new ApplicationType(ListType, bType)
+    const bListType = new ApplicationType(IListType, bType)
 
-    const cListType = new ApplicationType(ListType, cType)
+    const cListType = new ApplicationType(IListType, cType)
 
     const fmapBody = new BodyTerm(
-      List([
+      IList([
         new VariableTerm(fVar, fType),
         new VariableTerm(lVar, bListType)
       ]),
@@ -113,7 +113,7 @@ test('type constructor test', assert => {
     )
 
     // fmap :: forall b :: *, c :: * .
-    //          (b -> c) -> List b -> List c
+    //          (b -> c) -> IList b -> IList c
     const fmapTerm = new TypeLambdaTerm(
       bTVar, unitKind,
       new TypeLambdaTerm(
@@ -136,7 +136,7 @@ test('type constructor test', assert => {
     const numToString = new TermLambdaTerm(
       xVar, NumberType,
       new BodyTerm(
-        List([ new VariableTerm(xVar, NumberType) ]),
+        IList([ new VariableTerm(xVar, NumberType) ]),
         StringType,
         NumberCType =>
           num => `${num}`))
@@ -148,17 +148,17 @@ test('type constructor test', assert => {
     const numToStrListFn = compileTerm(numToStrListTerm)
 
     assert.deepEquals(
-      numToStrListFn.call(List([1, 2, 3])).toArray(),
+      numToStrListFn.call(IList([1, 2, 3])).toArray(),
       ['1', '2', '3'])
 
-    assert.throws(() => numToStrListFn.call(List([1, 'foo'])))
+    assert.throws(() => numToStrListFn.call(IList([1, 'foo'])))
     assert.throws(() => numToStrListFn.call([1, 2, 3]))
     assert.throws(() => numToStrListFn.call(1))
 
     const strListTerm = new TermApplicationTerm(
       numToStrListTerm,
       new ValueTerm(
-        List([1, 2, 3]),
+        IList([1, 2, 3]),
         NumberListType))
 
     assert::termTypeEquals(strListTerm, StringListType)
@@ -169,10 +169,10 @@ test('type constructor test', assert => {
 
     const squareStrFn = wrapFunction(
       num => `${num*num}`,
-      List([NumberType]), StringType)
+      IList([NumberType]), StringType)
 
     assert.deepEquals(
-      fmapNumStrFn.call(squareStrFn, List([1, 2, 3])).toArray(),
+      fmapNumStrFn.call(squareStrFn, IList([1, 2, 3])).toArray(),
       ['1', '4', '9'])
 
     assert.end()

@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  TermVariable, List
+  TermVariable, IList
 } from '../lib/core'
 
 import {
@@ -23,7 +23,7 @@ test('term compilation test', assert => {
     const yVarTerm = new VariableTerm(yVar, NumberType)
 
     const addTerm = new BodyTerm(
-      List([xVarTerm, yVarTerm]), NumberType,
+      IList([xVarTerm, yVarTerm]), NumberType,
       (xCompiledType, yCompiledType) => {
         assert.equals(xCompiledType.srcType, NumberType)
         assert.equals(yCompiledType.srcType, NumberType)

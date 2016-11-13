@@ -1,4 +1,4 @@
-import { List } from '../core/container'
+import { IList } from '../core/container'
 import { assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Type } from '../type/type'
@@ -10,7 +10,7 @@ import { CompiledFunction } from '../compiled-term/function'
 const $argTypes = Symbol('@argTypes')
 const $returnType = Symbol('@returnType')
 
-// flattenArrowType :: ArrowType -> List Type
+// flattenArrowType :: ArrowType -> IList Type
 const flattenArrowType = arrowType => {
   const { leftType, rightType } = arrowType
 
@@ -24,7 +24,7 @@ const flattenArrowType = arrowType => {
   }
 }
 
-// compileTypes :: List Type -> List CompiledType
+// compileTypes :: IList Type -> IList CompiledType
 const compileTypes = argTypes =>
   argTypes.map(argType => argType.compileType())
 
@@ -36,7 +36,7 @@ export class CompiledArrowType extends CompiledType {
     const compiledInTypes = compileTypes(inTypes)
     const { length } = compiledInTypes
 
-    const argTypes = List(compiledInTypes.slice(0, length-1))
+    const argTypes = IList(compiledInTypes.slice(0, length-1))
     const returnType = compiledInTypes[length-1]
 
     super(srcType)

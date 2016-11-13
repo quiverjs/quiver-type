@@ -1,4 +1,4 @@
-import { Set } from '../core/container'
+import { ISet } from '../core/container'
 import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
@@ -59,7 +59,7 @@ export class VariableTerm extends Term {
   }
 
   freeTermVariables() {
-    return Set([this.termVar])
+    return ISet([this.termVar])
   }
 
   termType() {

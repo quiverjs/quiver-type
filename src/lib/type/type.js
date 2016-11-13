@@ -6,7 +6,7 @@ export class Type {
       throw new Error('abstract class Type cannot be instantiated')
   }
 
-  // freeTypeVariable :: () -> Set TypeVariable
+  // freeTypeVariable :: () -> ISet TypeVariable
   freeTypeVariables() {
     throw new Error('Not implemented')
   }

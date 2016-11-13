@@ -17,8 +17,8 @@ const $returnType = Symbol('@returnType')
 const $compiler = Symbol('@compiler')
 
 export class BodyTerm extends Term {
-  // Compiler :: Function (List Type -> Function)
-  // constructor :: List Term -> Type -> Compiler -> ()
+  // Compiler :: Function (IList Type -> Function)
+  // constructor :: IList Term -> Type -> Compiler -> ()
   constructor(argTerms, returnType, compiler) {
     assertListContent(argTerms, Term)
 

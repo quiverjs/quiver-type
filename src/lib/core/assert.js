@@ -1,4 +1,4 @@
-import immutable from 'immutable'
+import { IMap, IList } from './container'
 
 export { assertFunction, assertString } from 'quiver-util/assert'
 
@@ -10,7 +10,7 @@ export const assertInstanceOf = (object, type, message) => {
 }
 
 export const assertList = (list, message) => {
-  if(!immutable.List.isList(list)) {
+  if(!IList.isList(list)) {
     const errMessage = message || 'argument must be ImmutableList'
     throw new TypeError(errMessage)
   }
@@ -25,7 +25,7 @@ export const assertListContent = (list, ElementType, message) => {
 }
 
 export const assertMap = (map, message) => {
-  if(!immutable.Map.isMap(map)) {
+  if(!IMap.isMap(map)) {
     const errMessage = message || 'argument must be ImmutableMap'
     throw new TypeError(errMessage)
   }

@@ -1,4 +1,4 @@
-import { Set } from '../core/container'
+import { ISet } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertListContent, assertInstanceOf, assertFunction } from '../core/assert'
 
@@ -34,7 +34,7 @@ export class TypeConstructor extends Type {
     return this.argTypes.reduce(
       (result, argType) =>
         result.union(argType.freeTypeVariables()),
-      Set())
+      ISet())
   }
 
   typeCheck(targetType) {

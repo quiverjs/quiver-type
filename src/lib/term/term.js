@@ -6,7 +6,7 @@ export class Term {
       throw new Error('Abstract class Term cannot be instantiated')
   }
 
-  // freeTermVariables :: () -> Set TermVariable
+  // freeTermVariables :: () -> ISet TermVariable
   // Unbound term variables in the term
   freeTermVariables() {
     throw new Error('not implemented')
@@ -51,12 +51,12 @@ export class Term {
     throw new Error('not implemented')
   }
 
-  // compileBody :: List ArgSpec -> Function
+  // compileBody :: IList ArgSpec -> Function
   compileBody(argSpecs) {
     throw new Error('not implemented')
   }
 
-  // formatTerm :: () -> List Object
+  // formatTerm :: () -> IList Object
   formatTerm() {
     throw new Error('not impemented')
   }

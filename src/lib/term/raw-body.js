@@ -18,7 +18,7 @@ const $returnType = Symbol('@returnType')
 const $func = Symbol('@func')
 
 export class RawBodyTerm extends Term {
-  // constructor :: List Term -> Type -> Function -> ()
+  // constructor :: IList Term -> Type -> Function -> ()
   constructor(argTerms, returnType, func) {
     assertListContent(argTerms, Term)
 

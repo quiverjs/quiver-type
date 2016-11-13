@@ -1,4 +1,4 @@
-import { Set } from '../core/container'
+import { ISet } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertInstanceOf, assertNoError } from '../core/assert'
 
@@ -31,7 +31,7 @@ export class VariableType extends Type {
   }
 
   freeTypeVariables() {
-    return Set([this.typeVar])
+    return ISet([this.typeVar])
   }
 
   bindType(typeVar, type) {

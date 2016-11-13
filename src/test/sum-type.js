@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  Map, List,
+  IMap, IList,
   TermVariable, TypeVariable
 } from '../lib/core'
 
@@ -46,7 +46,7 @@ test('sum type test', assert => {
       aTVar, unitKind,
       new ForAllType(
         bTVar, unitKind,
-        new SumType(Map({
+        new SumType(IMap({
           Left: aType,
           Right: bType
         }))))
@@ -69,13 +69,13 @@ test('sum type test', assert => {
       new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
-        Map({
+        IMap({
           Left: functionToTerm(
-            List([NumberType]),
+            IList([NumberType]),
             StringType,
             x => `num(${x})`),
           Right: functionToTerm(
-            List([StringType]),
+            IList([StringType]),
             StringType,
             x => `str(${x})`)
         })))
@@ -100,7 +100,7 @@ test('sum type test', assert => {
 
   assert.test('error sum types', assert => {
     assert.throws(() => {
-      const invalidSumType = new SumType(Map({
+      const invalidSumType = new SumType(IMap({
         Left: NumberType,
         Right: new VariableType(
           new TypeVariable('a'),
@@ -108,7 +108,7 @@ test('sum type test', assert => {
       }))
     }, 'should not allow non unit kind in sum type member')
 
-    const EitherNumStr = new SumType(Map({
+    const EitherNumStr = new SumType(IMap({
       Left: NumberType,
       Right: StringType
     }))
@@ -119,9 +119,9 @@ test('sum type test', assert => {
       const invalidMatch = new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
-        Map({
+        IMap({
           Left: functionToTerm(
-            List([NumberType]),
+            IList([NumberType]),
             StringType,
             x => `num(${x})`)
         }))
@@ -131,13 +131,13 @@ test('sum type test', assert => {
       const invalidMatch = new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
-        Map({
+        IMap({
           foo: functionToTerm(
-            List([NumberType]),
+            IList([NumberType]),
             StringType,
             x => `num(${x})`),
           bar: functionToTerm(
-            List([StringType]),
+            IList([StringType]),
             StringType,
             x => `str(${x})`)
         }))
@@ -147,13 +147,13 @@ test('sum type test', assert => {
       const invalidMatch = new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
-        Map({
+        IMap({
           Left: functionToTerm(
-            List([StringType]),
+            IList([StringType]),
             StringType,
             x => `num(${x})`),
           Right: functionToTerm(
-            List([NumberType]),
+            IList([NumberType]),
             StringType,
             x => `str(${x})`)
         }))
@@ -163,13 +163,13 @@ test('sum type test', assert => {
       const invalidMatch = new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
-        Map({
+        IMap({
           Left: functionToTerm(
-            List([NumberType]),
+            IList([NumberType]),
             StringType,
             x => `num(${x})`),
           Right: functionToTerm(
-            List([StringType]),
+            IList([StringType]),
             NumberType,
             x => `str(${x})`)
         }))
@@ -179,13 +179,13 @@ test('sum type test', assert => {
       const invalidMatch = new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
-        Map({
+        IMap({
           Left: functionToTerm(
-            List([NumberType]),
+            IList([NumberType]),
             StringType,
             x => `num(${x})`),
           Right: new BodyTerm(
-            List([
+            IList([
               new VariableTerm(xVar, NumberType),
             ]),
             StringType,

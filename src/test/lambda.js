@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  TermVariable, Set, List
+  TermVariable, ISet, IList
 } from '../lib/core'
 
 import {
@@ -26,7 +26,7 @@ test('term lambda test', assert => {
     const xVar = new TermVariable('x')
 
     const idNumTerm = new RawBodyTerm(
-      List([new VariableTerm(xVar, NumberType)]),
+      IList([new VariableTerm(xVar, NumberType)]),
       NumberType,
       x => x)
 
@@ -35,7 +35,7 @@ test('term lambda test', assert => {
     const idNumLambda = new TermLambdaTerm(
       xVar, NumberType, idNumTerm)
 
-    assert::equals(idNumLambda.freeTermVariables(), Set())
+    assert::equals(idNumLambda.freeTermVariables(), ISet())
 
     assert.equal(
       idNumLambda.bindTerm(xVar, new ValueTerm(1, NumberType)),
@@ -53,7 +53,7 @@ test('term lambda test', assert => {
       appliedTerm,
       'should not affect binding inside lambda')
 
-    assert::equals(appliedTerm.freeTermVariables(), Set())
+    assert::equals(appliedTerm.freeTermVariables(), ISet())
 
     const resultTerm = appliedTerm.evaluate()
     assert.equal(resultTerm, argTerm)
@@ -97,7 +97,7 @@ test('term lambda test', assert => {
     const yVar = new TermVariable('y')
 
     const plusTerm = new RawBodyTerm(
-      List([
+      IList([
         new VariableTerm(xVar, NumberType),
         new VariableTerm(yVar, NumberType)
       ]),
@@ -110,12 +110,12 @@ test('term lambda test', assert => {
     const yPlusLambda = new TermLambdaTerm(
       yVar, NumberType, plusTerm)
 
-    assert::equals(yPlusLambda.freeTermVariables(), Set([xVar]))
+    assert::equals(yPlusLambda.freeTermVariables(), ISet([xVar]))
 
     const plusLambda = new TermLambdaTerm(
       xVar, NumberType, yPlusLambda)
 
-    assert::equals(plusLambda.freeTermVariables(), Set())
+    assert::equals(plusLambda.freeTermVariables(), ISet())
 
     const plusType = new ArrowType(NumberType, new ArrowType(NumberType, NumberType))
     assert::termTypeEquals(plusLambda, plusType)
@@ -212,7 +212,7 @@ test('term lambda test', assert => {
     const plusTwoLambda = new TermLambdaTerm(
       yVar, NumberType,
       new BodyTerm(
-        List([
+        IList([
           new VariableTerm(yVar, NumberType)
         ]),
         NumberType,
@@ -231,7 +231,7 @@ test('term lambda test', assert => {
 
     const wrappedFunc = wrapFunction(
       x => x + 3,
-      List([NumberType]),
+      IList([NumberType]),
       NumberType)
 
     assert.equals(wrappedFunc.call(2), 5)
@@ -242,7 +242,7 @@ test('term lambda test', assert => {
 
     const numStrFunc = wrapFunction(
       x => `${x}`,
-      List([NumberType]),
+      IList([NumberType]),
       StringType
     )
 

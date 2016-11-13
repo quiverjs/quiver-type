@@ -1,4 +1,4 @@
-import { Set } from '../core/container'
+import { ISet } from '../core/container'
 import { assertInstanceOf, assertFunction, assertString } from '../core/assert'
 
 import { unitKind } from '../kind/unit'
@@ -30,7 +30,7 @@ export class LiteralType extends Type {
   }
 
   freeTypeVariables() {
-    return Set()
+    return ISet()
   }
 
   typeCheck(type) {

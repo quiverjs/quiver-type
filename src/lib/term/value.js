@@ -1,4 +1,4 @@
-import { Set } from '../core/container'
+import { ISet } from '../core/container'
 import { assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Type } from '../type/type'
@@ -31,7 +31,7 @@ export class ValueTerm extends Term {
   }
 
   freeTermVariables() {
-    return Set()
+    return ISet()
   }
 
   termType() {
