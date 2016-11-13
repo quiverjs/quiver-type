@@ -7,7 +7,7 @@ import { VariableTerm } from '../term/variable'
 
 import { Type } from '../type/type'
 
-import { CompiledFunction } from '../compiled/function'
+import { CompiledFunction } from '../compiled-term/function'
 
 export const functionToTerm = (argTypes, returnType, func) => {
   assertFunction(func)

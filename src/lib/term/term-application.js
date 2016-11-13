@@ -1,6 +1,6 @@
 import { List } from '../core/container'
-import { ArgSpec } from '../compiled/arg-spec'
-import { CompiledFunction } from '../compiled/function'
+import { ArgSpec } from '../compiled-term/arg-spec'
+import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
   assertType, assertListContent, assertNoError

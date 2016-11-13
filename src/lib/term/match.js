@@ -1,6 +1,6 @@
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
-import { ArgSpec } from '../compiled/arg-spec'
+import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'

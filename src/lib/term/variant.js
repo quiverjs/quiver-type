@@ -8,7 +8,7 @@ import { SumType } from '../type/sum'
 
 import { Kind } from '../kind/kind'
 
-import { ArgSpec } from '../compiled/arg-spec'
+import { ArgSpec } from '../compiled-term/arg-spec'
 
 import { TermVariable, TypeVariable } from '../core/variable'
 

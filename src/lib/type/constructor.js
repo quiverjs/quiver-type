@@ -2,7 +2,7 @@ import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertListContent, assertType, assertFunction } from '../core/assert'
 
-import { DynamicCompiledType } from '../compiled/dynamic'
+import { DynamicCompiledType } from '../compiled-type/dynamic'
 
 import { unitKind } from '../kind/unit'
 

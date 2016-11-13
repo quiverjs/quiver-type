@@ -1,5 +1,5 @@
 import { Set } from '../core/container'
-import { ArgSpec } from '../compiled/arg-spec'
+import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
   assertType, assertListContent, assertNoError

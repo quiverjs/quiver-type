@@ -5,7 +5,7 @@ import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { CompiledType } from './type'
-import { CompiledFunction } from './function'
+import { CompiledFunction } from '../compiled-term/function'
 
 const $argTypes = Symbol('@argTypes')
 const $returnType = Symbol('@returnType')
