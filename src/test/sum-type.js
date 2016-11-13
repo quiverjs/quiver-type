@@ -30,7 +30,7 @@ import {
 } from '../lib/util'
 
 import {
-  NumberType, StringType, termTypeEquals, typeKindEquals
+  NumberType, StringType
 } from './util'
 
 test('sum type test', assert => {
@@ -62,7 +62,6 @@ test('sum type test', assert => {
       new ValueTerm(3, NumberType))
 
     const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
 
     const matchLambda = new TermLambdaTerm(
       xVar, EitherNumStr,
@@ -100,7 +99,7 @@ test('sum type test', assert => {
 
   assert.test('error sum types', assert => {
     assert.throws(() => {
-      const invalidSumType = new SumType(IMap({
+      new SumType(IMap({
         Left: NumberType,
         Right: new VariableType(
           new TypeVariable('a'),
@@ -116,7 +115,7 @@ test('sum type test', assert => {
     const xVar = new TermVariable('x')
 
     assert.throws(() => {
-      const invalidMatch = new MatchTerm(
+      new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
         IMap({
@@ -128,7 +127,7 @@ test('sum type test', assert => {
     }, 'should not allow match term that doesn\'t match all cases')
 
     assert.throws(() => {
-      const invalidMatch = new MatchTerm(
+      new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
         IMap({
@@ -144,7 +143,7 @@ test('sum type test', assert => {
     }, 'should not allow match term that have wrong variant tags')
 
     assert.throws(() => {
-      const invalidMatch = new MatchTerm(
+      new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
         IMap({
@@ -160,7 +159,7 @@ test('sum type test', assert => {
     }, 'should not allow match term with wrong lambda type in tag')
 
     assert.throws(() => {
-      const invalidMatch = new MatchTerm(
+      new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
         IMap({
@@ -176,7 +175,7 @@ test('sum type test', assert => {
     }, 'should not allow match term with mismatched return type')
 
     assert.throws(() => {
-      const invalidMatch = new MatchTerm(
+      new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),
         StringType,
         IMap({

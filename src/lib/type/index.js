@@ -13,3 +13,5 @@ export { ApplicationType } from './application'
 export { TypeConstructor } from './constructor'
 
 export { SumType } from './sum'
+
+export { RecordType } from './record'

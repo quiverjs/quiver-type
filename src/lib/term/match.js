@@ -167,7 +167,7 @@ export class MatchTerm extends Term {
   compileBody(argSpecs) {
     assertListContent(argSpecs, ArgSpec)
 
-    const { variantTerm, caseTerms, returnType } = this
+    const { variantTerm, caseTerms } = this
 
     const compiledVariant = variantTerm.compileBody(argSpecs)
 
@@ -189,7 +189,7 @@ export class MatchTerm extends Term {
   }
 
   evaluate() {
-    const { variantTerm, caseTerms, returnType } = this
+    const { variantTerm, caseTerms } = this
 
     if(!(variantTerm instanceof VariantTerm))
       return this
