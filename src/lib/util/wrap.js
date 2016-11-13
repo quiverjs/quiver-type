@@ -9,7 +9,7 @@ import { Type } from '../type/type'
 
 import { CompiledFunction } from '../compiled/function'
 
-export const wrapFunction = (func, argTypes, returnType) => {
+export const functionToExpression = (argTypes, returnType, func) => {
   assertFunction(func)
   assertType(returnType, Type)
 
@@ -30,6 +30,12 @@ export const wrapFunction = (func, argTypes, returnType) => {
     (expr, [argVar, argType]) =>
       new TermLambdaExpression(argVar, argType, expr),
     bodyExpr)
+
+  return lambdaExpr
+}
+
+export const wrapFunction = (func, argTypes, returnType) => {
+  const lambdaExpr = functionToExpression(argTypes, returnType, func)
 
   return new CompiledFunction(lambdaExpr, func)
 }
