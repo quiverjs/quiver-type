@@ -12,31 +12,31 @@ import { ArgSpec } from '../compiled/arg-spec'
 
 import { TermVariable, TypeVariable } from '../core/variable'
 
-import { Expression } from './expression'
+import { Term } from './term'
 
 const $sumType = Symbol('@sumType')
 const $tag = Symbol('@tag')
-const $bodyExpr = Symbol('@bodyExpr')
+const $bodyTerm = Symbol('@bodyTerm')
 
-export class VariantExpression extends Expression {
-  constructor(sumType, tag, bodyExpr) {
+export class VariantTerm extends Term {
+  constructor(sumType, tag, bodyTerm) {
     assertType(sumType, SumType)
     assertString(tag)
-    assertType(bodyExpr, Expression)
+    assertType(bodyTerm, Term)
 
     const caseType = sumType.typeMap.get(tag)
 
     if(!caseType)
       throw new TypeError(`sumType do not have constructor ${tag}`)
 
-    const bodyType = bodyExpr.exprType()
+    const bodyType = bodyTerm.termType()
     assertNoError(caseType.typeCheck(bodyType))
 
     super()
 
     this[$sumType] = sumType
     this[$tag] = tag
-    this[$bodyExpr] = bodyExpr
+    this[$bodyTerm] = bodyTerm
   }
 
   get sumType() {
@@ -47,44 +47,44 @@ export class VariantExpression extends Expression {
     return this[$tag]
   }
 
-  get bodyExpr() {
-    return this[$bodyExpr]
+  get bodyTerm() {
+    return this[$bodyTerm]
   }
 
-  exprType() {
+  termType() {
     return this.sumType
   }
 
   freeTermVariables() {
-    return this.bodyExpr.freeTermVariables()
+    return this.bodyTerm.freeTermVariables()
   }
 
   validateVarType(termVar, type) {
-    return this.bodyExpr.validateVarType(termVar, type)
+    return this.bodyTerm.validateVarType(termVar, type)
   }
 
   validateTVarKind(typeVar, kind) {
     assertType(typeVar, TypeVariable)
     assertType(kind, Kind)
 
-    const { sumType, bodyExpr } = this
+    const { sumType, bodyTerm } = this
 
     const err = sumType.validateTVarKind(typeVar, kind)
     if(err) return err
 
-    return bodyExpr.validateTVarKind(typeVar, kind)
+    return bodyTerm.validateTVarKind(typeVar, kind)
   }
 
-  bindTerm(termVar, expr) {
+  bindTerm(termVar, term) {
     assertType(termVar, TermVariable)
-    assertType(expr, Expression)
+    assertType(term, Term)
 
-    const { sumType, tag, bodyExpr } = this
+    const { sumType, tag, bodyTerm } = this
 
-    const newBodyExpr = bodyExpr.bindTerm(termVar, expr)
+    const newBodyTerm = bodyTerm.bindTerm(termVar, term)
 
-    if(newBodyExpr !== bodyExpr) {
-      return new VariantExpression(sumType, tag, newBodyExpr)
+    if(newBodyTerm !== bodyTerm) {
+      return new VariantTerm(sumType, tag, newBodyTerm)
 
     } else {
       return this
@@ -95,13 +95,13 @@ export class VariantExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    const { sumType, tag, bodyExpr } = this
+    const { sumType, tag, bodyTerm } = this
 
     const newSumType = sumType.bindType(typeVar, type)
-    const newBodyExpr = bodyExpr.bindType(typeVar, type)
+    const newBodyTerm = bodyTerm.bindType(typeVar, type)
 
-    if(newSumType !== sumType || newBodyExpr !== bodyExpr) {
-      return new VariantExpression(newSumType, tag, newBodyExpr)
+    if(newSumType !== sumType || newBodyTerm !== bodyTerm) {
+      return new VariantTerm(newSumType, tag, newBodyTerm)
 
     } else {
       return this
@@ -111,10 +111,10 @@ export class VariantExpression extends Expression {
   compileBody(argSpecs) {
     assertListContent(argSpecs, ArgSpec)
 
-    const { sumType, tag, bodyExpr } = this
+    const { sumType, tag, bodyTerm } = this
 
     const compiledSumType = sumType.compileType()
-    const compiledBody = bodyExpr.compileBody(argSpecs)
+    const compiledBody = bodyTerm.compileBody(argSpecs)
 
     return (...args) => {
       const value = compiledBody(...args)
@@ -123,23 +123,23 @@ export class VariantExpression extends Expression {
   }
 
   evaluate() {
-    const { sumType, tag, bodyExpr } = this
+    const { sumType, tag, bodyTerm } = this
 
-    const newBodyExpr = bodyExpr.evaluate()
+    const newBodyTerm = bodyTerm.evaluate()
 
-    if(newBodyExpr !== bodyExpr) {
-      return new VariantExpression(sumType, tag, newBodyExpr)
+    if(newBodyTerm !== bodyTerm) {
+      return new VariantTerm(sumType, tag, newBodyTerm)
 
     } else {
       return this
     }
   }
 
-  formatExpr() {
-    const { sumType, tag, bodyExpr } = this
+  formatTerm() {
+    const { sumType, tag, bodyTerm } = this
 
     const sumTypeRep = sumType.formatType()
-    const bodyRep = bodyExpr.formatExpr()
+    const bodyRep = bodyTerm.formatTerm()
 
     return ['variant', [sumTypeRep, tag], bodyRep]
   }

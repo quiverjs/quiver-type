@@ -1,15 +1,15 @@
 import { TermVariable } from '../core/variable'
 import { assertFunction, assertType, assertListContent } from '../core/assert'
 
-import { BodyExpression } from '../expr/body'
-import { TermLambdaExpression } from '../expr/term-lambda'
-import { VariableExpression } from '../expr/variable'
+import { BodyTerm } from '../term/body'
+import { TermLambdaTerm } from '../term/term-lambda'
+import { VariableTerm } from '../term/variable'
 
 import { Type } from '../type/type'
 
 import { CompiledFunction } from '../compiled/function'
 
-export const functionToExpression = (argTypes, returnType, func) => {
+export const functionToTerm = (argTypes, returnType, func) => {
   assertFunction(func)
   assertType(returnType, Type)
 
@@ -18,24 +18,24 @@ export const functionToExpression = (argTypes, returnType, func) => {
   const argVars = argTypes.map(argType =>
     [new TermVariable('_'), argType])
 
-  const argExprs = argVars.map(
+  const argTerms = argVars.map(
     ([argVar, argType]) =>
-      new VariableExpression(argVar, argType))
+      new VariableTerm(argVar, argType))
 
-  const bodyExpr = new BodyExpression(
-    argExprs, returnType,
+  const bodyTerm = new BodyTerm(
+    argTerms, returnType,
     () => func)
 
-  const lambdaExpr = argVars.reduceRight(
-    (expr, [argVar, argType]) =>
-      new TermLambdaExpression(argVar, argType, expr),
-    bodyExpr)
+  const lambdaTerm = argVars.reduceRight(
+    (term, [argVar, argType]) =>
+      new TermLambdaTerm(argVar, argType, term),
+    bodyTerm)
 
-  return lambdaExpr
+  return lambdaTerm
 }
 
 export const wrapFunction = (func, argTypes, returnType) => {
-  const lambdaExpr = functionToExpression(argTypes, returnType, func)
+  const lambdaTerm = functionToTerm(argTypes, returnType, func)
 
-  return new CompiledFunction(lambdaExpr, func)
+  return new CompiledFunction(lambdaTerm, func)
 }

@@ -10,30 +10,30 @@ import {
 import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 
-import { Expression } from './expression'
+import { Term } from './term'
 
-const $argExprs = Symbol('@argExprs')
+const $argTerms = Symbol('@argTerms')
 const $returnType = Symbol('@returnType')
 const $compiler = Symbol('@compiler')
 
-export class BodyExpression extends Expression {
+export class BodyTerm extends Term {
   // Compiler :: Function (List Type -> Function)
-  // constructor :: List Expression -> Type -> Compiler -> ()
-  constructor(argExprs, returnType, compiler) {
-    assertListContent(argExprs, Expression)
+  // constructor :: List Term -> Type -> Compiler -> ()
+  constructor(argTerms, returnType, compiler) {
+    assertListContent(argTerms, Term)
 
     assertType(returnType, Type)
     assertFunction(compiler)
 
     super()
 
-    this[$argExprs] = argExprs
+    this[$argTerms] = argTerms
     this[$returnType] = returnType
     this[$compiler] = compiler
   }
 
-  get argExprs() {
-    return this[$argExprs]
+  get argTerms() {
+    return this[$argTerms]
   }
 
   get returnType() {
@@ -45,11 +45,11 @@ export class BodyExpression extends Expression {
   }
 
   freeTermVariables() {
-    return this.argExprs::unionMap(
-      argExpr => argExpr.freeTermVariables())
+    return this.argTerms::unionMap(
+      argTerm => argTerm.freeTermVariables())
   }
 
-  exprType() {
+  termType() {
     return this.returnType
   }
 
@@ -57,8 +57,8 @@ export class BodyExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(type, Type)
 
-    for(const expr of this.argExprs) {
-      const err = expr.validateVarType(termVar, type)
+    for(const term of this.argTerms) {
+      const err = term.validateVarType(termVar, type)
       if(err) return err
     }
 
@@ -69,25 +69,25 @@ export class BodyExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(kind, Kind)
 
-    for(const expr of this.argExprs) {
-      const err = expr.validateTVarKind(typeVar, kind)
+    for(const term of this.argTerms) {
+      const err = term.validateTVarKind(typeVar, kind)
       if(err) return err
     }
 
     return null
   }
 
-  bindTerm(termVar, expr) {
+  bindTerm(termVar, term) {
     assertType(termVar, TermVariable)
-    assertType(expr, Expression)
+    assertType(term, Term)
 
-    const { argExprs, returnType, compiler } = this
+    const { argTerms, returnType, compiler } = this
 
-    const [newArgExprs, exprModified] = argExprs::mapUnique(
-      argExpr => argExpr.bindTerm(termVar, expr))
+    const [newArgTerms, termModified] = argTerms::mapUnique(
+      argTerm => argTerm.bindTerm(termVar, term))
 
-    if(exprModified) {
-      return new BodyExpression(newArgExprs, returnType, compiler)
+    if(termModified) {
+      return new BodyTerm(newArgTerms, returnType, compiler)
     } else {
       return this
     }
@@ -97,15 +97,15 @@ export class BodyExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    const { argExprs, returnType, compiler } = this
+    const { argTerms, returnType, compiler } = this
 
-    const [newArgExprs, exprModified] = argExprs::mapUnique(
-      argExpr => argExpr.bindType(typeVar, type))
+    const [newArgTerms, termModified] = argTerms::mapUnique(
+      argTerm => argTerm.bindType(typeVar, type))
 
     const newReturnType = returnType.bindType(typeVar, type)
 
-    if(exprModified || newReturnType !== returnType) {
-      return new BodyExpression(newArgExprs, newReturnType, compiler)
+    if(termModified || newReturnType !== returnType) {
+      return new BodyTerm(newArgTerms, newReturnType, compiler)
     } else {
       return this
     }
@@ -114,13 +114,13 @@ export class BodyExpression extends Expression {
   compileBody(argSpecs) {
     assertListContent(argSpecs, ArgSpec)
 
-    const { argExprs, compiler } = this
+    const { argTerms, compiler } = this
 
-    const argExtractors = argExprs.map(
-      expr => expr.compileBody(argSpecs))
+    const argExtractors = argTerms.map(
+      term => term.compileBody(argSpecs))
 
-    const argCompiledTypes = argExprs.map(
-      expr => expr.exprType().compileType())
+    const argCompiledTypes = argTerms.map(
+      term => term.termType().compileType())
 
     const compiledBody = compiler(...argCompiledTypes)
     assertType(compiledBody, Function)
@@ -137,12 +137,12 @@ export class BodyExpression extends Expression {
     return this
   }
 
-  formatExpr() {
-    const { argExprs, returnType } = this
+  formatTerm() {
+    const { argTerms, returnType } = this
 
-    const argExprsRep = [...argExprs.map(expr => expr.formatExpr())]
+    const argTermsRep = [...argTerms.map(term => term.formatTerm())]
     const returnTypeRep = returnType.formatType()
 
-    return ['body-compiler', argExprsRep, returnTypeRep]
+    return ['body-compiler', argTermsRep, returnTypeRep]
   }
 }

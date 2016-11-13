@@ -5,12 +5,12 @@ import {
 } from '../lib/core'
 
 import {
-  VariableExpression,
-  TermLambdaExpression,
-  TypeLambdaExpression,
-  TermApplicationExpression,
-  TypeApplicationExpression
-} from '../lib/expr'
+  VariableTerm,
+  TermLambdaTerm,
+  TypeLambdaTerm,
+  TermApplicationTerm,
+  TypeApplicationTerm
+} from '../lib/term'
 
 import {
   ArrowType,
@@ -22,10 +22,10 @@ import {
   unitKind, ArrowKind
 } from '../lib/kind'
 
-import { compileExpr } from '../lib/util'
+import { compileTerm } from '../lib/util'
 
 import {
-  NumberType, StringType, exprTypeEquals, typeKindEquals
+  NumberType, StringType, termTypeEquals, typeKindEquals
 } from './util'
 
 test('type lambda test', assert => {
@@ -38,43 +38,43 @@ test('type lambda test', assert => {
 
     assert.equals(aType.bindType(aTVar, NumberType), NumberType)
 
-    const idExpr = new VariableExpression(xVar, aType)
+    const idTerm = new VariableTerm(xVar, aType)
 
-    assert.equals(idExpr.exprType(), aType)
+    assert.equals(idTerm.termType(), aType)
 
-    const idLambda = new TermLambdaExpression(
-      xVar, aType, idExpr)
+    const idLambda = new TermLambdaTerm(
+      xVar, aType, idTerm)
 
-    const idLambdaType = idLambda.exprType()
+    const idLambdaType = idLambda.termType()
 
     assert.ok(idLambdaType instanceof ArrowType)
     assert.equals(idLambdaType.leftType, aType)
     assert.equals(idLambdaType.rightType, aType)
 
-    assert.throws(() => compileExpr(idLambdaType))
+    assert.throws(() => compileTerm(idLambdaType))
 
-    const typeLambda = new TypeLambdaExpression(
+    const typeLambda = new TypeLambdaTerm(
       aTVar, unitKind, idLambda)
 
-    assert::exprTypeEquals(typeLambda,
+    assert::termTypeEquals(typeLambda,
       new ForAllType(aTVar, unitKind,
         new ArrowType(aType, aType)))
 
-    assert.ok(typeLambda.exprType() instanceof ForAllType)
+    assert.ok(typeLambda.termType() instanceof ForAllType)
 
-    const numTypeApp = new TypeApplicationExpression(
+    const numTypeApp = new TypeApplicationTerm(
       typeLambda, NumberType)
 
-    assert::exprTypeEquals(numTypeApp,
+    assert::termTypeEquals(numTypeApp,
       new ArrowType(NumberType, NumberType))
 
     const numIdLambda = numTypeApp.evaluate()
-    assert::exprTypeEquals(numIdLambda,
+    assert::termTypeEquals(numIdLambda,
       new ArrowType(NumberType, NumberType))
 
-    assert.ok(numIdLambda instanceof TermLambdaExpression)
+    assert.ok(numIdLambda instanceof TermLambdaTerm)
 
-    const numIdFunc = compileExpr(numIdLambda)
+    const numIdFunc = compileTerm(numIdLambda)
     assert.equals(numIdFunc.call(8), 8)
 
     assert.throws(() => numIdFunc.call('foo'))
@@ -82,25 +82,25 @@ test('type lambda test', assert => {
     const bTVar = new TypeVariable('b')
     const bType = new VariableType(bTVar, unitKind)
 
-    const bTypeApp = new TypeApplicationExpression(
+    const bTypeApp = new TypeApplicationTerm(
       typeLambda, bType)
 
-    assert::exprTypeEquals(bTypeApp, new ArrowType(bType, bType))
+    assert::termTypeEquals(bTypeApp, new ArrowType(bType, bType))
 
     assert.equals(bTypeApp.evaluate(), bTypeApp,
       'type application applied to non terminal type should not be evaluated')
 
-    const stringTypeApp = new TypeApplicationExpression(
-      new TypeLambdaExpression(bTVar, unitKind, bTypeApp),
+    const stringTypeApp = new TypeApplicationTerm(
+      new TypeLambdaTerm(bTVar, unitKind, bTypeApp),
       StringType)
 
-    assert::exprTypeEquals(stringTypeApp,
+    assert::termTypeEquals(stringTypeApp,
       new ArrowType(StringType, StringType))
 
     const stringIdLambda = stringTypeApp.evaluate()
-    assert.ok(stringIdLambda instanceof TermLambdaExpression)
+    assert.ok(stringIdLambda instanceof TermLambdaTerm)
 
-    const stringIdFunc = compileExpr(stringIdLambda)
+    const stringIdFunc = compileTerm(stringIdLambda)
 
     assert.equals(stringIdFunc.call('foo'), 'foo')
     assert.throws(() => stringIdFunc.call(9))
@@ -121,26 +121,26 @@ test('type lambda test', assert => {
     const aType = new VariableType(aTVar, unitKind)
     const bType = new VariableType(bTVar, unitKind)
 
-    assert.ok(new TypeLambdaExpression(aTVar, unitKind,
-      new VariableExpression(xVar,
+    assert.ok(new TypeLambdaTerm(aTVar, unitKind,
+      new VariableTerm(xVar,
         new VariableType(aTVar, unitKind))))
 
     assert.throws(() =>
-      new TypeLambdaExpression(aTVar, unitKind,
-        new VariableExpression(xVar,
+      new TypeLambdaTerm(aTVar, unitKind,
+        new VariableTerm(xVar,
           new VariableType(aTVar,
             new ArrowKind(unitKind, unitKind)))),
       'should not construct if type variable have mismatch kind in body')
 
     // first = forall a b . lambda x: a, y: b . x
-    const polyFirst = new TypeLambdaExpression(aTVar, unitKind,
-      new TypeLambdaExpression(bTVar, unitKind,
-        new TermLambdaExpression(xVar, aType,
-          new TermLambdaExpression(yVar, bType,
-            new VariableExpression(xVar, aType)))))
+    const polyFirst = new TypeLambdaTerm(aTVar, unitKind,
+      new TypeLambdaTerm(bTVar, unitKind,
+        new TermLambdaTerm(xVar, aType,
+          new TermLambdaTerm(yVar, bType,
+            new VariableTerm(xVar, aType)))))
 
     // first :: forall a b . a -> b -> a
-    assert::exprTypeEquals(polyFirst,
+    assert::termTypeEquals(polyFirst,
       new ForAllType(aTVar, unitKind,
         new ForAllType(bTVar, unitKind,
           new ArrowType(aType,
@@ -151,17 +151,17 @@ test('type lambda test', assert => {
       new ArrowKind(unitKind, unitKind))
 
     // first ::: * -> * -> *
-    assert::typeKindEquals(polyFirst.exprType(), twoArrowKind)
+    assert::typeKindEquals(polyFirst.termType(), twoArrowKind)
 
-    const firstNumStr = new TypeApplicationExpression(
-      new TypeApplicationExpression(
+    const firstNumStr = new TypeApplicationTerm(
+      new TypeApplicationTerm(
         polyFirst, NumberType),
       StringType)
 
-    assert::exprTypeEquals(firstNumStr, new ArrowType(
+    assert::termTypeEquals(firstNumStr, new ArrowType(
       NumberType, new ArrowType(StringType, NumberType)))
 
-    const firstNumFunc = compileExpr(firstNumStr.evaluate())
+    const firstNumFunc = compileTerm(firstNumStr.evaluate())
 
     assert.equals(firstNumFunc.call(1, 'foo'), 1)
     assert.throws(() => firstNumFunc.call('foo', 1))
@@ -174,42 +174,42 @@ test('type lambda test', assert => {
     //               lambda z : c .
     //                  TLambda d :: * .
     //                      z [d] [d]
-    const sameTypeLambda = new TypeLambdaExpression(
+    const sameTypeLambda = new TypeLambdaTerm(
       cTVar, twoArrowKind,
-      new TermLambdaExpression(
+      new TermLambdaTerm(
         zVar, cType,
-        new TypeLambdaExpression(
+        new TypeLambdaTerm(
           dTVar, unitKind,
-          new TypeApplicationExpression(
-            new TypeApplicationExpression(
-              new VariableExpression(
+          new TypeApplicationTerm(
+            new TypeApplicationTerm(
+              new VariableTerm(
                 zVar, cType),
               dType),
             dType))))
 
     // true :: a -> a -> a
     // true = sameType [forall a b . a] first
-    const polyTrue = new TermApplicationExpression(
-      new TypeApplicationExpression(
+    const polyTrue = new TermApplicationTerm(
+      new TypeApplicationTerm(
         sameTypeLambda,
-        polyFirst.exprType()),
+        polyFirst.termType()),
       polyFirst)
       .evaluate()
 
-    assert.ok(polyTrue instanceof TypeLambdaExpression)
-    assert::exprTypeEquals(polyTrue, new ForAllType(
+    assert.ok(polyTrue instanceof TypeLambdaTerm)
+    assert::termTypeEquals(polyTrue, new ForAllType(
       dTVar, unitKind,
       new ArrowType(dType, new ArrowType(dType, dType))))
 
-    const numTrue = new TypeApplicationExpression(
+    const numTrue = new TypeApplicationTerm(
       polyTrue, NumberType)
       .evaluate()
 
-    assert.ok(numTrue instanceof TermLambdaExpression)
-    assert::exprTypeEquals(numTrue, new ArrowType(
+    assert.ok(numTrue instanceof TermLambdaTerm)
+    assert::termTypeEquals(numTrue, new ArrowType(
       NumberType, new ArrowType(NumberType, NumberType)))
 
-    const trueFn = compileExpr(numTrue)
+    const trueFn = compileTerm(numTrue)
     assert.equals(trueFn.call(1, 2), 1)
 
     assert.end()

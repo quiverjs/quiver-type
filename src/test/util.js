@@ -14,8 +14,8 @@ export const equals = function(result, expected, message) {
   return this.ok(result.equals(expected), message)
 }
 
-export const exprTypeEquals = function(expr, expectedType, message) {
-  const err = expectedType.typeCheck(expr.exprType())
+export const termTypeEquals = function(term, expectedType, message) {
+  const err = expectedType.typeCheck(term.termType())
   this.notOk(err, message)
 }
 

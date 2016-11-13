@@ -1,5 +1,5 @@
-export { compileExpr } from './compile'
+export { compileTerm } from './compile'
 
-export { wrapFunction, functionToExpression } from './wrap'
+export { wrapFunction, functionToTerm } from './wrap'
 
-export { isTerminalType, isTerminalExpr } from './terminal'
+export { isTerminalType, isTerminalTerm } from './terminal'

@@ -5,45 +5,45 @@ import {
 } from '../lib/core'
 
 import {
-  BodyExpression,
-  ValueExpression,
-  VariableExpression,
-  TermLambdaExpression,
-  TermApplicationExpression
-} from '../lib/expr'
+  BodyTerm,
+  ValueTerm,
+  VariableTerm,
+  TermLambdaTerm,
+  TermApplicationTerm
+} from '../lib/term'
 
-import { compileExpr } from '../lib/util'
+import { compileTerm } from '../lib/util'
 
 import { NumberType } from './util'
 
-test('expression compilation test', assert => {
+test('term compilation test', assert => {
   assert.test('term application test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
     const zVar = new TermVariable('z')
 
-    const addExpr = new BodyExpression(
+    const addTerm = new BodyTerm(
       List([
-        new VariableExpression(xVar, NumberType),
-        new VariableExpression(yVar, NumberType)
+        new VariableTerm(xVar, NumberType),
+        new VariableTerm(yVar, NumberType)
       ]),
       NumberType,
       (xCompiledType, yCompiledType) =>
         (x, y) => x+y)
 
-    const addLambda = new TermLambdaExpression(
+    const addLambda = new TermLambdaTerm(
       xVar, NumberType,
-      new TermLambdaExpression(
-        yVar, NumberType, addExpr))
+      new TermLambdaTerm(
+        yVar, NumberType, addTerm))
 
-    const addFiveLambda = new TermLambdaExpression(
+    const addFiveLambda = new TermLambdaTerm(
       zVar, NumberType,
-      new TermApplicationExpression(
-        new TermApplicationExpression(addLambda,
-          new VariableExpression(zVar, NumberType)),
-        new ValueExpression(5, NumberType)))
+      new TermApplicationTerm(
+        new TermApplicationTerm(addLambda,
+          new VariableTerm(zVar, NumberType)),
+        new ValueTerm(5, NumberType)))
 
-    const compiledFunction = compileExpr(addFiveLambda)
+    const compiledFunction = compileTerm(addFiveLambda)
 
     assert.equals(compiledFunction.call(2), 7)
 
@@ -55,26 +55,26 @@ test('expression compilation test', assert => {
     const yVar = new TermVariable('y')
     const zVar = new TermVariable('z')
 
-    const addExpr = new BodyExpression(
+    const addTerm = new BodyTerm(
       List([
-        new VariableExpression(xVar, NumberType),
-        new VariableExpression(yVar, NumberType)
+        new VariableTerm(xVar, NumberType),
+        new VariableTerm(yVar, NumberType)
       ]),
       NumberType,
       (xCompiledType, yCompiledType) =>
         (x, y) => x+y)
 
-    const addLambda = new TermLambdaExpression(
+    const addLambda = new TermLambdaTerm(
       xVar, NumberType,
-      new TermLambdaExpression(
-        yVar, NumberType, addExpr))
+      new TermLambdaTerm(
+        yVar, NumberType, addTerm))
 
-    const adderLambda = new TermLambdaExpression(
+    const adderLambda = new TermLambdaTerm(
       zVar, NumberType,
-      new TermApplicationExpression(addLambda,
-        new VariableExpression(zVar, NumberType)))
+      new TermApplicationTerm(addLambda,
+        new VariableTerm(zVar, NumberType)))
 
-    const compiledAdder = compileExpr(adderLambda)
+    const compiledAdder = compileTerm(adderLambda)
 
     const fiveAdder = compiledAdder.func(5)
 

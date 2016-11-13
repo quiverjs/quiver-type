@@ -10,14 +10,14 @@ import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
-import { Expression } from './expression'
+import { Term } from './term'
 
 const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
-const $bodyExpr = Symbol('@bodyExpr')
+const $bodyTerm = Symbol('@bodyTerm')
 const $type = Symbol('@type')
 
-const closureWrap = (body, closureSize, expr) =>
+const closureWrap = (body, closureSize, term) =>
   (...closureArgs) => {
     if(closureArgs.length !== closureSize)
       throw new Error('closure args length mismatch')
@@ -26,25 +26,25 @@ const closureWrap = (body, closureSize, expr) =>
       return body(...closureArgs, ...inArgs)
     }
 
-    return new CompiledFunction(expr, func)
+    return new CompiledFunction(term, func)
   }
 
-export class TermLambdaExpression extends Expression {
-  // constructor :: TermVariable -> Type -> Expression -> ()
-  constructor(argVar, argType, bodyExpr) {
+export class TermLambdaTerm extends Term {
+  // constructor :: TermVariable -> Type -> Term -> ()
+  constructor(argVar, argType, bodyTerm) {
     assertType(argVar, TermVariable)
     assertType(argType, Type)
-    assertType(bodyExpr, Expression)
+    assertType(bodyTerm, Term)
 
-    assertNoError(bodyExpr.validateVarType(argVar, argType))
+    assertNoError(bodyTerm.validateVarType(argVar, argType))
 
-    const type = new ArrowType(argType, bodyExpr.exprType())
+    const type = new ArrowType(argType, bodyTerm.termType())
 
     super()
 
     this[$argVar] = argVar
     this[$argType] = argType
-    this[$bodyExpr] = bodyExpr
+    this[$bodyTerm] = bodyTerm
     this[$type] = type
   }
 
@@ -56,18 +56,18 @@ export class TermLambdaExpression extends Expression {
     return this[$argType]
   }
 
-  get bodyExpr() {
-    return this[$bodyExpr]
+  get bodyTerm() {
+    return this[$bodyTerm]
   }
 
   freeTermVariables() {
-    const { argVar, bodyExpr } = this
+    const { argVar, bodyTerm } = this
 
-    return bodyExpr.freeTermVariables()
+    return bodyTerm.freeTermVariables()
       .delete(argVar)
   }
 
-  exprType() {
+  termType() {
     return this[$type]
   }
 
@@ -75,48 +75,48 @@ export class TermLambdaExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(type, Type)
 
-    const { argVar, bodyExpr } = this
+    const { argVar, bodyTerm } = this
 
     if(termVar === argVar)
       return null
 
-    return bodyExpr.validateVarType(termVar, type)
+    return bodyTerm.validateVarType(termVar, type)
   }
 
   validateTVarKind(typeVar, kind) {
     assertType(typeVar, TypeVariable)
     assertType(kind, Kind)
 
-    const { argType, bodyExpr } = this
+    const { argType, bodyTerm } = this
 
     const err = argType.validateTVarKind(typeVar, kind)
     if(err) return err
 
-    return bodyExpr.validateTVarKind(typeVar, kind)
+    return bodyTerm.validateTVarKind(typeVar, kind)
   }
 
-  // bindTerm :: TermVariable -> Expression
-  bindTerm(termVar, expr) {
+  // bindTerm :: TermVariable -> Term
+  bindTerm(termVar, term) {
     assertType(termVar, TermVariable)
-    assertType(expr, Expression)
+    assertType(term, Term)
 
-    const { argVar, argType, bodyExpr } = this
+    const { argVar, argType, bodyTerm } = this
 
     if(termVar === argVar) return this
 
-    if(expr.freeTermVariables().has(termVar)) {
+    if(term.freeTermVariables().has(termVar)) {
       const argVar2 = new TermVariable(argVar.name)
-      const bodyExpr2 = bodyExpr.bindTerm(argVar, argVar2)
-      const newBodyExpr = bodyExpr2.bindTerm(termVar, expr)
+      const bodyTerm2 = bodyTerm.bindTerm(argVar, argVar2)
+      const newBodyTerm = bodyTerm2.bindTerm(termVar, term)
 
-      return new TermLambdaExpression(argVar2, argType, newBodyExpr)
+      return new TermLambdaTerm(argVar2, argType, newBodyTerm)
 
     } else {
-      const newBodyExpr = bodyExpr.bindTerm(termVar, expr)
+      const newBodyTerm = bodyTerm.bindTerm(termVar, term)
 
-      if(newBodyExpr === bodyExpr) return this
+      if(newBodyTerm === bodyTerm) return this
 
-      return new TermLambdaExpression(argVar, argType, newBodyExpr)
+      return new TermLambdaTerm(argVar, argType, newBodyTerm)
     }
   }
 
@@ -124,14 +124,14 @@ export class TermLambdaExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(type, Type)
 
-    const { argVar, argType, bodyExpr } = this
+    const { argVar, argType, bodyTerm } = this
     const newArgType = argType.bindType(typeVar, type)
-    const newBodyExpr = bodyExpr.bindType(typeVar, type)
+    const newBodyTerm = bodyTerm.bindType(typeVar, type)
 
-    if((newArgType === argType) && (newBodyExpr === bodyExpr))
+    if((newArgType === argType) && (newBodyTerm === bodyTerm))
       return this
 
-    return new TermLambdaExpression(argVar, newArgType, newBodyExpr)
+    return new TermLambdaTerm(argVar, newArgType, newBodyTerm)
   }
 
   evaluate() {
@@ -151,36 +151,36 @@ export class TermLambdaExpression extends Expression {
     assertListContent(closureSpecs, ArgSpec)
     assertListContent(argSpecs, ArgSpec)
 
-    const { argVar, argType, bodyExpr } = this
+    const { argVar, argType, bodyTerm } = this
 
     const compiledType = argType.compileType()
 
     const inArgSpecs = argSpecs.push(new ArgSpec(argVar, compiledType))
 
-    if(bodyExpr instanceof TermLambdaExpression) {
-      return bodyExpr.compileLambda(closureSpecs, inArgSpecs)
+    if(bodyTerm instanceof TermLambdaTerm) {
+      return bodyTerm.compileLambda(closureSpecs, inArgSpecs)
     } else {
-      return bodyExpr.compileBody(closureSpecs.concat(inArgSpecs))
+      return bodyTerm.compileBody(closureSpecs.concat(inArgSpecs))
     }
   }
 
-  // applyExpr :: Expression -> Expression
-  // Term application to the lambda expression
-  applyExpr(expr) {
-    assertType(expr, Expression)
+  // applyTerm :: Term -> Term
+  // Term application to the lambda term
+  applyTerm(term) {
+    assertType(term, Term)
 
-    const { argVar, argType, bodyExpr } = this
-    assertNoError(argType.typeCheck(expr.exprType()))
+    const { argVar, argType, bodyTerm } = this
+    assertNoError(argType.typeCheck(term.termType()))
 
-    return bodyExpr.bindTerm(argVar, expr)
+    return bodyTerm.bindTerm(argVar, term)
   }
 
-  formatExpr() {
-    const { argVar, argType, bodyExpr } = this
+  formatTerm() {
+    const { argVar, argType, bodyTerm } = this
 
     const varRep = argVar.name
     const argTypeRep = argType.formatType()
-    const bodyRep = bodyExpr.formatExpr()
+    const bodyRep = bodyTerm.formatTerm()
 
     return ['lambda', [varRep, argTypeRep], bodyRep]
   }

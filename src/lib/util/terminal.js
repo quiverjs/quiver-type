@@ -1,6 +1,6 @@
 import { Type } from '../type/type'
 import { assertType } from '../core/assert'
-import { Expression } from '../expr/expression'
+import { Term } from '../term/term'
 
 export const isTerminalType = type => {
   assertType(type, Type)
@@ -8,9 +8,9 @@ export const isTerminalType = type => {
   return type.freeTypeVariables().isEmpty()
 }
 
-export const isTerminalExpr = expr => {
-  assertType(expr, Expression)
+export const isTerminalTerm = term => {
+  assertType(term, Term)
 
-  return expr.freeTermVariables().isEmpty() &&
-    isTerminalType(expr.exprType())
+  return term.freeTermVariables().isEmpty() &&
+    isTerminalType(term.termType())
 }

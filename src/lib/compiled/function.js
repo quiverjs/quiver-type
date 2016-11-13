@@ -1,15 +1,15 @@
 import { assertType } from '../core/assert'
 
-import { CompiledExpression } from './expr'
+import { CompiledTerm } from './term'
 
 const $func = Symbol('@func')
 
-export class CompiledFunction extends CompiledExpression {
-  // constructor :: Function -> Expression -> CompiledType -> ()
-  constructor(srcExpr, func) {
+export class CompiledFunction extends CompiledTerm {
+  // constructor :: Function -> Term -> CompiledType -> ()
+  constructor(srcTerm, func) {
     assertType(func, Function)
 
-    super(srcExpr)
+    super(srcTerm)
 
     this[$func] = func
   }

@@ -3,7 +3,7 @@ import { assertType, assertNoError } from '../core/assert'
 
 import { Type } from '../type/type'
 
-import { Expression } from './expression'
+import { Term } from './term'
 
 const $value = Symbol('@value')
 const $type = Symbol('@type')
@@ -11,7 +11,7 @@ const $type = Symbol('@type')
 const constantFunc = value =>
   () => value
 
-export class ValueExpression extends Expression {
+export class ValueTerm extends Term {
   constructor(value, type) {
     assertType(type, Type)
     assertNoError(type.compileType().typeCheck(value))
@@ -34,7 +34,7 @@ export class ValueExpression extends Expression {
     return Set()
   }
 
-  exprType() {
+  termType() {
     return this.type
   }
 
@@ -62,7 +62,7 @@ export class ValueExpression extends Expression {
     return constantFunc(this.value)
   }
 
-  formatExpr() {
+  formatTerm() {
     const { value } = this
 
     return ['value', value]

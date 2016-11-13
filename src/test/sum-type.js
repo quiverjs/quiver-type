@@ -6,13 +6,13 @@ import {
 } from '../lib/core'
 
 import {
-  BodyExpression,
-  MatchExpression,
-  ValueExpression,
-  VariantExpression,
-  VariableExpression,
-  TermLambdaExpression
-} from '../lib/expr'
+  BodyTerm,
+  MatchTerm,
+  ValueTerm,
+  VariantTerm,
+  VariableTerm,
+  TermLambdaTerm
+} from '../lib/term'
 
 import {
   VariableType,
@@ -26,11 +26,11 @@ import {
 } from '../lib/kind'
 
 import {
-  functionToExpression, compileExpr
+  functionToTerm, compileTerm
 } from '../lib/util'
 
 import {
-  NumberType, StringType, exprTypeEquals, typeKindEquals
+  NumberType, StringType, termTypeEquals, typeKindEquals
 } from './util'
 
 test('sum type test', assert => {
@@ -57,37 +57,37 @@ test('sum type test', assert => {
         EitherType, NumberType),
       StringType)
 
-    const numVariantExpr = new VariantExpression(
+    const numVariantTerm = new VariantTerm(
       EitherNumStr, 'Left',
-      new ValueExpression(3, NumberType))
+      new ValueTerm(3, NumberType))
 
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const matchLambda = new TermLambdaExpression(
+    const matchLambda = new TermLambdaTerm(
       xVar, EitherNumStr,
-      new MatchExpression(
-        new VariableExpression(xVar, EitherNumStr),
+      new MatchTerm(
+        new VariableTerm(xVar, EitherNumStr),
         StringType,
         Map({
-          Left: functionToExpression(
+          Left: functionToTerm(
             List([NumberType]),
             StringType,
             x => `num(${x})`),
-          Right: functionToExpression(
+          Right: functionToTerm(
             List([StringType]),
             StringType,
             x => `str(${x})`)
         })))
 
-    const matchNumExpr = matchLambda.applyExpr(numVariantExpr)
-    assert.equals(compileExpr(matchNumExpr), 'num(3)')
+    const matchNumTerm = matchLambda.applyTerm(numVariantTerm)
+    assert.equals(compileTerm(matchNumTerm), 'num(3)')
 
     const compiledEitherNumStr = EitherNumStr.compileType()
 
-    const matchFn = compileExpr(matchLambda)
+    const matchFn = compileTerm(matchLambda)
 
-    const numVariant = compileExpr(numVariantExpr)
+    const numVariant = compileTerm(numVariantTerm)
 
     assert.equals(matchFn.call(numVariant), 'num(3)')
 
@@ -116,82 +116,82 @@ test('sum type test', assert => {
     const xVar = new TermVariable('x')
 
     assert.throws(() => {
-      const invalidMatch = new MatchExpression(
-        new VariableExpression(xVar, EitherNumStr),
+      const invalidMatch = new MatchTerm(
+        new VariableTerm(xVar, EitherNumStr),
         StringType,
         Map({
-          Left: functionToExpression(
+          Left: functionToTerm(
             List([NumberType]),
             StringType,
             x => `num(${x})`)
         }))
-    }, 'should not allow match expression that doesn\'t match all cases')
+    }, 'should not allow match term that doesn\'t match all cases')
 
     assert.throws(() => {
-      const invalidMatch = new MatchExpression(
-        new VariableExpression(xVar, EitherNumStr),
+      const invalidMatch = new MatchTerm(
+        new VariableTerm(xVar, EitherNumStr),
         StringType,
         Map({
-          foo: functionToExpression(
+          foo: functionToTerm(
             List([NumberType]),
             StringType,
             x => `num(${x})`),
-          bar: functionToExpression(
+          bar: functionToTerm(
             List([StringType]),
             StringType,
             x => `str(${x})`)
         }))
-    }, 'should not allow match expression that have wrong variant tags')
+    }, 'should not allow match term that have wrong variant tags')
 
     assert.throws(() => {
-      const invalidMatch = new MatchExpression(
-        new VariableExpression(xVar, EitherNumStr),
+      const invalidMatch = new MatchTerm(
+        new VariableTerm(xVar, EitherNumStr),
         StringType,
         Map({
-          Left: functionToExpression(
+          Left: functionToTerm(
             List([StringType]),
             StringType,
             x => `num(${x})`),
-          Right: functionToExpression(
+          Right: functionToTerm(
             List([NumberType]),
             StringType,
             x => `str(${x})`)
         }))
-    }, 'should not allow match expression with wrong lambda type in tag')
+    }, 'should not allow match term with wrong lambda type in tag')
 
     assert.throws(() => {
-      const invalidMatch = new MatchExpression(
-        new VariableExpression(xVar, EitherNumStr),
+      const invalidMatch = new MatchTerm(
+        new VariableTerm(xVar, EitherNumStr),
         StringType,
         Map({
-          Left: functionToExpression(
+          Left: functionToTerm(
             List([NumberType]),
             StringType,
             x => `num(${x})`),
-          Right: functionToExpression(
+          Right: functionToTerm(
             List([StringType]),
             NumberType,
             x => `str(${x})`)
         }))
-    }, 'should not allow match expression with mismatched return type')
+    }, 'should not allow match term with mismatched return type')
 
     assert.throws(() => {
-      const invalidMatch = new MatchExpression(
-        new VariableExpression(xVar, EitherNumStr),
+      const invalidMatch = new MatchTerm(
+        new VariableTerm(xVar, EitherNumStr),
         StringType,
         Map({
-          Left: functionToExpression(
+          Left: functionToTerm(
             List([NumberType]),
             StringType,
             x => `num(${x})`),
-          Right: new BodyExpression(
+          Right: new BodyTerm(
             List([
-              new VariableExpression(xVar, NumberType),
+              new VariableTerm(xVar, NumberType),
             ]),
             StringType,
             () => x => `str(${x})`)
         }))
-    }, 'should not allow match expression with non lambda expression case handler')
+    }, 'should not allow match term with non lambda term case handler')
 
     assert.end()
   })

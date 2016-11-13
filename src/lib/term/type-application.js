@@ -7,20 +7,20 @@ import { ArrowKind } from '../kind/arrow'
 
 import { isTerminalType } from '../util/terminal'
 
-import { Expression } from './expression'
-import { TypeLambdaExpression } from './type-lambda'
+import { Term } from './term'
+import { TypeLambdaTerm } from './type-lambda'
 
-const $leftExpr = Symbol('@leftExpr')
+const $leftTerm = Symbol('@leftTerm')
 const $rightType = Symbol('@rightType')
 const $selfType = Symbol('@selfType')
 
-export class TypeApplicationExpression extends Expression {
-  // constructor :: Expr -> Type -> ()
-  constructor(leftExpr, rightType) {
-    assertType(leftExpr, Expression)
+export class TypeApplicationTerm extends Term {
+  // constructor :: Term -> Type -> ()
+  constructor(leftTerm, rightType) {
+    assertType(leftTerm, Term)
     assertType(rightType, Type)
 
-    const leftType = leftExpr.exprType()
+    const leftType = leftTerm.termType()
     const leftKind = leftType.typeKind()
     const rightKind = rightType.typeKind()
 
@@ -31,13 +31,13 @@ export class TypeApplicationExpression extends Expression {
 
     super()
 
-    this[$leftExpr] = leftExpr
+    this[$leftTerm] = leftTerm
     this[$rightType] = rightType
     this[$selfType] = selfType
   }
 
-  get leftExpr() {
-    return this[$leftExpr]
+  get leftTerm() {
+    return this[$leftTerm]
   }
 
   get rightType() {
@@ -45,10 +45,10 @@ export class TypeApplicationExpression extends Expression {
   }
 
   freeTermVariables() {
-    return this.leftExpr.freeTermVariables()
+    return this.leftTerm.freeTermVariables()
   }
 
-  exprType() {
+  termType() {
     return this[$selfType]
   }
 
@@ -56,12 +56,12 @@ export class TypeApplicationExpression extends Expression {
     assertType(termVar, TermVariable)
     assertType(type, Type)
 
-    const { leftExpr, rightType } = this
+    const { leftTerm, rightType } = this
 
-    const err = leftExpr.validateVarType(termVar, type)
+    const err = leftTerm.validateVarType(termVar, type)
     if(!err) return null
 
-    const leftType = leftExpr.applyType(rightType)
+    const leftType = leftTerm.applyType(rightType)
     return leftType.validateVarType(termVar, type)
   }
 
@@ -69,68 +69,68 @@ export class TypeApplicationExpression extends Expression {
     assertType(typeVar, TypeVariable)
     assertType(kind, Kind)
 
-    const { leftExpr, rightType } = this
+    const { leftTerm, rightType } = this
 
-    const err = leftExpr.validateTVarKind(typeVar, kind)
+    const err = leftTerm.validateTVarKind(typeVar, kind)
     if(!err) return null
 
-    const leftType = leftExpr.applyType(rightType).exprType()
+    const leftType = leftTerm.applyType(rightType).termType()
     return leftType.validateTVarKind(typeVar, kind)
   }
 
-  bindTerm(termVar, targetExpr) {
+  bindTerm(termVar, targetTerm) {
     assertType(termVar, TermVariable)
-    assertType(targetExpr, Expression)
+    assertType(targetTerm, Term)
 
-    const { leftExpr, rightType } = this
+    const { leftTerm, rightType } = this
 
-    const newExpr = leftExpr.bindTerm(termVar, targetExpr)
+    const newTerm = leftTerm.bindTerm(termVar, targetTerm)
 
-    if(newExpr === leftExpr)
+    if(newTerm === leftTerm)
       return this
 
-    return new TypeApplicationExpression(newExpr, rightType)
+    return new TypeApplicationTerm(newTerm, rightType)
   }
 
   bindType(typeVar, targetType) {
     assertType(typeVar, TypeVariable)
     assertType(targetType, Type)
 
-    const { leftExpr, rightType } = this
+    const { leftTerm, rightType } = this
 
-    const newExpr = leftExpr.bindType(typeVar, targetType)
+    const newTerm = leftTerm.bindType(typeVar, targetType)
     const newType = rightType.bindType(typeVar, targetType)
 
-    if((newExpr === leftExpr) && (newType === rightType))
+    if((newTerm === leftTerm) && (newType === rightType))
       return this
 
-    return new TypeApplicationExpression(newExpr, newType)
+    return new TypeApplicationTerm(newTerm, newType)
   }
 
   evaluate() {
-    const { leftExpr, rightType } = this
+    const { leftTerm, rightType } = this
 
-    const newExpr = leftExpr.evaluate()
+    const newTerm = leftTerm.evaluate()
 
     // Only reduce the type application if type argument is terminal,
     // i.e. when type argument has no free type variable.
-    if((newExpr instanceof TypeLambdaExpression) &&
+    if((newTerm instanceof TypeLambdaTerm) &&
        isTerminalType(rightType))
     {
-      return newExpr.applyType(rightType).evaluate()
+      return newTerm.applyType(rightType).evaluate()
 
-    } else if(newExpr === leftExpr) {
+    } else if(newTerm === leftTerm) {
       return this
 
     } else {
-      return new TypeApplicationExpression(newExpr, rightType)
+      return new TypeApplicationTerm(newTerm, rightType)
     }
   }
 
-  formatExpr() {
-    const { leftExpr, rightType } = this
+  formatTerm() {
+    const { leftTerm, rightType } = this
 
-    const leftRep = leftExpr.formatExpr()
+    const leftRep = leftTerm.formatTerm()
     const rightRep = rightType.formatType()
 
     return ['type-app', leftRep, rightRep]

@@ -1,25 +1,25 @@
 import { formatLisp } from '../core/util'
 
-export class Expression {
+export class Term {
   constructor() {
-    if(this.constructor === Expression)
-      throw new Error('Abstract class Expression cannot be instantiated')
+    if(this.constructor === Term)
+      throw new Error('Abstract class Term cannot be instantiated')
   }
 
   // freeTermVariables :: () -> Set TermVariable
-  // Unbound term variables in the expression
+  // Unbound term variables in the term
   freeTermVariables() {
     throw new Error('not implemented')
   }
 
-  // exprType :: () -> Type
-  // Get the type of the expression for type checking
-  exprType() {
+  // termType :: () -> Type
+  // Get the type of the term for type checking
+  termType() {
     throw new Error('not implemented')
   }
 
-  // exprCheck :: Expression -> Maybe Error
-  exprCheck(targetExpr) {
+  // termCheck :: Term -> Maybe Error
+  termCheck(targetTerm) {
     throw new Error('not implemented')
   }
 
@@ -33,20 +33,20 @@ export class Expression {
     throw new Error('not implemented')
   }
 
-  // bindTermVariable :: TermVariable -> Expression -> Expression
-  // Bind unbound term variable to new expression
-  bindTerm(termVar, expr) {
+  // bindTermVariable :: TermVariable -> Term -> Term
+  // Bind unbound term variable to new term
+  bindTerm(termVar, term) {
     throw new Error('not implemented')
   }
 
-  // bindTypeVariable :: TypeVariable -> Type -> Expression
+  // bindTypeVariable :: TypeVariable -> Type -> Term
   // Bind unbound type variable to new type
   bindType(typeVar, type) {
     throw new Error('not implemented')
   }
 
-  // evaluate :: () -> Expression
-  // Eagerly reduce the expression into simpler forms
+  // evaluate :: () -> Term
+  // Eagerly reduce the term into simpler forms
   evaluate() {
     throw new Error('not implemented')
   }
@@ -56,12 +56,12 @@ export class Expression {
     throw new Error('not implemented')
   }
 
-  // formatExpr :: () -> List Object
-  formatExpr() {
+  // formatTerm :: () -> List Object
+  formatTerm() {
     throw new Error('not impemented')
   }
 
   inspect() {
-    return formatLisp(this.formatExpr())
+    return formatLisp(this.formatTerm())
   }
 }

@@ -8,7 +8,7 @@ import {
 import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 
-import { Expression } from './expression'
+import { Term } from './term'
 
 const $termVar = Symbol('@termVar')
 const $varType = Symbol('@varType')
@@ -39,7 +39,7 @@ const argPicker = index =>
     return args[index]
   }
 
-export class VariableExpression extends Expression {
+export class VariableTerm extends Term {
   constructor(termVar, varType) {
     assertType(termVar, TermVariable)
     assertType(varType, Type)
@@ -62,7 +62,7 @@ export class VariableExpression extends Expression {
     return Set([this.termVar])
   }
 
-  exprType() {
+  termType() {
     return this.varType
   }
 
@@ -84,17 +84,17 @@ export class VariableExpression extends Expression {
     return varType.validateTVarKind(typeVar, kind)
   }
 
-  bindTerm(termVar, expr) {
+  bindTerm(termVar, term) {
     assertType(termVar, TermVariable)
-    assertType(expr, Expression)
+    assertType(term, Term)
 
     if(this.termVar !== termVar)
       return this
 
-    const exprType = expr.exprType()
-    assertNoError(this.varType.typeCheck(exprType))
+    const termType = term.termType()
+    assertNoError(this.varType.typeCheck(termType))
 
-    return expr
+    return term
   }
 
   bindType(typeVar, type) {
@@ -104,7 +104,7 @@ export class VariableExpression extends Expression {
     if(newVarType === varType)
       return this
 
-    return new VariableExpression(termVar, newVarType)
+    return new VariableTerm(termVar, newVarType)
   }
 
   compileBody(argSpecs) {
@@ -122,7 +122,7 @@ export class VariableExpression extends Expression {
     return this
   }
 
-  formatExpr() {
+  formatTerm() {
     const { termVar } = this
     const varRep = termVar.name
 

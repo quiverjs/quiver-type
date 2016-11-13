@@ -5,139 +5,139 @@ import {
 } from '../lib/core'
 
 import {
-  ValueExpression,
-  RawBodyExpression,
-  VariableExpression
-} from '../lib/expr'
+  ValueTerm,
+  RawBodyTerm,
+  VariableTerm
+} from '../lib/term'
 
 import {
   LiteralType
 } from '../lib/type'
 
-import { compileExpr } from '../lib/util'
+import { compileTerm } from '../lib/util'
 
 import {
   NumberType, assertNumber, assertString, equals
 } from './util'
 
 test('primitive type test', assert => {
-  assert.test('value expr', assert => {
+  assert.test('value term', assert => {
     const NumberType = new LiteralType('Number', assertNumber)
 
-    const valueExpr = new ValueExpression(8, NumberType)
+    const valueTerm = new ValueTerm(8, NumberType)
 
-    assert.equal(valueExpr.exprType(), NumberType)
-    assert.equal(valueExpr.evaluate(), valueExpr)
-    assert.equal(valueExpr.value, 8)
+    assert.equal(valueTerm.termType(), NumberType)
+    assert.equal(valueTerm.evaluate(), valueTerm)
+    assert.equal(valueTerm.value, 8)
 
     assert.throws(() => {
-      new ValueExpression('foo', NumberType)
+      new ValueTerm('foo', NumberType)
     })
 
     const x = new TermVariable('x')
     const y = new TermVariable('y')
 
-    const varExpr = new VariableExpression(x, NumberType)
+    const varTerm = new VariableTerm(x, NumberType)
 
-    assert.ok(varExpr.freeTermVariables().equals(Set([x])))
+    assert.ok(varTerm.freeTermVariables().equals(Set([x])))
 
-    assert.equal(varExpr.exprType(), NumberType)
+    assert.equal(varTerm.termType(), NumberType)
 
-    assert.equal(varExpr.evaluate(), varExpr)
-    assert.equal(varExpr.bindTerm(y, valueExpr), varExpr)
+    assert.equal(varTerm.evaluate(), varTerm)
+    assert.equal(varTerm.bindTerm(y, valueTerm), varTerm)
 
     const x2 = new TermVariable('x')
-    assert.equal(varExpr.bindTerm(x2, valueExpr), varExpr,
+    assert.equal(varTerm.bindTerm(x2, valueTerm), varTerm,
       'term variable of same name but different instance should be distinguish')
 
-    const varExpr2 = varExpr.bindTerm(x, valueExpr)
-    assert.notEqual(varExpr2, varExpr)
-    assert.equal(varExpr2, valueExpr)
+    const varTerm2 = varTerm.bindTerm(x, valueTerm)
+    assert.notEqual(varTerm2, varTerm)
+    assert.equal(varTerm2, valueTerm)
 
     assert.end()
   })
 
-  assert.test('function expr', assert => {
+  assert.test('function term', assert => {
     const NumberType = new LiteralType('Number', assertNumber)
     const StringType = new LiteralType('String', assertString)
 
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const argExprs = List([
-      new VariableExpression(xVar, NumberType),
-      new VariableExpression(yVar, NumberType)
+    const argTerms = List([
+      new VariableTerm(xVar, NumberType),
+      new VariableTerm(yVar, NumberType)
     ])
 
-    const doPlus = (xExpr, yExpr) => {
-      const x = xExpr.value
-      const y = yExpr.value
+    const doPlus = (xTerm, yTerm) => {
+      const x = xTerm.value
+      const y = yTerm.value
 
       assert.equal(x, 3)
       assert.equal(y, 2)
 
       const result = x+y
-      return new ValueExpression(result, NumberType)
+      return new ValueTerm(result, NumberType)
     }
 
-    const plusExpr = new RawBodyExpression(
-      argExprs, NumberType, doPlus)
+    const plusTerm = new RawBodyTerm(
+      argTerms, NumberType, doPlus)
 
-    assert::equals(plusExpr.freeTermVariables(),
+    assert::equals(plusTerm.freeTermVariables(),
       Set([xVar, yVar]))
 
-    assert.equals(plusExpr.evaluate(), plusExpr)
+    assert.equals(plusTerm.evaluate(), plusTerm)
 
-    const xArg = new ValueExpression(3, NumberType)
+    const xArg = new ValueTerm(3, NumberType)
 
-    const plusExpr2 = plusExpr.bindTerm(xVar, xArg)
+    const plusTerm2 = plusTerm.bindTerm(xVar, xArg)
 
-    assert.notEqual(plusExpr2, plusExpr)
+    assert.notEqual(plusTerm2, plusTerm)
 
-    assert::equals(plusExpr.freeTermVariables(),
+    assert::equals(plusTerm.freeTermVariables(),
       Set([xVar, yVar]),
-      'original expression should not be modified')
+      'original term should not be modified')
 
-    assert::equals(plusExpr2.freeTermVariables(),
+    assert::equals(plusTerm2.freeTermVariables(),
       Set([yVar]),
-      'new expression should only have y not bounded')
+      'new term should only have y not bounded')
 
-    assert.equals(plusExpr2.evaluate(), plusExpr2)
+    assert.equals(plusTerm2.evaluate(), plusTerm2)
 
     assert.throws(() => {
-      const arg = new ValueExpression('foo', StringType)
-      plusExpr2.bindTerm(yVar, arg)
+      const arg = new ValueTerm('foo', StringType)
+      plusTerm2.bindTerm(yVar, arg)
     })
 
-    const yArg = new ValueExpression(2, NumberType)
+    const yArg = new ValueTerm(2, NumberType)
 
-    const plusExpr3 = plusExpr2.bindTerm(yVar, yArg)
+    const plusTerm3 = plusTerm2.bindTerm(yVar, yArg)
 
-    assert::equals(plusExpr3.freeTermVariables(),
+    assert::equals(plusTerm3.freeTermVariables(),
       Set(),
-      'new expression should have all variables bounded')
+      'new term should have all variables bounded')
 
-    const resultExpr = plusExpr3.evaluate()
+    const resultTerm = plusTerm3.evaluate()
 
-    assert.ok(resultExpr instanceof ValueExpression)
-    assert.equal(resultExpr.value, 5)
+    assert.ok(resultTerm instanceof ValueTerm)
+    assert.equal(resultTerm.value, 5)
 
     assert.end()
   })
 
-  assert.test('compile constant expression', assert => {
-    const valueExpr = new ValueExpression(8, NumberType)
-    const compiled = compileExpr(valueExpr)
+  assert.test('compile constant term', assert => {
+    const valueTerm = new ValueTerm(8, NumberType)
+    const compiled = compileTerm(valueTerm)
 
     assert.equals(compiled, 8)
     assert.end()
   })
 
-  assert.test('compile variable expression', assert => {
+  assert.test('compile variable term', assert => {
     const xVar = new TermVariable('x')
-    const varExpr = new VariableExpression(xVar, NumberType)
+    const varTerm = new VariableTerm(xVar, NumberType)
 
-    assert.throws(() => compileExpr(varExpr))
+    assert.throws(() => compileTerm(varTerm))
 
     assert.end()
   })

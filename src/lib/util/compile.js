@@ -1,10 +1,10 @@
 import { List } from '../core/container'
 import { assertType } from '../core/assert'
 
-import { Expression } from '../expr/expression'
+import { Term } from '../term/term'
 
-export const compileExpr = expr => {
-  assertType(expr, Expression)
+export const compileTerm = term => {
+  assertType(term, Term)
 
-  return expr.evaluate().compileBody(List())()
+  return term.evaluate().compileBody(List())()
 }

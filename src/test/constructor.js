@@ -1,14 +1,14 @@
 import test from 'tape'
 
 import {
-  BodyExpression,
-  ValueExpression,
-  VariableExpression,
-  TermLambdaExpression,
-  TypeLambdaExpression,
-  TypeApplicationExpression,
-  TermApplicationExpression
-} from '../lib/expr'
+  BodyTerm,
+  ValueTerm,
+  VariableTerm,
+  TermLambdaTerm,
+  TypeLambdaTerm,
+  TypeApplicationTerm,
+  TermApplicationTerm
+} from '../lib/term'
 
 import {
   ArrowType,
@@ -27,12 +27,12 @@ import {
 } from '../lib/core'
 
 import {
-  wrapFunction, compileExpr
+  wrapFunction, compileTerm
 } from '../lib/util'
 
 import {
   NumberType, StringType,
-  exprTypeEquals, typeKindEquals
+  termTypeEquals, typeKindEquals
 } from './util'
 
 test('type constructor test', assert => {
@@ -100,10 +100,10 @@ test('type constructor test', assert => {
 
     const cListType = new ApplicationType(ListType, cType)
 
-    const fmapBody = new BodyExpression(
+    const fmapBody = new BodyTerm(
       List([
-        new VariableExpression(fVar, fType),
-        new VariableExpression(lVar, bListType)
+        new VariableTerm(fVar, fType),
+        new VariableTerm(lVar, bListType)
       ]),
       cListType,
       (mapperCType, bListCType) =>
@@ -114,38 +114,38 @@ test('type constructor test', assert => {
 
     // fmap :: forall b :: *, c :: * .
     //          (b -> c) -> List b -> List c
-    const fmapExpr = new TypeLambdaExpression(
+    const fmapTerm = new TypeLambdaTerm(
       bTVar, unitKind,
-      new TypeLambdaExpression(
+      new TypeLambdaTerm(
         cTVar, unitKind,
-        new TermLambdaExpression(
+        new TermLambdaTerm(
           fVar, fType,
-          new TermLambdaExpression(
+          new TermLambdaTerm(
             lVar, bListType,
             fmapBody
           ))))
 
-    const fmapNumStr = new TypeApplicationExpression(
-      new TypeApplicationExpression(
-        fmapExpr, NumberType),
+    const fmapNumStr = new TypeApplicationTerm(
+      new TypeApplicationTerm(
+        fmapTerm, NumberType),
       StringType)
       .evaluate()
 
     const xVar = new TermVariable('x')
 
-    const numToString = new TermLambdaExpression(
+    const numToString = new TermLambdaTerm(
       xVar, NumberType,
-      new BodyExpression(
-        List([ new VariableExpression(xVar, NumberType) ]),
+      new BodyTerm(
+        List([ new VariableTerm(xVar, NumberType) ]),
         StringType,
         NumberCType =>
           num => `${num}`))
 
-    const numToStrListExpr = new TermApplicationExpression(
+    const numToStrListTerm = new TermApplicationTerm(
       fmapNumStr, numToString)
       .evaluate()
 
-    const numToStrListFn = compileExpr(numToStrListExpr)
+    const numToStrListFn = compileTerm(numToStrListTerm)
 
     assert.deepEquals(
       numToStrListFn.call(List([1, 2, 3])).toArray(),
@@ -155,17 +155,17 @@ test('type constructor test', assert => {
     assert.throws(() => numToStrListFn.call([1, 2, 3]))
     assert.throws(() => numToStrListFn.call(1))
 
-    const strListExpr = new TermApplicationExpression(
-      numToStrListExpr,
-      new ValueExpression(
+    const strListTerm = new TermApplicationTerm(
+      numToStrListTerm,
+      new ValueTerm(
         List([1, 2, 3]),
         NumberListType))
 
-    assert::exprTypeEquals(strListExpr, StringListType)
-    assert.deepEquals(compileExpr(strListExpr).toArray(),
+    assert::termTypeEquals(strListTerm, StringListType)
+    assert.deepEquals(compileTerm(strListTerm).toArray(),
       ['1', '2', '3'])
 
-    const fmapNumStrFn = compileExpr(fmapNumStr)
+    const fmapNumStrFn = compileTerm(fmapNumStr)
 
     const squareStrFn = wrapFunction(
       num => `${num*num}`,

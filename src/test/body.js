@@ -5,25 +5,25 @@ import {
 } from '../lib/core'
 
 import {
-  BodyExpression,
-  VariableExpression,
-  TermLambdaExpression
-} from '../lib/expr'
+  BodyTerm,
+  VariableTerm,
+  TermLambdaTerm
+} from '../lib/term'
 
-import { compileExpr } from '../lib/util'
+import { compileTerm } from '../lib/util'
 
 import { NumberType } from './util'
 
-test('expression compilation test', assert => {
-  assert.test('body expression', assert => {
+test('term compilation test', assert => {
+  assert.test('body term', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const xVarExpr = new VariableExpression(xVar, NumberType)
-    const yVarExpr = new VariableExpression(yVar, NumberType)
+    const xVarTerm = new VariableTerm(xVar, NumberType)
+    const yVarTerm = new VariableTerm(yVar, NumberType)
 
-    const addExpr = new BodyExpression(
-      List([xVarExpr, yVarExpr]), NumberType,
+    const addTerm = new BodyTerm(
+      List([xVarTerm, yVarTerm]), NumberType,
       (xCompiledType, yCompiledType) => {
         assert.equals(xCompiledType.srcType, NumberType)
         assert.equals(yCompiledType.srcType, NumberType)
@@ -33,12 +33,12 @@ test('expression compilation test', assert => {
         }
       })
 
-    const addLambda = new TermLambdaExpression(
+    const addLambda = new TermLambdaTerm(
       xVar, NumberType,
-      new TermLambdaExpression(
-        yVar, NumberType, addExpr))
+      new TermLambdaTerm(
+        yVar, NumberType, addTerm))
 
-    const compiledFunction = compileExpr(addLambda)
+    const compiledFunction = compileTerm(addLambda)
 
     assert.equals(compiledFunction.call(1, 2), 3)
 
