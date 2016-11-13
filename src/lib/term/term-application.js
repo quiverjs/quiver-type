@@ -3,7 +3,7 @@ import { ArgSpec } from '../compiled-term/arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertType, assertListContent, assertNoError
+  assertInstanceOf, assertListContent, assertNoError
 } from '../core/assert'
 
 import { Kind } from '../kind/kind'
@@ -53,12 +53,12 @@ const compilePartialTermApplication = (term, closureSpecs, argExtractors, partia
 
 export class TermApplicationTerm extends Term {
   constructor(leftTerm, rightTerm) {
-    assertType(leftTerm, Term)
-    assertType(rightTerm, Term)
+    assertInstanceOf(leftTerm, Term)
+    assertInstanceOf(rightTerm, Term)
 
     const leftType = leftTerm.termType()
 
-    assertType(leftType, ArrowType,
+    assertInstanceOf(leftType, ArrowType,
       'type of leftTerm must be arrow type')
 
     const argType = leftType.leftType
@@ -89,8 +89,8 @@ export class TermApplicationTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     const { leftTerm, rightTerm } = this
 
@@ -101,8 +101,8 @@ export class TermApplicationTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { leftTerm, rightTerm } = this
 
@@ -119,8 +119,8 @@ export class TermApplicationTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     if(!this.freeTermVariables().has(termVar))
       return this
@@ -134,8 +134,8 @@ export class TermApplicationTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { leftTerm, rightTerm } = this
 

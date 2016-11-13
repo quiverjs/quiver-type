@@ -1,5 +1,5 @@
 import { TypeVariable } from '../core/variable'
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
@@ -14,13 +14,13 @@ const $selfKind = Symbol('@selfKind')
 
 export class ApplicationType extends Type {
   constructor(leftType, rightType) {
-    assertType(leftType, Type)
-    assertType(rightType, Type)
+    assertInstanceOf(leftType, Type)
+    assertInstanceOf(rightType, Type)
 
     const leftKind = leftType.typeKind()
     const rightKind = rightType.typeKind()
 
-    assertType(leftKind, ArrowKind)
+    assertInstanceOf(leftKind, ArrowKind)
     assertNoError(leftKind.leftKind.kindCheck(rightKind))
 
     if(isTerminalType(leftType) &&
@@ -57,7 +57,7 @@ export class ApplicationType extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     if(!(targetType instanceof ApplicationType))
       return new TypeError('target type must be instance of ApplicationType')
@@ -71,8 +71,8 @@ export class ApplicationType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { leftType, rightType } = this
 
@@ -83,8 +83,8 @@ export class ApplicationType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { leftType, rightType } = this
 

@@ -1,4 +1,4 @@
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
@@ -14,9 +14,9 @@ const $kind = Symbol('@kind')
 
 export class ForAllType extends Type {
   constructor(argTVar, argKind, bodyType) {
-    assertType(argTVar, TypeVariable)
-    assertType(argKind, Kind)
-    assertType(bodyType, Type)
+    assertInstanceOf(argTVar, TypeVariable)
+    assertInstanceOf(argKind, Kind)
+    assertInstanceOf(bodyType, Type)
 
     assertNoError(bodyType.validateTVarKind(argTVar, argKind))
 
@@ -50,7 +50,7 @@ export class ForAllType extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     if(!(targetType instanceof ForAllType))
       return new Error('target type must be ForAllType')
@@ -68,8 +68,8 @@ export class ForAllType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { argTVar, bodyType } = this
 
@@ -80,8 +80,8 @@ export class ForAllType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argTVar, argKind, bodyType } = this
 
@@ -106,7 +106,7 @@ export class ForAllType extends Type {
 
   // applyType :: Type -> Type
   applyType(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     const { argTVar, argKind, bodyType } = this
 

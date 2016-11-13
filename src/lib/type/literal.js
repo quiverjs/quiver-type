@@ -1,5 +1,5 @@
 import { Set } from '../core/container'
-import { assertType, assertFunction, assertString } from '../core/assert'
+import { assertInstanceOf, assertFunction, assertString } from '../core/assert'
 
 import { unitKind } from '../kind/unit'
 import { DynamicCompiledType } from '../compiled-type/dynamic'
@@ -34,7 +34,7 @@ export class LiteralType extends Type {
   }
 
   typeCheck(type) {
-    assertType(type, Type)
+    assertInstanceOf(type, Type)
 
     if(!(type instanceof LiteralType))
       return new TypeError('target type must be ConstantType')

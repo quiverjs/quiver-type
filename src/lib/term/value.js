@@ -1,5 +1,5 @@
 import { Set } from '../core/container'
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Type } from '../type/type'
 
@@ -13,7 +13,7 @@ const constantFunc = value =>
 
 export class ValueTerm extends Term {
   constructor(value, type) {
-    assertType(type, Type)
+    assertInstanceOf(type, Type)
     assertNoError(type.compileType().typeCheck(value))
 
     super()

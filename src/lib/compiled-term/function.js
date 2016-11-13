@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertInstanceOf } from '../core/assert'
 
 import { CompiledTerm } from './term'
 
@@ -7,7 +7,7 @@ const $func = Symbol('@func')
 export class CompiledFunction extends CompiledTerm {
   // constructor :: Function -> Term -> CompiledType -> ()
   constructor(srcTerm, func) {
-    assertType(func, Function)
+    assertInstanceOf(func, Function)
 
     super(srcTerm)
 

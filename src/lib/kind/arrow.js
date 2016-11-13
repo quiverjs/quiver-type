@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertInstanceOf } from '../core/assert'
 
 import { Kind } from './kind'
 
@@ -7,8 +7,8 @@ const $rightKind = Symbol('@rightKind')
 
 export class ArrowKind extends Kind {
   constructor(leftKind, rightKind) {
-    assertType(leftKind, Kind)
-    assertType(rightKind, Kind)
+    assertInstanceOf(leftKind, Kind)
+    assertInstanceOf(rightKind, Kind)
 
     super()
 
@@ -25,9 +25,9 @@ export class ArrowKind extends Kind {
   }
 
   kindCheck(targetKind) {
-    assertType(targetKind, Kind)
+    assertInstanceOf(targetKind, Kind)
 
-    assertType(targetKind, ArrowKind,
+    assertInstanceOf(targetKind, ArrowKind,
       'target kind must be arrow kind')
 
     const { leftKind, rightKind } = this

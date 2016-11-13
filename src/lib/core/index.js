@@ -1,5 +1,5 @@
 export {
-  assertType, assertList, assertFunction
+  assertInstanceOf, assertList, assertFunction
 } from './assert'
 
 export {

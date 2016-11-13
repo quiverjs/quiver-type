@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertInstanceOf } from '../core/assert'
 import { Term } from '../term/term'
 
 const $srcTerm = Symbol('@srcTerm')
@@ -10,7 +10,7 @@ export class CompiledTerm {
     if(this.constructor === CompiledTerm)
       throw new Error('Abstract class Term cannot be instantiated')
 
-    assertType(srcTerm, Term)
+    assertInstanceOf(srcTerm, Term)
 
     const srcType = srcTerm.termType()
     const compiledType = srcType.compileType()

@@ -4,7 +4,7 @@ import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import {
-  assertListContent, assertType, assertFunction
+  assertListContent, assertInstanceOf, assertFunction
 } from '../core/assert'
 
 import { Type } from '../type/type'
@@ -22,7 +22,7 @@ export class BodyTerm extends Term {
   constructor(argTerms, returnType, compiler) {
     assertListContent(argTerms, Term)
 
-    assertType(returnType, Type)
+    assertInstanceOf(returnType, Type)
     assertFunction(compiler)
 
     super()
@@ -54,8 +54,8 @@ export class BodyTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     for(const term of this.argTerms) {
       const err = term.validateVarType(termVar, type)
@@ -66,8 +66,8 @@ export class BodyTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     for(const term of this.argTerms) {
       const err = term.validateTVarKind(typeVar, kind)
@@ -78,8 +78,8 @@ export class BodyTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     const { argTerms, returnType, compiler } = this
 
@@ -94,8 +94,8 @@ export class BodyTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argTerms, returnType, compiler } = this
 
@@ -123,7 +123,7 @@ export class BodyTerm extends Term {
       term => term.termType().compileType())
 
     const compiledBody = compiler(...argCompiledTypes)
-    assertType(compiledBody, Function)
+    assertInstanceOf(compiledBody, Function)
 
     return (...args) => {
       const inArgs = argExtractors.map(

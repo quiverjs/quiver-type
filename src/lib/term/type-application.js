@@ -1,4 +1,4 @@
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -17,14 +17,14 @@ const $selfType = Symbol('@selfType')
 export class TypeApplicationTerm extends Term {
   // constructor :: Term -> Type -> ()
   constructor(leftTerm, rightType) {
-    assertType(leftTerm, Term)
-    assertType(rightType, Type)
+    assertInstanceOf(leftTerm, Term)
+    assertInstanceOf(rightType, Type)
 
     const leftType = leftTerm.termType()
     const leftKind = leftType.typeKind()
     const rightKind = rightType.typeKind()
 
-    assertType(leftKind, ArrowKind)
+    assertInstanceOf(leftKind, ArrowKind)
     assertNoError(leftKind.leftKind.kindCheck(rightKind))
 
     const selfType = leftType.applyType(rightType)
@@ -53,8 +53,8 @@ export class TypeApplicationTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     const { leftTerm, rightType } = this
 
@@ -66,8 +66,8 @@ export class TypeApplicationTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { leftTerm, rightType } = this
 
@@ -79,8 +79,8 @@ export class TypeApplicationTerm extends Term {
   }
 
   bindTerm(termVar, targetTerm) {
-    assertType(termVar, TermVariable)
-    assertType(targetTerm, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(targetTerm, Term)
 
     const { leftTerm, rightType } = this
 
@@ -93,8 +93,8 @@ export class TypeApplicationTerm extends Term {
   }
 
   bindType(typeVar, targetType) {
-    assertType(typeVar, TypeVariable)
-    assertType(targetType, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(targetType, Type)
 
     const { leftTerm, rightType } = this
 

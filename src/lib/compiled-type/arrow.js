@@ -1,5 +1,5 @@
 import { List } from '../core/container'
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
@@ -14,8 +14,8 @@ const $returnType = Symbol('@returnType')
 const flattenArrowType = arrowType => {
   const { leftType, rightType } = arrowType
 
-  assertType(leftType, Type)
-  assertType(rightType, Type)
+  assertInstanceOf(leftType, Type)
+  assertInstanceOf(rightType, Type)
 
   if(rightType instanceof ArrowType) {
     return [leftType, ...flattenArrowType(rightType)]
@@ -30,7 +30,7 @@ const compileTypes = argTypes =>
 
 export class CompiledArrowType extends CompiledType {
   constructor(srcType) {
-    assertType(srcType, ArrowType)
+    assertInstanceOf(srcType, ArrowType)
 
     const inTypes = flattenArrowType(srcType)
     const compiledInTypes = compileTypes(inTypes)
@@ -54,7 +54,7 @@ export class CompiledArrowType extends CompiledType {
   }
 
   typeCheck(compiledFunction) {
-    assertType(compiledFunction, CompiledFunction)
+    assertInstanceOf(compiledFunction, CompiledFunction)
 
     return this.srcType.typeCheck(compiledFunction.srcType)
   }

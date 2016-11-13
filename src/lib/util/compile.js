@@ -1,10 +1,10 @@
 import { List } from '../core/container'
-import { assertType } from '../core/assert'
+import { assertInstanceOf } from '../core/assert'
 
 import { Term } from '../term/term'
 
 export const compileTerm = term => {
-  assertType(term, Term)
+  assertInstanceOf(term, Term)
 
   return term.evaluate().compileBody(List())()
 }

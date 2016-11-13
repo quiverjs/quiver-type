@@ -2,7 +2,7 @@ import { Set } from '../core/container'
 import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertType, assertListContent, assertNoError
+  assertInstanceOf, assertListContent, assertNoError
 } from '../core/assert'
 
 import { Type } from '../type/type'
@@ -41,8 +41,8 @@ const argPicker = index =>
 
 export class VariableTerm extends Term {
   constructor(termVar, varType) {
-    assertType(termVar, TermVariable)
-    assertType(varType, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(varType, Type)
 
     super()
 
@@ -67,8 +67,8 @@ export class VariableTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     if(this.termVar !== termVar)
       return null
@@ -77,16 +77,16 @@ export class VariableTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { varType } = this
     return varType.validateTVarKind(typeVar, kind)
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     if(this.termVar !== termVar)
       return this

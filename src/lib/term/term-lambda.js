@@ -3,7 +3,7 @@ import { ArgSpec } from '../compiled-term/arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertType, assertListContent, assertNoError
+  assertInstanceOf, assertListContent, assertNoError
 } from '../core/assert'
 
 import { Kind } from '../kind/kind'
@@ -32,9 +32,9 @@ const closureWrap = (body, closureSize, term) =>
 export class TermLambdaTerm extends Term {
   // constructor :: TermVariable -> Type -> Term -> ()
   constructor(argVar, argType, bodyTerm) {
-    assertType(argVar, TermVariable)
-    assertType(argType, Type)
-    assertType(bodyTerm, Term)
+    assertInstanceOf(argVar, TermVariable)
+    assertInstanceOf(argType, Type)
+    assertInstanceOf(bodyTerm, Term)
 
     assertNoError(bodyTerm.validateVarType(argVar, argType))
 
@@ -72,8 +72,8 @@ export class TermLambdaTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     const { argVar, bodyTerm } = this
 
@@ -84,8 +84,8 @@ export class TermLambdaTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { argType, bodyTerm } = this
 
@@ -97,8 +97,8 @@ export class TermLambdaTerm extends Term {
 
   // bindTerm :: TermVariable -> Term
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     const { argVar, argType, bodyTerm } = this
 
@@ -121,8 +121,8 @@ export class TermLambdaTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argVar, argType, bodyTerm } = this
     const newArgType = argType.bindType(typeVar, type)
@@ -167,7 +167,7 @@ export class TermLambdaTerm extends Term {
   // applyTerm :: Term -> Term
   // Term application to the lambda term
   applyTerm(term) {
-    assertType(term, Term)
+    assertInstanceOf(term, Term)
 
     const { argVar, argType, bodyTerm } = this
     assertNoError(argType.typeCheck(term.termType()))

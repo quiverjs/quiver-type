@@ -1,4 +1,4 @@
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -16,9 +16,9 @@ const $type = Symbol('@type')
 export class TypeLambdaTerm extends Term {
   // constructor :: TypeVariable -> Term -> ()
   constructor(argTVar, argKind, bodyTerm) {
-    assertType(argTVar, TypeVariable)
-    assertType(argKind, Kind)
-    assertType(bodyTerm, Term)
+    assertInstanceOf(argTVar, TypeVariable)
+    assertInstanceOf(argKind, Kind)
+    assertInstanceOf(bodyTerm, Term)
 
     assertNoError(bodyTerm.validateTVarKind(argTVar, argKind))
 
@@ -58,8 +58,8 @@ export class TypeLambdaTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { argTVar, bodyTerm } = this
 
@@ -70,8 +70,8 @@ export class TypeLambdaTerm extends Term {
   }
 
   bindType(targetTypeVar, type) {
-    assertType(targetTypeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(targetTypeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argTVar, argKind, bodyTerm } = this
 
@@ -87,8 +87,8 @@ export class TypeLambdaTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     const { argTVar, argKind, bodyTerm } = this
 
@@ -114,7 +114,7 @@ export class TypeLambdaTerm extends Term {
   // applyType :: Type -> Term
   // Apply a type to the type lambda
   applyType(type) {
-    assertType(type, Type)
+    assertInstanceOf(type, Type)
 
     const { argTVar, argKind, bodyTerm } = this
     assertNoError(argKind.kindCheck(type.typeKind()))

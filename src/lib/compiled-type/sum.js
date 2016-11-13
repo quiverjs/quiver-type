@@ -1,5 +1,5 @@
 import {
-  assertType, assertString, assertNoError
+  assertInstanceOf, assertString, assertNoError
 } from '../core/assert'
 
 import { SumType } from '../type/sum'
@@ -15,11 +15,11 @@ const $typeMap = Symbol('@typeMap')
 
 class VariantValue {
   constructor(sumType, tag, value) {
-    assertType(sumType, CompiledSumType)
+    assertInstanceOf(sumType, CompiledSumType)
     assertString(tag)
 
     const caseType = sumType.typeMap.get(tag)
-    assertType(caseType, CompiledType)
+    assertInstanceOf(caseType, CompiledType)
 
     assertNoError(caseType.typeCheck(value))
 
@@ -43,7 +43,7 @@ class VariantValue {
 
 export class CompiledSumType extends CompiledType {
   constructor(srcType) {
-    assertType(srcType, SumType)
+    assertInstanceOf(srcType, SumType)
 
     const { typeMap } = srcType
 

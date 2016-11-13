@@ -1,6 +1,6 @@
 import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
-import { assertListContent, assertType, assertFunction } from '../core/assert'
+import { assertListContent, assertInstanceOf, assertFunction } from '../core/assert'
 
 import { DynamicCompiledType } from '../compiled-type/dynamic'
 
@@ -38,7 +38,7 @@ export class TypeConstructor extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     if(!(targetType instanceof TypeConstructor))
       return new TypeError('target type must be type constructor')
@@ -69,8 +69,8 @@ export class TypeConstructor extends Type {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argTypes, typeCheckerBuilder } = this
 

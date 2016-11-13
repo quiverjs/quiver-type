@@ -2,7 +2,7 @@ import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertListContent, assertType,
+  assertListContent, assertInstanceOf,
   assertFunction, assertNoError
 } from '../core/assert'
 
@@ -22,7 +22,7 @@ export class RawBodyTerm extends Term {
   constructor(argTerms, returnType, func) {
     assertListContent(argTerms, Term)
 
-    assertType(returnType, Type)
+    assertInstanceOf(returnType, Type)
     assertFunction(func)
 
     super()
@@ -54,8 +54,8 @@ export class RawBodyTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     for(const term of this.argTerms) {
       const err = term.validateVarType(termVar, type)
@@ -66,8 +66,8 @@ export class RawBodyTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     for(const term of this.argTerms) {
       const err = term.validateTVarKind(typeVar, kind)
@@ -78,8 +78,8 @@ export class RawBodyTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     const { argTerms, returnType, func } = this
 
@@ -94,8 +94,8 @@ export class RawBodyTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argTerms, returnType, func } = this
 
@@ -120,7 +120,7 @@ export class RawBodyTerm extends Term {
 
     const resultTerm = func(...argTerms)
 
-    assertType(resultTerm, Term)
+    assertInstanceOf(resultTerm, Term)
     assertNoError(returnType.typeCheck(resultTerm.termType()))
 
     return resultTerm

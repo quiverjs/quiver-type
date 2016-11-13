@@ -14,7 +14,7 @@ import { VariantTerm } from './variant'
 import { TermLambdaTerm } from './term-lambda'
 
 import {
-  assertMap, assertType,
+  assertMap, assertInstanceOf,
   assertListContent, assertNoError
 } from '../core/assert'
 
@@ -24,12 +24,12 @@ const $returnType = Symbol('@returnType')
 
 export class MatchTerm extends Term {
   constructor(variantTerm, returnType, caseTerms) {
-    assertType(variantTerm, Term)
-    assertType(returnType, Type)
+    assertInstanceOf(variantTerm, Term)
+    assertInstanceOf(returnType, Type)
     assertMap(caseTerms)
 
     const sumType = variantTerm.termType()
-    assertType(sumType, SumType)
+    assertInstanceOf(sumType, SumType)
 
     const { typeMap } = sumType
     if(typeMap.size !== caseTerms.size)
@@ -41,10 +41,10 @@ export class MatchTerm extends Term {
         throw new TypeError('case terms must match all sum types')
       }
 
-      assertType(caseTerm, TermLambdaTerm)
+      assertInstanceOf(caseTerm, TermLambdaTerm)
 
       const termType = caseTerm.termType()
-      assertType(termType, ArrowType)
+      assertInstanceOf(termType, ArrowType)
 
       assertNoError(caseType.typeCheck(termType.leftType))
       assertNoError(returnType.typeCheck(termType.rightType))
@@ -82,8 +82,8 @@ export class MatchTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertType(termVar, TermVariable)
-    assertType(type, Type)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(type, Type)
 
     const { variantTerm, caseTerms } = this
 
@@ -96,8 +96,8 @@ export class MatchTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { variantTerm, caseTerms, returnType } = this
 
@@ -113,8 +113,8 @@ export class MatchTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     const { variantTerm, caseTerms, returnType } = this
 
@@ -131,8 +131,8 @@ export class MatchTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { variantTerm, caseTerms, returnType } = this
 
@@ -197,7 +197,7 @@ export class MatchTerm extends Term {
     const { tag, bodyTerm } = variantTerm
     const caseTerm = caseTerms.get(tag)
 
-    assertType(caseTerm, TermLambdaTerm)
+    assertInstanceOf(caseTerm, TermLambdaTerm)
 
     return caseTerm.applyTerm(bodyTerm)
   }

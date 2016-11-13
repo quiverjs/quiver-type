@@ -1,4 +1,4 @@
-import { assertType } from '../core/assert'
+import { assertInstanceOf } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
@@ -13,8 +13,8 @@ const $rightType = Symbol('@rightType')
 export class ArrowType extends Type {
   // constructor :: Type -> Type -> ()
   constructor(leftType, rightType) {
-    assertType(leftType, Type)
-    assertType(rightType, Type)
+    assertInstanceOf(leftType, Type)
+    assertInstanceOf(rightType, Type)
 
     super()
 
@@ -36,7 +36,7 @@ export class ArrowType extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     if(!(targetType instanceof ArrowType))
       return new TypeError('target type must be ArrowType')
@@ -50,8 +50,8 @@ export class ArrowType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { leftType, rightType } = this
 
@@ -62,8 +62,8 @@ export class ArrowType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { leftType, rightType } = this
 

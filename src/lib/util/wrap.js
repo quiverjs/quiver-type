@@ -1,5 +1,5 @@
 import { TermVariable } from '../core/variable'
-import { assertFunction, assertType, assertListContent } from '../core/assert'
+import { assertFunction, assertInstanceOf, assertListContent } from '../core/assert'
 
 import { BodyTerm } from '../term/body'
 import { TermLambdaTerm } from '../term/term-lambda'
@@ -11,7 +11,7 @@ import { CompiledFunction } from '../compiled-term/function'
 
 export const functionToTerm = (argTypes, returnType, func) => {
   assertFunction(func)
-  assertType(returnType, Type)
+  assertInstanceOf(returnType, Type)
 
   assertListContent(argTypes, Type)
 

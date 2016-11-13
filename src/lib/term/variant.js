@@ -1,5 +1,5 @@
 import {
-  assertType, assertListContent,
+  assertInstanceOf, assertListContent,
   assertString, assertNoError
 } from '../core/assert'
 
@@ -20,9 +20,9 @@ const $bodyTerm = Symbol('@bodyTerm')
 
 export class VariantTerm extends Term {
   constructor(sumType, tag, bodyTerm) {
-    assertType(sumType, SumType)
+    assertInstanceOf(sumType, SumType)
     assertString(tag)
-    assertType(bodyTerm, Term)
+    assertInstanceOf(bodyTerm, Term)
 
     const caseType = sumType.typeMap.get(tag)
 
@@ -64,8 +64,8 @@ export class VariantTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { sumType, bodyTerm } = this
 
@@ -76,8 +76,8 @@ export class VariantTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertType(termVar, TermVariable)
-    assertType(term, Term)
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
 
     const { sumType, tag, bodyTerm } = this
 
@@ -92,8 +92,8 @@ export class VariantTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { sumType, tag, bodyTerm } = this
 

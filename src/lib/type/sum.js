@@ -1,5 +1,5 @@
 import {
-  assertType, assertMap,
+  assertInstanceOf, assertMap,
   assertString, assertNoError
 } from '../core/assert'
 
@@ -25,7 +25,7 @@ export class SumType extends Type {
 
     for(const [tag, type] of typeMap.entries()) {
       assertString(tag)
-      assertType(type, Type)
+      assertInstanceOf(type, Type)
       assertNoError(unitKind.kindCheck(type.typeKind()))
     }
 
@@ -44,7 +44,7 @@ export class SumType extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     if(!(targetType instanceof SumType))
       return new TypeError('target type must be SumType')
@@ -69,8 +69,8 @@ export class SumType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     const { typeMap } = this
 
@@ -83,8 +83,8 @@ export class SumType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { typeMap } = this
 

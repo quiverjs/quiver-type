@@ -1,6 +1,6 @@
 import { Set } from '../core/container'
 import { TypeVariable } from '../core/variable'
-import { assertType, assertNoError } from '../core/assert'
+import { assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
@@ -13,8 +13,8 @@ const $kind = Symbol('@kind')
 
 export class VariableType extends Type {
   constructor(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     super()
 
@@ -35,8 +35,8 @@ export class VariableType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertType(typeVar, TypeVariable)
-    assertType(type, Type)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     if(typeVar !== this.typeVar)
       return this
@@ -47,7 +47,7 @@ export class VariableType extends Type {
   }
 
   typeCheck(targetType) {
-    assertType(targetType, Type)
+    assertInstanceOf(targetType, Type)
 
     if(!(targetType instanceof VariableType))
       return new TypeError('target type must be VariableType')
@@ -58,8 +58,8 @@ export class VariableType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertType(typeVar, TypeVariable)
-    assertType(kind, Kind)
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
 
     if(this.typeVar !== typeVar)
       return null
