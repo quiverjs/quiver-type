@@ -19,3 +19,5 @@ export { MatchTerm } from './match'
 export { VariantTerm } from './variant'
 
 export { RecordTerm, ProjectRecordTerm } from './record'
+
+export { FixedPointTerm } from './fixed'
