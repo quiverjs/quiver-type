@@ -6,42 +6,42 @@ import { Type } from '../../type/type'
 import { Kind } from '../../kind/kind'
 
 import {
-  assertMap, assertString, assertInstanceOf
+  assertMap, assertListContent, assertString,
+  assertNoError, assertInstanceOf
 } from '../../core/assert'
 
-import { RecordType } from '../../type/record'
+import { ProductType, RecordType } from '../../type/product'
 
 import { Term } from '../term'
 
-const $recordType = Symbol('@recordType')
+const $productType = Symbol('@productType')
 const $fieldTerms = Symbol('@fieldTerms')
 
-export class RecordTerm extends Term {
-  constructor(recordType, fieldTerms) {
-    assertInstanceOf(recordType, RecordType)
-    assertMap(fieldTerms)
-
-    const { fieldTypes } = recordType
+export class BaseProductTerm extends Term {
+  constructor(productType, fieldTerms) {
+    const { fieldTypes } = productType
 
     if(fieldTypes.size !== fieldTerms.size)
       throw new TypeError('field terms size mismatch')
 
-    for(const fieldKey of fieldTypes.keys()) {
+    for(const [fieldKey, fieldType] of fieldTypes.entries()) {
       const fieldTerm = fieldTerms.get(fieldKey)
+
       if(!fieldTerm)
         throw new TypeError(`missing field ${fieldKey} in record term`)
 
       assertInstanceOf(fieldTerm, Term)
+      assertNoError(fieldType.typeCheck(fieldTerm.termType()))
     }
 
     super()
 
-    this[$recordType] = recordType
+    this[$productType] = productType
     this[$fieldTerms] = fieldTerms
   }
 
-  get recordType() {
-    return this[$recordType]
+  get productType() {
+    return this[$productType]
   }
 
   get fieldTerms() {
@@ -66,7 +66,7 @@ export class RecordTerm extends Term {
   }
 
   termType() {
-    return this.recordType
+    return this.productType
   }
 
   validateVarType(termVar, type) {
@@ -85,27 +85,27 @@ export class RecordTerm extends Term {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(kind, Kind)
 
-    const { recordType, fieldTerms } = this
+    const { productType, fieldTerms } = this
 
     for(const fieldTerm of fieldTerms.values()) {
       const err = fieldTerm.validateTVarKind(typeVar, kind)
       if(err) return err
     }
 
-    return recordType.validateTVarKind(typeVar, kind)
+    return productType.validateTVarKind(typeVar, kind)
   }
 
   bindTerm(termVar, term) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(term, Term)
 
-    const { recordType, fieldTerms } = this
+    const { productType, fieldTerms } = this
 
     const [newFieldTerms, isModified] = fieldTerms::mapUnique(
       fieldTerm => fieldTerm.bindTerm(termVar, term))
 
     if(isModified) {
-      return new RecordTerm(recordType, newFieldTerms)
+      return new this.constructor(productType, newFieldTerms)
 
     } else {
       return this
@@ -116,15 +116,15 @@ export class RecordTerm extends Term {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(type, Type)
 
-    const { recordType, fieldTerms } = this
+    const { productType, fieldTerms } = this
 
-    const newRecordType = recordType.bindType(typeVar, type)
+    const newProductType = productType.bindType(typeVar, type)
 
     const [newFieldTerms, isModified] = fieldTerms::mapUnique(
       fieldTerm => fieldTerm.bindType(typeVar, type))
 
-    if(isModified || recordType !== newRecordType) {
-      return new RecordTerm(newRecordType, newFieldTerms)
+    if(isModified || productType !== newProductType) {
+      return new this.constructor(newProductType, newFieldTerms)
 
     } else {
       return this
@@ -132,17 +132,33 @@ export class RecordTerm extends Term {
   }
 
   evaluate() {
-    const { recordType, fieldTerms } = this
+    const { productType, fieldTerms } = this
 
     const [newFieldTerms, isModified] = fieldTerms::mapUnique(
       fieldTerm => fieldTerm.evaluate())
 
     if(isModified) {
-      return new RecordTerm(recordType, newFieldTerms)
+      return new this.constructor(productType, newFieldTerms)
 
     } else {
       return this
     }
+  }
+}
+
+export class RecordTerm extends BaseProductTerm {
+  constructor(fieldTerms) {
+    assertMap(fieldTerms)
+
+    for(const [fieldKey, fieldTerm] of fieldTerms.entries()) {
+      assertString(fieldKey)
+      assertInstanceOf(fieldTerm, Term)
+    }
+
+    const recordType = new RecordType(
+      fieldTerms.map(term => term.termType()))
+
+    super(recordType, fieldTerms)
   }
 
   compileBody() {
@@ -150,13 +166,39 @@ export class RecordTerm extends Term {
   }
 
   formatTerm() {
-    const { recordType, fieldTerms } = this
+    const { productType, fieldTerms } = this
 
-    const recordTypeRep = recordType.formatType()
-    const fieldTermsRep = fieldTerms.mapEntries(
-      ([fieldKey, fieldTerm]) =>
-        [fieldKey, fieldTerm.formatTerm()])
+    const recordTypeRep = productType.formatType()
 
-    return ['record-term', recordTypeRep, [...fieldTermsRep]]
+    const fieldTermsRep = fieldTerms.map(
+      fieldTerm => fieldTerm.formatTerm())
+
+    return ['record-term', recordTypeRep, [...fieldTermsRep.entries()]]
+  }
+}
+
+export class ProductTerm extends BaseProductTerm {
+  constructor(fieldTerms) {
+    assertListContent(fieldTerms, Term)
+
+    const productType = new ProductType(
+      fieldTerms.map(term => term.termType()))
+
+    super(productType, fieldTerms)
+  }
+
+  compileBody() {
+    throw new Error('not yet implemented')
+  }
+
+  formatTerm() {
+    const { productType, fieldTerms } = this
+
+    const productTypeRep = productType.formatType()
+
+    const fieldTermsRep = fieldTerms.map(
+      fieldTerm => fieldTerm.formatTerm())
+
+    return ['product-term', productTypeRep, [...fieldTermsRep]]
   }
 }

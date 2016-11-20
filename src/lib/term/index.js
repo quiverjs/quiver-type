@@ -2,6 +2,8 @@ export { Term } from './term'
 
 export { ValueTerm } from './value'
 
+export { unitTerm, UnitTerm } from './unit'
+
 export { BodyTerm, RawBodyTerm } from './body'
 
 export { VariableTerm } from './variable'
@@ -18,6 +20,9 @@ export { MatchTerm } from './match'
 
 export { VariantTerm } from './variant'
 
-export { RecordTerm, ProjectRecordTerm } from './record'
+export {
+  ProductTerm, ProjectProductTerm,
+  RecordTerm, ProjectRecordTerm
+} from './product'
 
 export { FixedPointTerm } from './fixed'

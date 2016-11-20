@@ -2,6 +2,8 @@ export { Type } from './type'
 
 export { LiteralType } from './literal'
 
+export { unitType, UnitType } from './unit'
+
 export { VariableType } from './variable'
 
 export { ArrowType } from './arrow'
@@ -14,4 +16,6 @@ export { TypeConstructor } from './constructor'
 
 export { SumType } from './sum'
 
-export { RecordType } from './record'
+export { ProductType, RecordType } from './product'
+
+export { FixedPointType } from './fixed'

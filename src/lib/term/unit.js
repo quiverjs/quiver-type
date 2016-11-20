@@ -1,36 +1,20 @@
 import { ISet } from '../core/container'
-import { assertInstanceOf, assertNoError } from '../core/assert'
+import { assertInstanceOf } from '../core/assert'
 
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 
+import { unitType } from '../type/unit'
+
 import { Term } from './term'
 
-const $value = Symbol('@value')
-const $type = Symbol('@type')
+const unitValue = Symbol('unit')
 
-const constantFunc = value =>
-  () => value
-
-export class ValueTerm extends Term {
-  constructor(value, type) {
-    assertInstanceOf(type, Type)
-    assertNoError(type.compileType().typeCheck(value))
-
+export class UnitTerm extends Term {
+  constructor() {
     super()
-
-    this[$value] = value
-    this[$type] = type
-  }
-
-  get value() {
-    return this[$value]
-  }
-
-  get type() {
-    return this[$type]
   }
 
   freeTermVariables() {
@@ -38,7 +22,15 @@ export class ValueTerm extends Term {
   }
 
   termType() {
-    return this.type
+    return unitType
+  }
+
+  termCheck(targetTerm) {
+    if(targetTerm instanceof UnitTerm) {
+      return null
+    } else {
+      return new TypeError('target term must be unit term')
+    }
   }
 
   validateVarType(termVar, type) {
@@ -74,12 +66,12 @@ export class ValueTerm extends Term {
   }
 
   compileBody(argSpecs) {
-    return constantFunc(this.value)
+    return (...args) => unitValue
   }
 
   formatTerm() {
-    const { value } = this
-
-    return ['value', value]
+    return ['unit-term']
   }
 }
+
+export const unitTerm = new UnitTerm()
