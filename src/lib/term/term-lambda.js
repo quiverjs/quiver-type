@@ -11,6 +11,7 @@ import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { Term } from './term'
+import { VariableTerm } from './variable'
 
 const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
@@ -69,6 +70,33 @@ export class TermLambdaTerm extends Term {
 
   termType() {
     return this[$type]
+  }
+
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof TermLambdaTerm))
+      return new TypeError('target term must be TermLambdaTerm')
+
+    const { argVar, argType, bodyTerm } = this
+
+    const err = argType.typeCheck(targetTerm.argType)
+    if(err) return err
+
+    const targetVar = targetTerm.argVar
+    const targetBody = targetTerm.bodyTerm
+
+    if(argVar !== targetVar) {
+      const newTargetBody = targetBody.bindTerm(
+        targetVar, new VariableTerm(argVar, argType))
+
+      return bodyTerm.termCheck(newTargetBody)
+
+    } else {
+      return bodyTerm.termCheck(targetBody)
+    }
   }
 
   validateVarType(termVar, type) {

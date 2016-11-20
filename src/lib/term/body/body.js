@@ -27,6 +27,21 @@ export class BodyTerm extends CommonBodyTerm {
     return new BodyTerm(argTerms, returnType, this.compiler)
   }
 
+  termCheck(targetTerm) {
+    const err = super.termCheck(targetTerm)
+    if(err) return err
+
+    if(!(targetTerm instanceof BodyTerm))
+      return new TypeError('target term must be BodyTerm')
+
+    const { compiler } = this
+
+    if(compiler !== targetTerm.compiler)
+      return new TypeError('target term have different compiler')
+
+    return null
+  }
+
   compileBody(argSpecs) {
     assertListContent(argSpecs, ArgSpec)
 

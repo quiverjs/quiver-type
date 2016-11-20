@@ -88,6 +88,22 @@ export class TermApplicationTerm extends Term {
     return this[$type]
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof TermApplicationTerm))
+      return new TypeError('target term must be TermApplicationTerm')
+
+    const { leftTerm, rightTerm } = this
+
+    const err = leftTerm.termCheck(targetTerm.leftTerm)
+    if(err) return err
+
+    return rightTerm.termCheck(targetTerm.rightTerm)
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)

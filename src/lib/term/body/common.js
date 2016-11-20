@@ -45,6 +45,29 @@ export class CommonBodyTerm extends Term {
     return this.returnType
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof CommonBodyTerm))
+      return new TypeError('target term must be CommonBodyTerm')
+
+    const { argTerms, returnType } = this
+
+    const targetArgs = targetTerm.argTerms
+
+    if(argTerms.size !== targetArgs.size)
+      return new TypeError('target body term have different number of arg terms')
+
+    for(const [argTerm, targetArgTerm] of argTerms.zip(targetArgs)) {
+      const err = argTerm.termCheck(targetArgTerm)
+      if(err) return err
+    }
+
+    return returnType.typeCheck(targetTerm.returnType)
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)

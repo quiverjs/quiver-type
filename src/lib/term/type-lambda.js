@@ -3,6 +3,7 @@ import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { ForAllType } from '../type/forall'
+import { VariableType } from '../type/variable'
 
 import { Kind } from '../kind/kind'
 
@@ -51,6 +52,33 @@ export class TypeLambdaTerm extends Term {
   // Type of type lambda is Forall a. t
   termType() {
     return this[$type]
+  }
+
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof TypeLambdaTerm))
+      return new TypeError('target term must be TypeLambdaTerm')
+
+    const { argTVar, argKind, bodyTerm } = this
+
+    const err = argKind.typeCheck(targetTerm.argKind)
+    if(err) return err
+
+    const targetTVar = targetTerm.argTVar
+    const targetBody = targetTerm.bodyTerm
+
+    if(argTVar !== targetTVar) {
+      const newTargetBody = targetBody.bindType(
+        targetTVar, new VariableType(argTVar, argKind))
+
+      return bodyTerm.termCheck(newTargetBody)
+
+    } else {
+      return bodyTerm.termCheck(targetBody)
+    }
   }
 
   validateVarType(termVar, type) {

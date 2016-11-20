@@ -29,6 +29,21 @@ export class RawBodyTerm extends CommonBodyTerm {
     return new RawBodyTerm(argTerms, returnType, this.func)
   }
 
+  termCheck(targetTerm) {
+    const err = super.termCheck(targetTerm)
+    if(err) return err
+
+    if(!(targetTerm instanceof RawBodyTerm))
+      return new TypeError('target term must be RawBodyTerm')
+
+    const { func } = this
+
+    if(func !== targetTerm.func)
+      return new TypeError('target term have different body function')
+
+    return null
+  }
+
   evaluate() {
     const { argTerms, returnType, func } = this
 

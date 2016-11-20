@@ -41,6 +41,23 @@ export class ValueTerm extends Term {
     return this.type
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof ValueTerm))
+      return new TypeError('target term must be ValueTerm')
+
+    const { value, type } = this
+
+    const err = type.typeCheck(targetTerm.type)
+    if(err) return err
+
+    if(value !== targetTerm.value)
+      return new TypeError('value mismatch in value term')
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)

@@ -55,6 +55,25 @@ export class VariantTerm extends Term {
     return this.sumType
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof VariantTerm))
+      return new TypeError('target term must be VariantTerm')
+
+    const { sumType, tag, bodyTerm } = this
+
+    const err = sumType.typeCheck(targetTerm.sumType)
+    if(err) return err
+
+    if(tag !== targetTerm.tag)
+      return new TypeError('target term have different variant tag')
+
+    return bodyTerm.termCheck(targetTerm.bodyTerm)
+  }
+
   freeTermVariables() {
     return this.bodyTerm.freeTermVariables()
   }

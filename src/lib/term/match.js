@@ -81,6 +81,26 @@ export class MatchTerm extends Term {
     return this.returnType
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!(targetTerm instanceof MatchTerm))
+      return new TypeError('target term must be MatchTerm')
+
+    const { variantTerm, caseTerms } = this
+    const targetCases = targetTerm.caseTerms
+
+    const err = variantTerm.termCheck(targetTerm.variantTerm)
+    if(err) return err
+
+    for(const [tag, term] of caseTerms.entries()) {
+      const err = term.termCheck(targetCases.get(tag))
+      if(err) return err
+    }
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)
