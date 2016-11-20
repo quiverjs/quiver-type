@@ -26,6 +26,9 @@ export class BaseProjectTerm extends Term {
 
     super()
 
+    if(this.constructor === BaseProjectTerm)
+      throw new Error('Abstract class BaseProjectTerm cannot be instantiated')
+
     this[$productTerm] = productTerm
     this[$fieldKey] = fieldKey
     this[$fieldType] = fieldType
@@ -94,16 +97,13 @@ export class BaseProjectTerm extends Term {
   evaluate() {
     const { productTerm, fieldKey } = this
 
-    const ProductTerm = this.productTermClass()
-
-    if(productTerm instanceof ProductTerm) {
-      return productTerm.getFieldTerm(fieldKey).evaluate()
-    }
-
     const newProductTerm = productTerm.evaluate()
 
-    if(newProductTerm !== productTerm) {
-      return new ProjectRecordTerm(newProductTerm, fieldKey)
+    if(newProductTerm instanceof this.productTermClass()) {
+      return productTerm.getFieldTerm(fieldKey).evaluate()
+
+    } else if(newProductTerm !== productTerm) {
+      return new this.constructor(newProductTerm, fieldKey)
 
     } else {
       return this

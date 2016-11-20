@@ -100,9 +100,8 @@ test('fixed point test', assert => {
       'Nil',
       unitTerm)
 
-    // singleList :: List number
-    // singleList = Cons 1 Nil
-    const singleList = new VariantTerm(
+    // oneList :: List number
+    const oneList = new VariantTerm(
       NumListType.transposedType(),
       'Cons',
       new ProductTerm(IList([
@@ -110,7 +109,13 @@ test('fixed point test', assert => {
         nilList
       ])))
 
-    console.log(singleList)
+    const twoList = new VariantTerm(
+      NumListType.transposedType(),
+      'Cons',
+      new ProductTerm(IList([
+        new ValueTerm(1, NumberType),
+        oneList
+      ])))
 
     assert.end()
   })

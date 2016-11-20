@@ -17,7 +17,7 @@ export const mapUnique = function(mapper) {
 
 export const formatLisp = list => {
   const str = inspect(list, {
-    depth: 10,
+    depth: 20,
     breakLength: 80
   })
 

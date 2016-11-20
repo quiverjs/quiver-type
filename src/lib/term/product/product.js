@@ -35,6 +35,9 @@ export class BaseProductTerm extends Term {
     }
 
     super()
+  
+    if(this.constructor === BaseProductTerm)
+      throw new Error('Abstract class BaseProductTerm cannot be instantiated')
 
     this[$productType] = productType
     this[$fieldTerms] = fieldTerms
@@ -166,14 +169,12 @@ export class RecordTerm extends BaseProductTerm {
   }
 
   formatTerm() {
-    const { productType, fieldTerms } = this
-
-    const recordTypeRep = productType.formatType()
+    const { fieldTerms } = this
 
     const fieldTermsRep = fieldTerms.map(
       fieldTerm => fieldTerm.formatTerm())
 
-    return ['record-term', recordTypeRep, [...fieldTermsRep.entries()]]
+    return ['record-term', [...fieldTermsRep.entries()]]
   }
 }
 
@@ -192,13 +193,11 @@ export class ProductTerm extends BaseProductTerm {
   }
 
   formatTerm() {
-    const { productType, fieldTerms } = this
-
-    const productTypeRep = productType.formatType()
+    const { fieldTerms } = this
 
     const fieldTermsRep = fieldTerms.map(
       fieldTerm => fieldTerm.formatTerm())
 
-    return ['product-term', productTypeRep, [...fieldTermsRep]]
+    return ['product-term', [...fieldTermsRep]]
   }
 }

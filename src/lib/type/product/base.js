@@ -10,6 +10,9 @@ const $fieldTypes = Symbol('@fieldTypes')
 export class BaseProductType extends Type {
   constructor(fieldTypes) {
     super()
+  
+    if(this.constructor === BaseProductType)
+      throw new Error('Abstract class BaseProductType cannot be instantiated')
 
     this[$fieldTypes] = fieldTypes
   }
