@@ -10,6 +10,11 @@ export const assertString = str => {
     return new TypeError('argument must be string')
 }
 
+export const assertBoolean = bool => {
+  if(typeof(bool) !== 'boolean')
+    return new TypeError('argument must be boolean')
+}
+
 export const equals = function(result, expected, message) {
   return this.ok(result.equals(expected), message)
 }
@@ -26,3 +31,4 @@ export const typeKindEquals = function(type, expectedKind, message) {
 
 export const NumberType = new LiteralType('Number', assertNumber)
 export const StringType = new LiteralType('String', assertString)
+export const BooleanType = new LiteralType('Boolean', assertBoolean)

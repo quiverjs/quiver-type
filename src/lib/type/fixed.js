@@ -1,4 +1,4 @@
-import { assertInstanceOf, assertNoError } from '../core/assert'
+import { assertInstanceOf, isInstanceOf, assertNoError } from '../core/assert'
 import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
@@ -8,7 +8,8 @@ import { Type } from './type'
 const $fixedVar = Symbol('@fixedVar')
 const $selfKind = Symbol('@selfKind')
 const $bodyType = Symbol('@bodyType')
-const $transposedType = Symbol('@transposedType')
+
+const $unfoldType = Symbol('@unfoldType')
 
 export class FixedPointType extends Type {
   constructor(fixedVar, selfKind, bodyType) {
@@ -25,6 +26,7 @@ export class FixedPointType extends Type {
     this[$fixedVar] = fixedVar
     this[$selfKind] = selfKind
     this[$bodyType] = bodyType
+    this[$unfoldType] = null
   }
 
   get fixedVar() {
@@ -39,13 +41,16 @@ export class FixedPointType extends Type {
     return this[$bodyType]
   }
 
-  transposedType() {
-    if(!this[$transposedType]) {
+  unfoldType() {
+    let unfoldType = this[$unfoldType]
+
+    if(!unfoldType) {
       const { fixedVar, bodyType } = this
-      this[$transposedType] = bodyType.bindType(fixedVar, this)
+      unfoldType = bodyType.bindType(fixedVar, this)
+      this[$unfoldType] = unfoldType
     }
 
-    return this[$transposedType]
+    return unfoldType
   }
 
   typeKind() {
@@ -65,22 +70,15 @@ export class FixedPointType extends Type {
     if(targetType === this)
       return null
 
-    if(targetType instanceof FixedPointType) {
-      const { fixedVar, bodyType } = this
+    if(!isInstanceOf(targetType, FixedPointType))
+      return new TypeError('target type must be fixed point type')
 
-      if(targetType.fixedVar !== fixedVar)
-        return new TypeError('target fixed point type is fixing different type variable')
+    const { fixedVar, bodyType } = this
 
-      return bodyType.typeCheck(targetType.bodyType)
+    if(targetType.fixedVar !== fixedVar)
+      return new TypeError('target fixed point type is fixing different type variable')
 
-    } else {
-      const transposedType = this.transposedType()
-      if(targetType === transposedType) {
-        return null
-      } else {
-        return transposedType.typeCheck(targetType.bodyType)
-      }
-    }
+    return bodyType.typeCheck(targetType.bodyType)
   }
 
   validateTVarKind(typeVar, kind) {

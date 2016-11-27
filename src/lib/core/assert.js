@@ -2,8 +2,12 @@ import { IMap, IList } from './container'
 
 export { assertFunction, assertString } from 'quiver-util/assert'
 
+export const isInstanceOf = (object, type) => {
+  return object instanceof type
+}
+
 export const assertInstanceOf = (object, type, message) => {
-  if(!(object instanceof type)) {
+  if(!isInstanceOf(object, type)) {
     const errMessage = message || `argument must be instance of ${type.name}`
     throw new TypeError(errMessage)
   }

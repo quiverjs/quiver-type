@@ -8,7 +8,10 @@ import {
 import {
   unitTerm,
   BodyTerm,
+  FoldTerm,
+  MatchTerm,
   ValueTerm,
+  UnfoldTerm,
   VariantTerm,
   ProductTerm,
   VariableTerm,
@@ -34,7 +37,7 @@ import {
 import { compileTerm } from '../lib/util'
 
 import {
-  NumberType
+  NumberType, BooleanType
 } from './util'
 
 test('fixed point test', assert => {
@@ -95,27 +98,61 @@ test('fixed point test', assert => {
     const NumListType = new ApplicationType(
       ListType, NumberType)
 
-    const nilList = new VariantTerm(
-      NumListType.transposedType(),
-      'Nil',
-      unitTerm)
+    const UnfoldNumList = NumListType.unfoldType()
+    const NumConsType = new ProductType(IList(
+      [NumberType, NumListType]))
+
+    const nilList = new FoldTerm(
+      NumListType,
+      new VariantTerm(
+        UnfoldNumList,
+        'Nil',
+        unitTerm))
 
     // oneList :: List number
-    const oneList = new VariantTerm(
-      NumListType.transposedType(),
-      'Cons',
-      new ProductTerm(IList([
-        new ValueTerm(1, NumberType),
-        nilList
-      ])))
+    const oneList = new FoldTerm(
+      NumListType,
+      new VariantTerm(
+        UnfoldNumList,
+        'Cons',
+        new ProductTerm(IList([
+          new ValueTerm(1, NumberType),
+          nilList
+        ]))))
 
-    const twoList = new VariantTerm(
-      NumListType.transposedType(),
-      'Cons',
-      new ProductTerm(IList([
-        new ValueTerm(1, NumberType),
-        oneList
-      ])))
+    const twoList = new FoldTerm(
+      NumListType,
+      new VariantTerm(
+        UnfoldNumList,
+        'Cons',
+        new ProductTerm(IList([
+          new ValueTerm(1, NumberType),
+          oneList
+        ]))))
+
+    // console.log(twoList)
+
+    const xVar = new TermVariable('x')
+    const yVar = new TermVariable('y')
+
+    const isNilLambda = new TermLambdaTerm(
+      xVar, NumListType,
+      new MatchTerm(
+        new UnfoldTerm(
+          new VariableTerm(xVar, NumListType)),
+        BooleanType,
+        IMap({
+          Nil: new TermLambdaTerm(
+            yVar, unitType,
+            new ValueTerm(
+              true, BooleanType)),
+          Cons: new TermLambdaTerm(
+            yVar, NumConsType,
+            new ValueTerm(
+              false, BooleanType))
+        })))
+
+    console.log('isNilLambda:', isNilLambda)
 
     assert.end()
   })

@@ -155,11 +155,10 @@ export class VariantTerm extends Term {
   }
 
   formatTerm() {
-    const { sumType, tag, bodyTerm } = this
+    const { tag, bodyTerm } = this
 
-    const sumTypeRep = sumType.formatType()
     const bodyRep = bodyTerm.formatTerm()
 
-    return ['variant', [sumTypeRep, tag], bodyRep]
+    return ['variant', tag, bodyRep]
   }
 }

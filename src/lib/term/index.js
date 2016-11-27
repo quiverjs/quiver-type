@@ -26,3 +26,7 @@ export {
 } from './product'
 
 export { FixedPointTerm } from './fixed'
+
+export { FoldTerm } from './fold'
+
+export { UnfoldTerm } from './unfold'
