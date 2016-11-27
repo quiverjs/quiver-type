@@ -2,6 +2,8 @@ import { mapUnique } from '../../core/util'
 import { unionMap } from '../../core/container'
 import { TermVariable, TypeVariable } from '../../core/variable'
 
+import { ArgSpec } from '../../compiled-term/arg-spec'
+
 import { Type } from '../../type/type'
 import { Kind } from '../../kind/kind'
 
@@ -35,7 +37,7 @@ export class BaseProductTerm extends Term {
     }
 
     super()
-  
+
     if(this.constructor === BaseProductTerm)
       throw new Error('Abstract class BaseProductTerm cannot be instantiated')
 
@@ -52,8 +54,6 @@ export class BaseProductTerm extends Term {
   }
 
   getFieldTerm(fieldKey) {
-    assertString(fieldKey)
-
     const fieldTerm = this.fieldTerms.get(fieldKey)
     if(!fieldTerm)
       throw new Error(`invalid field key ${fieldKey}`)
@@ -188,7 +188,19 @@ export class ProductTerm extends BaseProductTerm {
     super(productType, fieldTerms)
   }
 
-  compileBody() {
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+
+    const { fieldTerms } = this
+
+    const compiledFieldTerms = fieldTerms.map(
+      fieldTerm => fieldTerm.compileBody(argSpecs))
+
+    return (...args) => {
+      return compiledFieldTerms.map(
+        compiledTerm => compiledTerm(...args))
+    }
+
     throw new Error('not yet implemented')
   }
 

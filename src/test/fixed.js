@@ -152,7 +152,7 @@ test('fixed point test', assert => {
               false, BooleanType))
         })))
 
-    console.log('isNilLambda:', isNilLambda)
+    // console.log('isNilLambda:', isNilLambda)
 
     assert.end()
   })

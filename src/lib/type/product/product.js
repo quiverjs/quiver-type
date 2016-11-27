@@ -4,6 +4,8 @@ import {
 
 import { Type } from '../../type/type'
 
+import { CompiledProductType } from '../../compiled-type/product'
+
 import { BaseProductType } from './base'
 
 export class ProductType extends BaseProductType {
@@ -23,7 +25,12 @@ export class ProductType extends BaseProductType {
   }
 
   compileType() {
-    throw new Error('not yet implemented')
+    const { fieldTypes } = this
+
+    const compiledFieldTypes = fieldTypes.map(
+      fieldType => fieldType.compileType())
+
+    return new CompiledProductType(this, compiledFieldTypes)
   }
 
   formatType() {

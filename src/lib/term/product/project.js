@@ -3,8 +3,10 @@ import { TermVariable, TypeVariable } from '../../core/variable'
 import { Type } from '../../type/type'
 
 import {
-  assertInstanceOf, assertString
+  assertInstanceOf, assertString, assertListContent
 } from '../../core/assert'
+
+import { ArgSpec } from '../../compiled-term/arg-spec'
 
 import { ProductType, RecordType } from '../../type/product'
 
@@ -50,7 +52,7 @@ export class BaseProjectTerm extends Term {
     return this.productTerm.freeTermVariables()
   }
 
-  get termType() {
+  termType() {
     return this.fieldType
   }
 
@@ -109,6 +111,19 @@ export class BaseProjectTerm extends Term {
       return this
     }
   }
+
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+
+    const { productTerm, fieldKey } = this
+
+    const compiledProductTerm = productTerm.compileBody(argSpecs)
+
+    return (...args) => {
+      const productValue = compiledProductTerm(...args)
+      return productValue.get(fieldKey)
+    }
+  }
 }
 
 export class ProjectProductTerm extends BaseProjectTerm {
@@ -130,10 +145,6 @@ export class ProjectProductTerm extends BaseProjectTerm {
 
   productTermClass() {
     return ProductTerm
-  }
-
-  compileBody(argSpecs) {
-    throw new Error('not yet implemented')
   }
 
   formatTerm() {
@@ -158,10 +169,6 @@ export class ProjectRecordTerm extends BaseProjectTerm {
 
   productTermClass() {
     return RecordTerm
-  }
-
-  compileBody(argSpecs) {
-    throw new Error('not yet implemented')
   }
 
   formatTerm() {

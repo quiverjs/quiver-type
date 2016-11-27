@@ -22,7 +22,8 @@ export { VariantTerm } from './variant'
 
 export {
   ProductTerm, ProjectProductTerm,
-  RecordTerm, ProjectRecordTerm
+  RecordTerm, ProjectRecordTerm,
+  UpdateProductTerm, UpdateRecordTerm
 } from './product'
 
 export { FixedPointTerm } from './fixed'

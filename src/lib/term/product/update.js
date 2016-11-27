@@ -3,8 +3,10 @@ import { TermVariable, TypeVariable } from '../../core/variable'
 import { Type } from '../../type/type'
 
 import {
-  assertInstanceOf, assertString, assertNoError
+  assertInstanceOf, assertString, assertNoError, assertListContent
 } from '../../core/assert'
+
+import { ArgSpec } from '../../compiled-term/arg-spec'
 
 import { ProductType, RecordType } from '../../type/product'
 
@@ -57,7 +59,7 @@ export class BaseUpdateTerm extends Term {
       .union(updateTerm.freeTermVariables())
   }
 
-  get termType() {
+  termType() {
     return this.productTerm.termType()
   }
 
@@ -135,6 +137,22 @@ export class BaseUpdateTerm extends Term {
       return this
     }
   }
+
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+
+    const { productTerm, fieldKey, updateTerm } = this
+
+    const compiledProductTerm = productTerm.compileBody(argSpecs)
+    const compiledUpdateTerm = updateTerm.compileBody(argSpecs)
+
+    return (...args) => {
+      const productValue = compiledProductTerm(...args)
+      const updateValue = compiledUpdateTerm(...args)
+
+      return productValue.set(fieldKey, updateValue)
+    }
+  }
 }
 
 export class UpdateProductTerm extends BaseUpdateTerm {
@@ -156,10 +174,6 @@ export class UpdateProductTerm extends BaseUpdateTerm {
 
   productTermClass() {
     return ProductTerm
-  }
-
-  compileBody(argSpecs) {
-    throw new Error('not yet implemented')
   }
 
   formatTerm() {
@@ -185,10 +199,6 @@ export class UpdateRecordTerm extends BaseUpdateTerm {
 
   productTermClass() {
     return RecordTerm
-  }
-
-  compileBody(argSpecs) {
-    throw new Error('not yet implemented')
   }
 
   formatTerm() {
