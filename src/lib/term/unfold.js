@@ -43,6 +43,8 @@ export class UnfoldTerm extends Term {
   termCheck(targetTerm) {
     assertInstanceOf(targetTerm, Term)
 
+    if(targetTerm === this) return null
+
     if(!isInstanceOf(targetTerm, UnfoldTerm))
       return new TypeError('target term must be an unfold term')
 

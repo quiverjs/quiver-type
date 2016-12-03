@@ -1,4 +1,4 @@
-import { assertInstanceOf } from '../core/assert'
+import { assertInstanceOf, isInstanceOf } from '../core/assert'
 
 import { Kind } from './kind'
 
@@ -27,8 +27,10 @@ export class ArrowKind extends Kind {
   kindCheck(targetKind) {
     assertInstanceOf(targetKind, Kind)
 
-    assertInstanceOf(targetKind, ArrowKind,
-      'target kind must be arrow kind')
+    if(targetKind === this) return null
+
+    if(!isInstanceOf(targetKind, ArrowKind))
+      return new TypeError('target kind must be arrow kind')
 
     const { leftKind, rightKind } = this
 

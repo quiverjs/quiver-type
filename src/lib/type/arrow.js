@@ -38,6 +38,8 @@ export class ArrowType extends Type {
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
 
+    if(targetType === this) return null
+
     if(!(targetType instanceof ArrowType))
       return new TypeError('target type must be ArrowType')
 

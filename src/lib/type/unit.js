@@ -19,6 +19,8 @@ export class UnitType extends Type {
   }
 
   typeCheck(targetType) {
+    if(targetType === this) return null
+
     if(targetType instanceof UnitType) {
       return null
     } else {

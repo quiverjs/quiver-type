@@ -2,7 +2,7 @@ import test from 'tape'
 
 import {
   IMap, IList,
-  TermVariable, TypeVariable
+  TermVariable
 } from '../lib/core'
 
 import {
@@ -19,8 +19,7 @@ import {
 
 import {
   RecordType,
-  ProductType,
-  LiteralType
+  ProductType
 } from '../lib/type'
 
 import { compileTerm } from '../lib/util'

@@ -10,7 +10,7 @@ const $fieldTypes = Symbol('@fieldTypes')
 export class BaseProductType extends Type {
   constructor(fieldTypes) {
     super()
-  
+
     if(this.constructor === BaseProductType)
       throw new Error('Abstract class BaseProductType cannot be instantiated')
 
@@ -45,6 +45,8 @@ export class BaseProductType extends Type {
       const err = fieldType.typeCheck(targetFieldType)
       if(err) return err
     }
+
+    return null
   }
 
   validateTVarKind(typeVar, kind) {

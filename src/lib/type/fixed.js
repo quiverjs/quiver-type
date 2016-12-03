@@ -67,8 +67,7 @@ export class FixedPointType extends Type {
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
 
-    if(targetType === this)
-      return null
+    if(targetType === this) return null
 
     if(!isInstanceOf(targetType, FixedPointType))
       return new TypeError('target type must be fixed point type')

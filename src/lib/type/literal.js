@@ -33,13 +33,15 @@ export class LiteralType extends Type {
     return ISet()
   }
 
-  typeCheck(type) {
-    assertInstanceOf(type, Type)
+  typeCheck(targetType) {
+    assertInstanceOf(targetType, Type)
 
-    if(!(type instanceof LiteralType))
+    if(targetType === this) return null
+
+    if(!(targetType instanceof LiteralType))
       return new TypeError('target type must be ConstantType')
 
-    if(type.typeChecker !== this.typeChecker)
+    if(targetType.typeChecker !== this.typeChecker)
       return new TypeError('target type is different constant type')
   }
 

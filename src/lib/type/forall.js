@@ -51,6 +51,8 @@ export class ForAllType extends Type {
 
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
+    
+    if(targetType === this) return null
 
     if(!(targetType instanceof ForAllType))
       return new Error('target type must be ForAllType')

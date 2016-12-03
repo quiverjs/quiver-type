@@ -1,5 +1,5 @@
 import { TypeVariable } from '../core/variable'
-import { assertInstanceOf, assertNoError } from '../core/assert'
+import { isInstanceOf, assertInstanceOf, assertNoError } from '../core/assert'
 
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
@@ -59,7 +59,9 @@ export class ApplicationType extends Type {
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
 
-    if(!(targetType instanceof ApplicationType))
+    if(targetType === this) return null
+
+    if(!isInstanceOf(targetType, ApplicationType))
       return new TypeError('target type must be instance of ApplicationType')
 
     const { leftType, rightType } = this

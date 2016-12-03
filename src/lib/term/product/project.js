@@ -3,7 +3,8 @@ import { TermVariable, TypeVariable } from '../../core/variable'
 import { Type } from '../../type/type'
 
 import {
-  assertInstanceOf, assertString, assertListContent
+  assertInstanceOf, isInstanceOf,
+  assertString, assertListContent
 } from '../../core/assert'
 
 import { ArgSpec } from '../../compiled-term/arg-spec'
@@ -96,6 +97,18 @@ export class BaseProjectTerm extends Term {
     }
   }
 
+  termCheck(targetTerm) {
+    const { productTerm, fieldKey } = this
+
+    const err = productTerm.termCheck(targetTerm.productTerm)
+    if(err) return err
+
+    if(fieldKey !== targetTerm.fieldKey)
+      return new TypeError('target term is projecting different field key')
+
+    return null
+  }
+
   evaluate() {
     const { productTerm, fieldKey } = this
 
@@ -147,6 +160,17 @@ export class ProjectProductTerm extends BaseProjectTerm {
     return ProductTerm
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!isInstanceOf(targetTerm, ProjectProductTerm))
+      return new TypeError('target term must be ProjectProductTerm')
+
+    return super.termCheck(targetTerm)
+  }
+
   formatTerm() {
     const { productTerm, fieldKey } = this
 
@@ -169,6 +193,17 @@ export class ProjectRecordTerm extends BaseProjectTerm {
 
   productTermClass() {
     return RecordTerm
+  }
+
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!isInstanceOf(targetTerm, ProjectRecordTerm))
+      return new TypeError('target term must be ProjectRecordTerm')
+
+    return super.termCheck(targetTerm)
   }
 
   formatTerm() {

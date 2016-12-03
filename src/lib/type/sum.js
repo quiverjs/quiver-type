@@ -46,6 +46,8 @@ export class SumType extends Type {
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
 
+    if(targetType === this) return null
+
     if(!(targetType instanceof SumType))
       return new TypeError('target type must be SumType')
 

@@ -48,6 +48,8 @@ export class VariableType extends Type {
 
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
+    
+    if(targetType === this) return null
 
     if(!(targetType instanceof VariableType))
       return new TypeError('target type must be VariableType')

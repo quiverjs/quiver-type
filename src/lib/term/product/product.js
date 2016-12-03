@@ -9,7 +9,7 @@ import { Kind } from '../../kind/kind'
 
 import {
   assertMap, assertListContent, assertString,
-  assertNoError, assertInstanceOf
+  assertNoError, assertInstanceOf, isInstanceOf
 } from '../../core/assert'
 
 import { ProductType, RecordType } from '../../type/product'
@@ -134,6 +134,28 @@ export class BaseProductTerm extends Term {
     }
   }
 
+  termCheck(targetTerm) {
+    const { fieldTerms } = this
+
+    const targetFieldTerms = targetTerm.fieldTerms
+
+    if(fieldTerms.size !== targetFieldTerms.size) {
+      return new TypeError('field types size mismatch')
+    }
+
+    for(const [fieldKey, fieldTerm] of fieldTerms.entries()) {
+      const targetFieldTerm = targetFieldTerms.get(fieldKey)
+
+      if(!targetFieldTerm)
+        return new TypeError(`missing field ${fieldKey} in target term`)
+
+      const err = fieldTerm.termCheck(targetFieldTerm)
+      if(err) return err
+    }
+
+    return null
+  }
+
   compileBody(argSpecs) {
     assertListContent(argSpecs, ArgSpec)
 
@@ -180,6 +202,17 @@ export class RecordTerm extends BaseProductTerm {
     super(recordType, fieldTerms)
   }
 
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!isInstanceOf(targetTerm, RecordTerm))
+      return new TypeError('target term must be RecordTerm')
+
+    return super.termCheck(targetTerm)
+  }
+
   formatTerm() {
     const { fieldTerms } = this
 
@@ -198,6 +231,17 @@ export class ProductTerm extends BaseProductTerm {
       fieldTerms.map(term => term.termType()))
 
     super(productType, fieldTerms)
+  }
+
+  termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+
+    if(targetTerm === this) return null
+
+    if(!isInstanceOf(targetTerm, ProductTerm))
+      return new TypeError('target term must be ProductTerm')
+
+    return super.termCheck(targetTerm)
   }
 
   formatTerm() {

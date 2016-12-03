@@ -45,6 +45,8 @@ export class FoldTerm extends Term {
 
   termCheck(targetTerm) {
     assertInstanceOf(targetTerm, Term)
+    
+    if(targetTerm === this) return null
 
     if(!isInstanceOf(targetTerm, FoldTerm))
       return new TypeError('target term must be a fold term')

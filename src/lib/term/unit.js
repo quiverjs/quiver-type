@@ -26,6 +26,10 @@ export class UnitTerm extends Term {
   }
 
   termCheck(targetTerm) {
+    assertInstanceOf(targetTerm, Term)
+    
+    if(targetTerm === this) return null
+
     if(targetTerm instanceof UnitTerm) {
       return null
     } else {

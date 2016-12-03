@@ -40,6 +40,8 @@ export class TypeConstructor extends Type {
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
 
+    if(targetType === this) return null
+
     if(!(targetType instanceof TypeConstructor))
       return new TypeError('target type must be type constructor')
 
