@@ -134,6 +134,22 @@ export class BaseProductTerm extends Term {
     }
   }
 
+  compileBody(argSpecs) {
+    assertListContent(argSpecs, ArgSpec)
+
+    const { fieldTerms } = this
+
+    const compiledFieldTerms = fieldTerms.map(
+      fieldTerm => fieldTerm.compileBody(argSpecs))
+
+    return (...args) => {
+      return compiledFieldTerms.map(
+        compiledTerm => compiledTerm(...args))
+    }
+
+    throw new Error('not yet implemented')
+  }
+
   evaluate() {
     const { productType, fieldTerms } = this
 
@@ -164,10 +180,6 @@ export class RecordTerm extends BaseProductTerm {
     super(recordType, fieldTerms)
   }
 
-  compileBody() {
-    throw new Error('not yet implemented')
-  }
-
   formatTerm() {
     const { fieldTerms } = this
 
@@ -186,22 +198,6 @@ export class ProductTerm extends BaseProductTerm {
       fieldTerms.map(term => term.termType()))
 
     super(productType, fieldTerms)
-  }
-
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
-
-    const { fieldTerms } = this
-
-    const compiledFieldTerms = fieldTerms.map(
-      fieldTerm => fieldTerm.compileBody(argSpecs))
-
-    return (...args) => {
-      return compiledFieldTerms.map(
-        compiledTerm => compiledTerm(...args))
-    }
-
-    throw new Error('not yet implemented')
   }
 
   formatTerm() {

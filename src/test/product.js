@@ -7,14 +7,18 @@ import {
 
 import {
   ValueTerm,
+  RecordTerm,
   ProductTerm,
   VariableTerm,
   TermLambdaTerm,
+  UpdateRecordTerm,
   UpdateProductTerm,
+  ProjectRecordTerm,
   ProjectProductTerm,
 } from '../lib/term'
 
 import {
+  RecordType,
   ProductType,
   LiteralType
 } from '../lib/type'
@@ -46,6 +50,30 @@ test('product type test', assert => {
     assert.end()
   })
 
+  assert.test('basic record', assert => {
+    const numStrType = new RecordType(IMap({
+      num: NumberType,
+      str: StringType
+    }))
+
+    const numStrTerm = new RecordTerm(IMap({
+      num: new ValueTerm(3, NumberType),
+      str: new ValueTerm('foo', StringType)
+    }))
+
+    assert.notOk(numStrType.typeCheck(numStrTerm.termType()))
+
+    const numStrValue = compileTerm(numStrTerm)
+
+    assert.ok(IMap.isMap(numStrValue))
+    assert.deepEquals(numStrValue.toObject(), {
+      num: 3,
+      str: 'foo'
+    })
+
+    assert.end()
+  })
+
   assert.test('closure product', assert => {
     const xVar = new TermVariable('x')
     const makePairLambda = new TermLambdaTerm(
@@ -67,7 +95,34 @@ test('product type test', assert => {
     assert.end()
   })
 
-  assert.test('project term', assert => {
+  assert.test('closure record', assert => {
+    const xVar = new TermVariable('x')
+
+    const makePairLambda = new TermLambdaTerm(
+      xVar, StringType,
+      new RecordTerm(IMap({
+        num: new ValueTerm(8, NumberType),
+        str: new VariableTerm(xVar, StringType)
+      })))
+
+    const makePairFn = compileTerm(makePairLambda)
+    const pair1 = makePairFn.call('foo')
+
+    assert.ok(IMap.isMap(pair1))
+    assert.deepEquals(pair1.toObject(), {
+      num: 8,
+      str: 'foo'
+    })
+
+    const pair2 = makePairFn.call('bar')
+    assert.deepEquals(pair2.toObject(), {
+      num: 8, str: 'bar'
+    })
+
+    assert.end()
+  })
+
+  assert.test('project product', assert => {
     const numTerm = new ValueTerm(3, NumberType)
     const strTerm = new ValueTerm('foo', StringType)
 
@@ -108,7 +163,68 @@ test('product type test', assert => {
     assert.end()
   })
 
-  assert.test('update term', assert => {
+  assert.test('project record', assert => {
+    const numTerm = new ValueTerm(3, NumberType)
+    const strTerm = new ValueTerm('foo', StringType)
+
+    const numStrTerm = new RecordTerm(IMap({
+      num: numTerm,
+      str: strTerm
+    }))
+
+    const numStrType = new RecordType(IMap({
+      num: NumberType,
+      str: StringType
+    }))
+
+    const projectTerm = new ProjectRecordTerm(
+      numStrTerm, 'str')
+
+    assert.equals(projectTerm.evaluate(), strTerm)
+    assert.equals(compileTerm(projectTerm), 'foo')
+
+    assert.throws(() => new ProjectProductTerm(numStrTerm, 3))
+    assert.throws(() => new ProjectProductTerm(numStrTerm, 'invalid key'))
+
+    const xVar = new TermVariable('x')
+
+    const firstLambda = new TermLambdaTerm(
+      xVar, numStrType,
+      new ProjectRecordTerm(
+        new VariableTerm(xVar, numStrType),
+        'num'))
+
+    const firstFn = compileTerm(firstLambda)
+    assert.equals(firstFn.call(IMap({
+      num: 4,
+      str: 'bar'
+    })), 4)
+
+    assert.throws(() => firstFn.call(IMap({
+      num: 3,
+      str: 'foo',
+      extra: 'extra'
+    })))
+
+    assert.throws(() => firstFn.call(IMap({
+      num: 'invalid',
+      str: 99
+    })))
+
+    assert.throws(() => firstFn.call(IMap({
+      num: 0
+    })))
+
+    assert.throws(() => firstFn.call({
+      num: 1, str: 'no'
+    }))
+
+    assert.throws(() => firstFn.call())
+
+    assert.end()
+  })
+
+  assert.test('update product', assert => {
     const numStrTerm = new ProductTerm(IList([
       new ValueTerm(3, NumberType),
       new ValueTerm('foo', StringType)
@@ -123,6 +239,14 @@ test('product type test', assert => {
       new ValueTerm('bar', StringType))
 
     assert.deepEquals(compileTerm(updateTerm).toArray(), [3, 'bar'])
+
+    assert.throws(() => new UpdateProductTerm(
+      numStrTerm, 3,
+      new ValueTerm('bar', StringType)))
+
+    assert.throws(() => new UpdateProductTerm(
+      numStrTerm, 'invalid',
+      new ValueTerm('bar', StringType)))
 
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
@@ -141,6 +265,64 @@ test('product type test', assert => {
     assert.deepEquals(updateSecondFn.call(
       IList([5, 'food']), 'beer').toArray(),
       [5, 'beer'])
+
+    assert.end()
+  })
+
+  assert.test('update record', assert => {
+    const numStrTerm = new RecordTerm(IMap({
+      num: new ValueTerm(3, NumberType),
+      str: new ValueTerm('foo', StringType)
+    }))
+
+    const numStrType = new RecordType(IMap({
+      num: NumberType,
+      str: StringType
+    }))
+
+    const updateTerm = new UpdateRecordTerm(
+      numStrTerm, 'str',
+      new ValueTerm('bar', StringType))
+
+    assert.deepEquals(compileTerm(updateTerm).toObject(), {
+      num: 3,
+      str: 'bar'
+    })
+
+    assert.throws(() => new UpdateRecordTerm(
+      numStrTerm, 0,
+      new ValueTerm('bar', StringType)))
+
+    assert.throws(() => new UpdateRecordTerm(
+      numStrTerm, 'invalid',
+      new ValueTerm('bar', StringType)))
+
+    const xVar = new TermVariable('x')
+    const yVar = new TermVariable('y')
+
+    const updateSecondLambda = new TermLambdaTerm(
+      xVar, numStrType,
+      new TermLambdaTerm(
+        yVar, StringType,
+        new UpdateRecordTerm(
+          new VariableTerm(xVar, numStrType),
+          'str',
+          new VariableTerm(yVar, StringType))))
+
+    const updateSecondFn = compileTerm(updateSecondLambda)
+
+    assert.deepEquals(
+      updateSecondFn.call(
+        IMap({
+          num: 5,
+          str: 'food'
+        }),
+        'beer'
+      ).toObject(),
+      {
+        num: 5,
+        str: 'beer'
+      })
 
     assert.end()
   })

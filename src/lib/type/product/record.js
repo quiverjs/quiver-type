@@ -3,6 +3,7 @@ import {
 } from '../../core/assert'
 
 import { Type } from '../../type/type'
+import { CompiledRecordType } from '../../compiled-type/product'
 
 import { BaseProductType } from './base'
 
@@ -28,7 +29,12 @@ export class RecordType extends BaseProductType {
   }
 
   compileType() {
-    throw new Error('not yet implemented')
+    const { fieldTypes } = this
+
+    const compiledFieldTypes = fieldTypes.map(
+      fieldType => fieldType.compileType())
+
+    return new CompiledRecordType(this, compiledFieldTypes)
   }
 
   formatType() {
