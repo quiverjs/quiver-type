@@ -2,8 +2,6 @@ import { mapUnique } from '../../core/util'
 import { unionMap } from '../../core/container'
 import { TermVariable, TypeVariable } from '../../core/variable'
 
-import { ArgSpec } from '../../compiled-term/arg-spec'
-
 import { Type } from '../../type/type'
 import { Kind } from '../../kind/kind'
 
@@ -15,6 +13,7 @@ import {
 import { ProductType, RecordType } from '../../type/product'
 
 import { Term } from '../term'
+import { ArgSpec } from '../arg-spec'
 
 const $productType = Symbol('@productType')
 const $fieldTerms = Symbol('@fieldTerms')
@@ -156,18 +155,17 @@ export class BaseProductTerm extends Term {
     return null
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
 
     const { fieldTerms } = this
 
-    const compiledFieldTerms = fieldTerms.map(
-      fieldTerm => fieldTerm.compileBody(argSpecs))
+    const fieldClosures = fieldTerms.map(
+      fieldTerm => fieldTerm.compileClosure(closureSpecs))
 
-    return (...args) => {
-      return compiledFieldTerms.map(
-        compiledTerm => compiledTerm(...args))
-    }
+    return closureArgs =>
+      fieldClosures.map(
+        fieldClosure => fieldClosure(closureArgs))
 
     throw new Error('not yet implemented')
   }

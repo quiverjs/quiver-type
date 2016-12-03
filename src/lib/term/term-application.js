@@ -1,9 +1,10 @@
 import { IList } from '../core/container'
-import { ArgSpec } from '../compiled-term/arg-spec'
+import { ArgSpec } from './arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertInstanceOf, assertListContent, assertNoError
+  assertInstanceOf, isInstanceOf,
+  assertListContent, assertNoError
 } from '../core/assert'
 
 import { Kind } from '../kind/kind'
@@ -18,38 +19,32 @@ const $type = Symbol('@type')
 const $leftTerm = Symbol('@leftTerm')
 const $rightTerm = Symbol('@rightTerm')
 
-const compileTermApplication = (term, closureSpecs, argExtractors) => {
-  const compiledBody = term.compileBody(closureSpecs)
-
-  return (...args) => {
-    const closure = compiledBody(...args)
+const compileTermApplication = (closure, closureSpecs, argExtractors) =>
+  closureArgs => {
+    const func = closure(closureArgs)
 
     const inArgs = argExtractors.map(
-      extractArg => extractArg(...args))
+      extractArg => extractArg(closureArgs))
 
-    return closure.call(...inArgs)
+    return func.call(...inArgs)
   }
-}
 
-const partialWrap = (closure, partialArgs) =>
+const partialWrap = (func, partialArgs) =>
   (...restArgs) => {
-    return closure.call(...partialArgs, ...restArgs)
+    return func.call(...partialArgs, ...restArgs)
   }
 
-const compilePartialTermApplication = (term, closureSpecs, argExtractors, partialTerm) => {
-  const compiledBody = term.compileBody(closureSpecs)
-
-  return (...args) => {
-    const closure = compiledBody(...args)
+const compilePartialTermApplication = (closure, closureSpecs, argExtractors, partialArrow) =>
+  closureArgs => {
+    const func = closure(closureArgs)
 
     const partialArgs = argExtractors.map(
-      extractArg => extractArg(...args))
+      extractArg => extractArg(closureArgs))
 
-    const partialFunc = partialWrap(closure, partialArgs)
+    const partialFunc = partialWrap(func, partialArgs)
 
-    return new CompiledFunction(partialTerm, partialFunc)
+    return new CompiledFunction(partialArrow, partialFunc)
   }
-}
 
 export class TermApplicationTerm extends Term {
   constructor(leftTerm, rightTerm) {
@@ -184,9 +179,10 @@ export class TermApplicationTerm extends Term {
     }
   }
 
-  compileBody(argSpecs) {
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
     const partialTerm = this.isPartial() ? this : null
-    return this.compileApplication(argSpecs, IList(), partialTerm)
+    return this.compileApplication(closureSpecs, IList(), partialTerm)
   }
 
   compileApplication(closureSpecs, argExtractors, partialTerm) {
@@ -195,23 +191,26 @@ export class TermApplicationTerm extends Term {
 
     const { leftTerm, rightTerm } = this
 
-    const argExtractor = rightTerm.compileBody(closureSpecs)
+    const argExtractor = rightTerm.compileClosure(closureSpecs)
 
     const inArgExtractors = argExtractors.unshift(argExtractor)
 
-    if(leftTerm instanceof TermApplicationTerm) {
+    if(isInstanceOf(leftTerm, TermApplicationTerm)) {
       return leftTerm.compileApplication(closureSpecs, inArgExtractors, partialTerm)
 
     } else if(partialTerm) {
-      return compilePartialTermApplication(leftTerm, closureSpecs, inArgExtractors, partialTerm)
+      const closure = leftTerm.compileClosure(closureSpecs)
+      const partialArrow = partialTerm.termType().compileType()
+      return compilePartialTermApplication(closure, closureSpecs, inArgExtractors, partialArrow)
 
     } else {
-      return compileTermApplication(leftTerm, closureSpecs, inArgExtractors)
+      const closure = leftTerm.compileClosure(closureSpecs)
+      return compileTermApplication(closure, closureSpecs, inArgExtractors)
     }
   }
 
   isPartial() {
-    return this.termType() instanceof ArrowType
+    return isInstanceOf(this.termType(), ArrowType)
   }
 
   formatTerm() {

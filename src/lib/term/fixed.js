@@ -2,7 +2,7 @@ import {
   assertInstanceOf, assertListContent, assertNoError
 } from '../core/assert'
 
-import { ArgSpec } from '../compiled-term/arg-spec'
+import { ArgSpec } from './arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 
@@ -136,7 +136,7 @@ export class FixedPointTerm extends Term {
     return this
   }
 
-  compileBody(closureSpecs) {
+  compileClosure(closureSpecs) {
     assertListContent(closureSpecs, ArgSpec)
 
     const { fixedVar, selfType, bodyLambda } = this
@@ -146,12 +146,12 @@ export class FixedPointTerm extends Term {
     const inClosureSpecs = closureSpecs.push(
       new ArgSpec(fixedVar, compiledSelfType))
 
-    const compiledLambda = bodyLambda.compileBody(inClosureSpecs)
+    const bodyClosure = bodyLambda.compileClosure(inClosureSpecs)
 
-    return (...closureArgs) => {
+    return closureArgs => {
       let inFunc
 
-      const fixedFunc = new CompiledFunction(this,
+      const fixedFunc = new CompiledFunction(compiledSelfType,
         (...args) => {
           if(!inFunc)
             throw new TypeError('inner function has not been initialized')
@@ -159,7 +159,7 @@ export class FixedPointTerm extends Term {
           return inFunc.call(...args)
         })
 
-      inFunc = compiledLambda(...closureArgs, fixedFunc)
+      inFunc = bodyClosure([...closureArgs, fixedFunc])
 
       return inFunc
     }

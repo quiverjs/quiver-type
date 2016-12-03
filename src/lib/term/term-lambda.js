@@ -1,5 +1,4 @@
 import { IList } from '../core/container'
-import { ArgSpec } from '../compiled-term/arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
@@ -11,6 +10,7 @@ import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { Term } from './term'
+import { ArgSpec } from './arg-spec'
 import { VariableTerm } from './variable'
 
 const $argVar = Symbol('@argVar')
@@ -18,16 +18,13 @@ const $argType = Symbol('@argType')
 const $bodyTerm = Symbol('@bodyTerm')
 const $type = Symbol('@type')
 
-const closureWrap = (body, closureSize, term) =>
-  (...closureArgs) => {
-    if(closureArgs.length !== closureSize)
-      throw new Error('closure args length mismatch')
-
+const closureWrap = (bodyClosure, compiledArrow) =>
+  closureArgs => {
     const func = (...inArgs) => {
-      return body(...closureArgs, ...inArgs)
+      return bodyClosure([...closureArgs, ...inArgs])
     }
 
-    return new CompiledFunction(term, func)
+    return new CompiledFunction(compiledArrow, func)
   }
 
 export class TermLambdaTerm extends Term {
@@ -166,13 +163,13 @@ export class TermLambdaTerm extends Term {
     return this
   }
 
-  compileBody(closureSpecs) {
-    assertListContent(closureSpecs, ArgSpec)
+  compileClosure(closureArgs) {
+    assertListContent(closureArgs, ArgSpec)
 
-    const closureSize = closureSpecs.size
-    const innerBody = this.compileLambda(closureSpecs, IList())
+    const bodyClosure = this.compileLambda(closureArgs, IList())
+    const compiledArrow = this.termType().compileType()
 
-    return closureWrap(innerBody, closureSize, this)
+    return closureWrap(bodyClosure, compiledArrow)
   }
 
   compileLambda(closureSpecs, argSpecs) {
@@ -187,8 +184,9 @@ export class TermLambdaTerm extends Term {
 
     if(bodyTerm instanceof TermLambdaTerm) {
       return bodyTerm.compileLambda(closureSpecs, inArgSpecs)
+
     } else {
-      return bodyTerm.compileBody(closureSpecs.concat(inArgSpecs))
+      return bodyTerm.compileClosure(closureSpecs.concat(inArgSpecs))
     }
   }
 

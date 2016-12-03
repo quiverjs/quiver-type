@@ -1,5 +1,4 @@
 import { ISet } from '../core/container'
-import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
   assertInstanceOf, assertListContent, assertNoError
@@ -9,6 +8,7 @@ import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 
 import { Term } from './term'
+import { ArgSpec } from './arg-spec'
 
 const $termVar = Symbol('@termVar')
 const $varType = Symbol('@varType')
@@ -35,9 +35,8 @@ const findArgIndex = (argSpecs, termVar) => {
 }
 
 const argPicker = index =>
-  (...args) => {
-    return args[index]
-  }
+  closureArgs =>
+    closureArgs[index]
 
 export class VariableTerm extends Term {
   constructor(termVar, varType) {
@@ -123,13 +122,15 @@ export class VariableTerm extends Term {
     return new VariableTerm(termVar, newVarType)
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
     const { termVar, varType } = this
 
-    const [argIndex, argSpec] = findArgIndex(argSpecs, termVar)
+    const [argIndex, argSpec] = findArgIndex(closureSpecs, termVar)
 
-    assertNoError(varType.typeCheck(argSpec.compiledType.srcType))
+    const argSpecType = argSpec.compiledType.srcType
+
+    assertNoError(varType.typeCheck(argSpecType))
 
     return argPicker(argIndex)
   }

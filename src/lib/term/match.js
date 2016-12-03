@@ -1,6 +1,5 @@
 import { mapUnique } from '../core/util'
 import { unionMap } from '../core/container'
-import { ArgSpec } from '../compiled-term/arg-spec'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -10,6 +9,7 @@ import { ArrowType } from '../type/arrow'
 import { Kind } from '../kind/kind'
 
 import { Term } from './term'
+import { ArgSpec } from './arg-spec'
 import { VariantTerm } from './variant'
 import { TermLambdaTerm } from './term-lambda'
 
@@ -184,27 +184,29 @@ export class MatchTerm extends Term {
     }
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
 
     const { variantTerm, caseTerms } = this
 
-    const compiledVariant = variantTerm.compileBody(argSpecs)
+    const variantClosure = variantTerm.compileClosure(closureSpecs)
 
-    const compiledCases = caseTerms.map(term =>
-      term.compileBody(argSpecs))
+    const caseClosures = caseTerms.map(term =>
+      term.compileClosure(closureSpecs))
 
-    return (...args) => {
-      const variant = compiledVariant(...args)
+    return closureArgs => {
+      const variant = variantClosure(closureArgs)
 
       const { tag, value } = variant
-      const compiledCase = compiledCases.get(tag)
+      const caseClosure = caseClosures.get(tag)
 
-      if(!compiledCase) {
+      if(!caseClosure) {
         throw new Error('variant value contains unexpected tag')
       }
 
-      return compiledCase(...args).call(value)
+      const caseFunc = caseClosure(closureArgs)
+      
+      return caseFunc.call(value)
     }
   }
 

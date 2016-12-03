@@ -6,5 +6,5 @@ import { Term } from '../term/term'
 export const compileTerm = term => {
   assertInstanceOf(term, Term)
 
-  return term.evaluate().compileBody(IList())()
+  return term.evaluate().compileClosure(IList())([])
 }

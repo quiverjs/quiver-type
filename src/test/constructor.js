@@ -109,8 +109,7 @@ test('type constructor test', assert => {
       (mapperCType, bListCType) =>
         (mapper, list) =>
           list.map(element =>
-            mapperCType.call(mapper, element))
-    )
+            mapperCType.call(mapper, [element])))
 
     // fmap :: forall b :: *, c :: * .
     //          (b -> c) -> IList b -> IList c

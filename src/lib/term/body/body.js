@@ -1,4 +1,4 @@
-import { ArgSpec } from '../../compiled-term/arg-spec'
+import { ArgSpec } from '../arg-spec'
 
 import {
   assertListContent, assertInstanceOf, assertFunction
@@ -42,25 +42,25 @@ export class BodyTerm extends CommonBodyTerm {
     return null
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
 
     const { argTerms, compiler } = this
 
     const argExtractors = argTerms.map(
-      term => term.compileBody(argSpecs))
+      term => term.compileClosure(closureSpecs))
 
     const argCompiledTypes = argTerms.map(
       term => term.termType().compileType())
 
-    const compiledBody = compiler(...argCompiledTypes)
-    assertInstanceOf(compiledBody, Function)
+    const bodyClosure = compiler(...argCompiledTypes)
+    assertInstanceOf(bodyClosure, Function)
 
-    return (...args) => {
-      const inArgs = argExtractors.map(
-        extractArgs => extractArgs(...args))
+    return closureArgs => {
+      const inClosureArgs = argExtractors.map(
+        extractArgs => extractArgs(closureArgs))
 
-      return compiledBody(...inArgs)
+      return bodyClosure(...inClosureArgs)
     }
   }
 

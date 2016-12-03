@@ -8,11 +8,10 @@ import { SumType } from '../type/sum'
 
 import { Kind } from '../kind/kind'
 
-import { ArgSpec } from '../compiled-term/arg-spec'
-
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Term } from './term'
+import { ArgSpec } from './arg-spec'
 
 const $sumType = Symbol('@sumType')
 const $tag = Symbol('@tag')
@@ -127,16 +126,16 @@ export class VariantTerm extends Term {
     }
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
 
     const { sumType, tag, bodyTerm } = this
 
     const compiledSumType = sumType.compileType()
-    const compiledBody = bodyTerm.compileBody(argSpecs)
+    const bodyClosure = bodyTerm.compileClosure(closureSpecs)
 
-    return (...args) => {
-      const value = compiledBody(...args)
+    return closureArgs => {
+      const value = bodyClosure(closureArgs)
       return compiledSumType.construct(tag, value)
     }
   }

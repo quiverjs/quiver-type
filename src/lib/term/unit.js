@@ -1,5 +1,5 @@
 import { ISet } from '../core/container'
-import { assertInstanceOf } from '../core/assert'
+import { assertInstanceOf, assertListContent } from '../core/assert'
 
 import { TermVariable, TypeVariable } from '../core/variable'
 
@@ -9,6 +9,7 @@ import { Kind } from '../kind/kind'
 import { unitType } from '../type/unit'
 
 import { Term } from './term'
+import { ArgSpec } from './arg-spec'
 
 const unitValue = Symbol('unit')
 
@@ -27,7 +28,7 @@ export class UnitTerm extends Term {
 
   termCheck(targetTerm) {
     assertInstanceOf(targetTerm, Term)
-    
+
     if(targetTerm === this) return null
 
     if(targetTerm instanceof UnitTerm) {
@@ -69,8 +70,10 @@ export class UnitTerm extends Term {
     return this
   }
 
-  compileBody(argSpecs) {
-    return (...args) => unitValue
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
+
+    return closureArgs => unitValue
   }
 
   formatTerm() {

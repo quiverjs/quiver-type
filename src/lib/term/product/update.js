@@ -8,11 +8,10 @@ import {
   assertListContent
 } from '../../core/assert'
 
-import { ArgSpec } from '../../compiled-term/arg-spec'
-
 import { ProductType, RecordType } from '../../type/product'
 
 import { Term } from '../term'
+import { ArgSpec } from '../arg-spec'
 
 import { ProductTerm, RecordTerm } from './product'
 
@@ -152,17 +151,17 @@ export class BaseUpdateTerm extends Term {
     }
   }
 
-  compileBody(argSpecs) {
-    assertListContent(argSpecs, ArgSpec)
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
 
     const { productTerm, fieldKey, updateTerm } = this
 
-    const compiledProductTerm = productTerm.compileBody(argSpecs)
-    const compiledUpdateTerm = updateTerm.compileBody(argSpecs)
+    const productClosure = productTerm.compileClosure(closureSpecs)
+    const updateClosure = updateTerm.compileClosure(closureSpecs)
 
-    return (...args) => {
-      const productValue = compiledProductTerm(...args)
-      const updateValue = compiledUpdateTerm(...args)
+    return closureArgs => {
+      const productValue = productClosure(closureArgs)
+      const updateValue = updateClosure(closureArgs)
 
       return productValue.set(fieldKey, updateValue)
     }

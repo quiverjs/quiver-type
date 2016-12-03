@@ -1,11 +1,16 @@
 import { TermVariable } from '../core/variable'
-import { assertFunction, assertInstanceOf, assertListContent } from '../core/assert'
+import {
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
+} from '../core/assert'
 
 import { BodyTerm } from '../term/body'
 import { TermLambdaTerm } from '../term/term-lambda'
 import { VariableTerm } from '../term/variable'
 
 import { Type } from '../type/type'
+import { ArrowType } from '../type/arrow'
 
 import { CompiledFunction } from '../compiled-term/function'
 
@@ -35,7 +40,17 @@ export const functionToTerm = (argTypes, returnType, func) => {
 }
 
 export const wrapFunction = (func, argTypes, returnType) => {
-  const lambdaTerm = functionToTerm(argTypes, returnType, func)
+  assertFunction(func)
+  assertInstanceOf(returnType, Type)
 
-  return new CompiledFunction(lambdaTerm, func)
+  assertListContent(argTypes, Type)
+
+  const arrowType = argTypes.reduceRight(
+    (returnType, argType) =>
+      new ArrowType(argType, returnType),
+    returnType)
+
+  const compiledArrow = arrowType.compileType()
+
+  return new CompiledFunction(compiledArrow, func)
 }

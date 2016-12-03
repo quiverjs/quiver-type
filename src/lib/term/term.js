@@ -51,8 +51,8 @@ export class Term {
     throw new Error('not implemented')
   }
 
-  // compileBody :: IList ArgSpec -> Function
-  compileBody(argSpecs) {
+  // compileClosure :: IList ArgSpec -> Closure
+  compileClosure(closureArgs) {
     throw new Error('not implemented')
   }
 

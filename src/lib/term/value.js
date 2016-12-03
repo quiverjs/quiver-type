@@ -1,5 +1,9 @@
 import { ISet } from '../core/container'
-import { assertInstanceOf, assertNoError } from '../core/assert'
+import {
+  assertNoError,
+  assertInstanceOf,
+  assertListContent
+} from '../core/assert'
 
 import { TermVariable, TypeVariable } from '../core/variable'
 
@@ -7,6 +11,7 @@ import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
 
 import { Term } from './term'
+import { ArgSpec } from './arg-spec'
 
 const $value = Symbol('@value')
 const $type = Symbol('@type')
@@ -90,7 +95,9 @@ export class ValueTerm extends Term {
     return this
   }
 
-  compileBody(argSpecs) {
+  compileClosure(closureSpecs) {
+    assertListContent(closureSpecs, ArgSpec)
+
     return constantFunc(this.value)
   }
 

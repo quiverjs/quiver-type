@@ -98,8 +98,8 @@ export class UnfoldTerm extends Term {
     }
   }
 
-  compileBody(closureSpecs) {
-    return this.bodyTerm.compileBody(closureSpecs)
+  compileClosure(closureSpecs) {
+    return this.bodyTerm.compileClosure(closureSpecs)
   }
 
   formatTerm() {

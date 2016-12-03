@@ -45,7 +45,7 @@ export class FoldTerm extends Term {
 
   termCheck(targetTerm) {
     assertInstanceOf(targetTerm, Term)
-    
+
     if(targetTerm === this) return null
 
     if(!isInstanceOf(targetTerm, FoldTerm))
@@ -101,8 +101,8 @@ export class FoldTerm extends Term {
     }
   }
 
-  compileBody(closureSpecs) {
-    return this.bodyTerm.compileBody(closureSpecs)
+  compileClosure(closureSpecs) {
+    return this.bodyTerm.compileClosure(closureSpecs)
   }
 
   formatTerm() {

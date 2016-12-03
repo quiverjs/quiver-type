@@ -23,7 +23,8 @@ test('term compilation test', assert => {
     const yVarTerm = new VariableTerm(yVar, NumberType)
 
     const addTerm = new BodyTerm(
-      IList([xVarTerm, yVarTerm]), NumberType,
+      IList([xVarTerm, yVarTerm]),
+      NumberType,
       (xCompiledType, yCompiledType) => {
         assert.equals(xCompiledType.srcType, NumberType)
         assert.equals(yCompiledType.srcType, NumberType)

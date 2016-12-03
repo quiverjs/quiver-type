@@ -59,13 +59,13 @@ export class CompiledArrowType extends CompiledType {
     return this.srcType.typeCheck(compiledFunction.srcType)
   }
 
-  call(compiledFunction, ...args) {
+  call(compiledFunction, args) {
     assertNoError(this.typeCheck(compiledFunction))
 
-    return this.directCall(compiledFunction.func, ...args)
+    return this.directCall(compiledFunction.func, args)
   }
 
-  directCall(func, ...args) {
+  directCall(func, args) {
     const { argTypes, returnType } = this
     const argsLength = argTypes.size
 
@@ -73,7 +73,9 @@ export class CompiledArrowType extends CompiledType {
       throw new TypeError('arguments size mismatch')
 
     for(let i=0; i<argsLength; i++) {
-      assertNoError(argTypes.get(i).typeCheck(args[i]))
+      const arg = args[i]
+      const argType = argTypes.get(i)
+      assertNoError(argType.typeCheck(arg))
     }
 
     const result = func(...args)
