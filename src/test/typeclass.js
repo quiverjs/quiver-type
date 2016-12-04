@@ -138,11 +138,16 @@ test('type class test', assert => {
 
     assert::termTypeEquals(MaybeFunctorInstance, MaybeFunctorClass)
 
+    const showType = new ArrowType(sType, StringType)
+
     const ShowClass = new ForAllType(
       sTVar, unitKind,
       new RecordType(IMap({
-        show: new ArrowType(sType, StringType)
+        show: showType
       })))
+
+    const showAVar = new TermVariable('showA')
+    const showAType = new ApplicationType(ShowClass, aType)
 
     const StringShowClass = new ApplicationType(
       ShowClass, StringType)
@@ -178,108 +183,164 @@ test('type class test', assert => {
 
     assert::termTypeEquals(NumberShowInstance, NumberShowClass)
 
-    const MaybeShowClass = new ForAllType(
-      aTVar, unitKind,
-      new ApplicationType(
-        ShowClass,
-        new ApplicationType(
-          MaybeType, aType)))
-
-    const maVar = new TermVariable('ma')
-    const xStrVar = new TermVariable('xStr')
-    const showAVar = new TermVariable('showA')
-    const showAType = new ApplicationType(ShowClass, aType)
-
-    // MaybeShowInstance =
-    //   Λ a :: * .
-    //     λ showA : Show a .
-    //       show : Maybe a -> String
-    //       show ma = match ma
-    //         Just x: `Just ${ showA.show x }`
-    //         Nothing: 'Nothing'
-    const MaybeShowInstance = new TypeLambdaTerm(
-      aTVar, unitKind,
-      new TermLambdaTerm(
-        showAVar, showAType,
-        new RecordTerm(IMap({
-          show: new TermLambdaTerm(
-            maVar, MaybeAType,
-            new MatchTerm(
-              new VariableTerm(maVar, MaybeAType),
-              StringType,
-              IMap({
-                Just: new TermLambdaTerm(
-                  xVar, aType,
-                  new TermApplicationTerm(
-                    new TermLambdaTerm(
-                      xStrVar, StringType,
-                      new BodyTerm(
-                        IList([
-                          new VariableTerm(xStrVar, StringType)
-                        ]),
-                        StringType,
-                        stringCompiledType =>
-                          xStr =>
-                            `Just(${xStr})`
-                      )),
-                    new TermApplicationTerm(
-                      new ProjectRecordTerm(
-                        new VariableTerm(
-                          showAVar, showAType),
-                        'show'),
-                      new VariableTerm(xVar, aType)))),
-
-                Nothing: new TermLambdaTerm(
-                  xVar, unitType,
-                  new ValueTerm('Nothing', StringType))
-              }))),
-        }))))
-
-    const MaybeStringShowInstance = new TermApplicationTerm(
-      new TypeApplicationTerm(
-        MaybeShowInstance, StringType),
-      StringShowInstance)
-
-    const showMaybeStr = compileTerm(MaybeStringShowInstance).get('show')
-
-    const MaybeString = new ApplicationType(
-      MaybeType, StringType)
-
-    const CompiledMaybeStr = MaybeString.compileType()
-
-    const justFoo = CompiledMaybeStr.construct('Just', 'foo')
-    assert.equals(showMaybeStr.call(justFoo), 'Just(str(foo))')
-
-    const nothingStr = CompiledMaybeStr.construct('Nothing', unitValue)
-    assert.equals(showMaybeStr.call(nothingStr), 'Nothing')
-
-    const MaybeNumShowInstance = new TermApplicationTerm(
-      new TypeApplicationTerm(
-        MaybeShowInstance, NumberType),
-      NumberShowInstance)
-
-    const showMaybeNum = compileTerm(MaybeNumShowInstance).get('show')
-
     const MaybeNum = new ApplicationType(
       MaybeType, NumberType)
 
     const CompiledMaybeNum = MaybeNum.compileType()
 
-    const justOne = CompiledMaybeNum.construct('Just', 1)
-    assert.equals(showMaybeNum.call(justOne), 'Just(num(1))')
+    assert.test('maybe show 1', assert => {
+      const MaybeShowClass = new ForAllType(
+        aTVar, unitKind,
+        new ApplicationType(
+          ShowClass,
+          new ApplicationType(
+            MaybeType, aType)))
 
-    const nothingNum = CompiledMaybeNum.construct('Nothing', unitValue)
-    assert.equals(showMaybeNum.call(nothingNum), 'Nothing')
+      const maVar = new TermVariable('ma')
+      const xStrVar = new TermVariable('xStr')
 
-    assert.throws(() => showMaybeNum.call(nothingStr))
+      // MaybeShowInstance =
+      //   Λ a :: * .
+      //     λ showA : Show a .
+      //       show : Maybe a -> String
+      //       show ma = match ma
+      //         Just x: `Just ${ showA.show x }`
+      //         Nothing: 'Nothing'
+      const MaybeShowInstance = new TypeLambdaTerm(
+        aTVar, unitKind,
+        new TermLambdaTerm(
+          showAVar, showAType,
+          new RecordTerm(IMap({
+            show: new TermLambdaTerm(
+              maVar, MaybeAType,
+              new MatchTerm(
+                new VariableTerm(maVar, MaybeAType),
+                StringType,
+                IMap({
+                  Just: new TermLambdaTerm(
+                    xVar, aType,
+                    new TermApplicationTerm(
+                      new TermLambdaTerm(
+                        xStrVar, StringType,
+                        new BodyTerm(
+                          IList([
+                            new VariableTerm(xStrVar, StringType)
+                          ]),
+                          StringType,
+                          stringCompiledType =>
+                            xStr =>
+                              `Just(${xStr})`
+                        )),
+                      new TermApplicationTerm(
+                        new ProjectRecordTerm(
+                          new VariableTerm(
+                            showAVar, showAType),
+                          'show'),
+                        new VariableTerm(xVar, aType)))),
 
-    // FunctorShowInstance =
-    //   Λ a :: * .
-    //   Λ f :: * -> * .
-    //     λ showA : Show a .
-    //     λ functorFA : Functor f a .
-    //       show : f a -> String
-    //       show fa = functorFA.fmap showA.show fa
+                  Nothing: new TermLambdaTerm(
+                    xVar, unitType,
+                    new ValueTerm('Nothing', StringType))
+                }))),
+          }))))
+
+      const MaybeStringShowInstance = new TermApplicationTerm(
+        new TypeApplicationTerm(
+          MaybeShowInstance, StringType),
+        StringShowInstance)
+
+      const showMaybeStr = compileTerm(MaybeStringShowInstance).get('show')
+
+      const MaybeString = new ApplicationType(
+        MaybeType, StringType)
+
+      const CompiledMaybeStr = MaybeString.compileType()
+
+      const justFoo = CompiledMaybeStr.construct('Just', 'foo')
+      assert.equals(showMaybeStr.call(justFoo), 'Just(str(foo))')
+
+      const nothingStr = CompiledMaybeStr.construct('Nothing', unitValue)
+      assert.equals(showMaybeStr.call(nothingStr), 'Nothing')
+
+      const MaybeNumShowInstance = new TermApplicationTerm(
+        new TypeApplicationTerm(
+          MaybeShowInstance, NumberType),
+        NumberShowInstance)
+
+      const showMaybeNum = compileTerm(MaybeNumShowInstance).get('show')
+
+      const justOne = CompiledMaybeNum.construct('Just', 1)
+      assert.equals(showMaybeNum.call(justOne), 'Just(num(1))')
+
+      const nothingNum = CompiledMaybeNum.construct('Nothing', unitValue)
+      assert.equals(showMaybeNum.call(nothingNum), 'Nothing')
+
+      assert.throws(() => showMaybeNum.call(nothingStr))
+
+      assert.end()
+    })
+
+    assert.test('Maybe show 2', assert => {
+      const faVar = new TermVariable('fa')
+      const showVar = new TermVariable('show')
+      const fmapVar = new TermVariable('fmap')
+      const faType = new ApplicationType(fType, aType)
+
+      const functorFVar = new TermVariable('functorF')
+      const functorFType = new ApplicationType(FunctorClass, fType)
+
+      const fmapAStrType = new ApplicationType(
+        new ApplicationType(
+          fmapType, aType),
+        StringType)
+
+      // fmapShow =
+      //   Λ f :: * -> * .
+      //   Λ a :: * .
+      //     λ showA : Show a .
+      //     λ functorF : Functor f .
+      //       functorF.fmap [a, String] showA.show
+
+      const fmapShow = new TypeLambdaTerm(
+        fTVar, arrowKind,
+        new TypeLambdaTerm(
+          aTVar, unitKind,
+          new TermLambdaTerm(
+            showAVar, showAType,
+            new TermLambdaTerm(
+              functorFVar, functorFType,
+              new TermApplicationTerm(
+                new TypeApplicationTerm(
+                  new TypeApplicationTerm(
+                    new ProjectRecordTerm(
+                      new VariableTerm(functorFVar, functorFType),
+                      'fmap'),
+                    aType),
+                  StringType),
+                new ProjectRecordTerm(
+                  new VariableTerm(showAVar, showAType),
+                  'show'))))))
+
+      const fmapShowMaybeNumTerm = new TermApplicationTerm(
+        new TermApplicationTerm(
+          new TypeApplicationTerm(
+            new TypeApplicationTerm(
+              fmapShow, MaybeType),
+            NumberType),
+          NumberShowInstance),
+        MaybeFunctorInstance)
+
+      const fmapShowMaybeNum = compileTerm(fmapShowMaybeNumTerm)
+
+      const justOne = CompiledMaybeNum.construct('Just', 1)
+
+      const justOneStr = fmapShowMaybeNum.call(justOne)
+
+      assert.equals(justOneStr.tag, 'Just')
+      assert.equals(justOneStr.value, 'num(1)')
+
+      assert.end()
+    })
 
     assert.end()
   })

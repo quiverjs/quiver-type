@@ -101,7 +101,7 @@ export class BaseProductTerm extends Term {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(term, Term)
 
-    const { productType, fieldTerms } = this
+    const { fieldTerms } = this
 
     const [newFieldTerms, isModified] = fieldTerms::mapUnique(
       fieldTerm => fieldTerm.bindTerm(termVar, term))
@@ -171,7 +171,7 @@ export class BaseProductTerm extends Term {
   }
 
   evaluate() {
-    const { productType, fieldTerms } = this
+    const { fieldTerms } = this
 
     const [newFieldTerms, isModified] = fieldTerms::mapUnique(
       fieldTerm => fieldTerm.evaluate())
