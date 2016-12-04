@@ -11,6 +11,7 @@ import { Kind } from '../kind/kind'
 import { Term } from './term'
 import { ArgSpec } from './arg-spec'
 import { VariantTerm } from './variant'
+import { VariableTerm } from './variable'
 import { TermLambdaTerm } from './term-lambda'
 
 import {
@@ -35,7 +36,7 @@ export class MatchTerm extends Term {
     if(typeMap.size !== caseTerms.size)
       throw new TypeError('case terms must match all sum types')
 
-    for(const [tag, caseType] of typeMap) {
+    for(const [tag, caseType] of typeMap.entries()) {
       const caseTerm = caseTerms.get(tag)
       if(!caseTerm) {
         throw new TypeError('case terms must match all sum types')
@@ -191,8 +192,19 @@ export class MatchTerm extends Term {
 
     const variantClosure = variantTerm.compileClosure(closureSpecs)
 
-    const caseClosures = caseTerms.map(term =>
-      term.compileClosure(closureSpecs))
+    const caseClosures = caseTerms.map(
+      lambdaTerm => {
+        const { argType } = lambdaTerm
+        const argVar = new TermVariable('_')
+        const argSpec = new ArgSpec(
+          argVar, argType.compileType())
+
+        const bodyTerm = lambdaTerm.applyTerm(
+          new VariableTerm(argVar, argType))
+
+        const inClosureSpecs = closureSpecs.push(argSpec)
+        return bodyTerm.compileClosure(inClosureSpecs)
+      })
 
     return closureArgs => {
       const variant = variantClosure(closureArgs)
@@ -204,9 +216,9 @@ export class MatchTerm extends Term {
         throw new Error('variant value contains unexpected tag')
       }
 
-      const caseFunc = caseClosure(closureArgs)
+      const inClosureArgs = [...closureArgs, value]
 
-      return caseFunc.call(value)
+      return caseClosure(inClosureArgs)
     }
   }
 

@@ -281,18 +281,8 @@ test('type class test', assert => {
     })
 
     assert.test('Maybe show 2', assert => {
-      const faVar = new TermVariable('fa')
-      const showVar = new TermVariable('show')
-      const fmapVar = new TermVariable('fmap')
-      const faType = new ApplicationType(fType, aType)
-
       const functorFVar = new TermVariable('functorF')
       const functorFType = new ApplicationType(FunctorClass, fType)
-
-      const fmapAStrType = new ApplicationType(
-        new ApplicationType(
-          fmapType, aType),
-        StringType)
 
       // fmapShow =
       //   Λ f :: * -> * .
