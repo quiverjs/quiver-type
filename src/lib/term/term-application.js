@@ -117,10 +117,10 @@ export class TermApplicationTerm extends Term {
 
     const { leftTerm, rightTerm } = this
 
-    const err = leftTerm.validateVarType(typeVar, kind)
+    const err = leftTerm.validateTVarKind(typeVar, kind)
     if(err) return err
 
-    return rightTerm.validateVarType(typeVar, kind)
+    return rightTerm.validateTVarKind(typeVar, kind)
   }
 
   freeTermVariables() {

@@ -205,7 +205,7 @@ export class MatchTerm extends Term {
       }
 
       const caseFunc = caseClosure(closureArgs)
-      
+
       return caseFunc.call(value)
     }
   }

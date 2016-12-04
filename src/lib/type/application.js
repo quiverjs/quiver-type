@@ -23,10 +23,7 @@ export class ApplicationType extends Type {
     assertInstanceOf(leftKind, ArrowKind)
     assertNoError(leftKind.leftKind.kindCheck(rightKind))
 
-    if(isTerminalType(leftType) &&
-       isTerminalType(rightType) &&
-       leftType.applyType)
-    {
+    if(isTerminalType(leftType) && leftType.applyType) {
       return leftType.applyType(rightType)
     }
 
