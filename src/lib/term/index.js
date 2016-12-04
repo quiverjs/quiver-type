@@ -2,7 +2,7 @@ export { Term } from './term'
 
 export { ValueTerm } from './value'
 
-export { unitTerm, UnitTerm } from './unit'
+export { unitTerm, UnitTerm, unitValue } from './unit'
 
 export { BodyTerm, RawBodyTerm } from './body'
 

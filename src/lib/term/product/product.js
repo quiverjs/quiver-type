@@ -107,7 +107,7 @@ export class BaseProductTerm extends Term {
       fieldTerm => fieldTerm.bindTerm(termVar, term))
 
     if(isModified) {
-      return new this.constructor(productType, newFieldTerms)
+      return new this.constructor(newFieldTerms)
 
     } else {
       return this
@@ -126,7 +126,7 @@ export class BaseProductTerm extends Term {
       fieldTerm => fieldTerm.bindType(typeVar, type))
 
     if(isModified || productType !== newProductType) {
-      return new this.constructor(newProductType, newFieldTerms)
+      return new this.constructor(newFieldTerms)
 
     } else {
       return this
@@ -177,7 +177,7 @@ export class BaseProductTerm extends Term {
       fieldTerm => fieldTerm.evaluate())
 
     if(isModified) {
-      return new this.constructor(productType, newFieldTerms)
+      return new this.constructor(newFieldTerms)
 
     } else {
       return this

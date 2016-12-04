@@ -47,7 +47,7 @@ export class UnitType extends Type {
   }
 
   compileType() {
-    return new CompiledUnitType()
+    return new CompiledUnitType(this)
   }
 
   formatType() {
