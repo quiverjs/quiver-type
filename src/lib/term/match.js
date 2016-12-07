@@ -1,5 +1,5 @@
 import { mapUnique } from '../core/util'
-import { unionMap } from '../core/container'
+import { IMap, unionMap } from '../core/container'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -245,3 +245,6 @@ export class MatchTerm extends Term {
     return ['match', sumRep, [...caseReps]]
   }
 }
+
+export const match = (variantTerm, returnType, caseTerms) =>
+  new MatchTerm(variantTerm, returnType, IMap(caseTerms))

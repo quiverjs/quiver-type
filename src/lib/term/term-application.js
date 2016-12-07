@@ -222,3 +222,9 @@ export class TermApplicationTerm extends Term {
     return ['app', leftRep, rightRep]
   }
 }
+
+export const apply = (lambdaTerm, ...argTerms) =>
+  argTerms.reduce(
+    (lambdaTerm, argTerm) =>
+      new TermApplicationTerm(lambdaTerm, argTerm),
+    lambdaTerm)

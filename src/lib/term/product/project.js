@@ -213,3 +213,9 @@ export class ProjectRecordTerm extends BaseProjectTerm {
     return ['project-record', fieldKey, recordTermRep]
   }
 }
+
+export const projectProduct = (productTerm, fieldKey) =>
+  new ProjectProductTerm(productTerm, fieldKey)
+
+export const projectRecord = (recordTerm, fieldKey) =>
+  new ProjectRecordTerm(recordTerm, fieldKey)

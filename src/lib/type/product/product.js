@@ -12,6 +12,9 @@ export class ProductType extends BaseProductType {
   constructor(fieldTypes) {
     assertListContent(fieldTypes, Type)
 
+    if(fieldTypes.size === 0)
+      throw new TypeError('size of field types must be at last one')
+
     super(fieldTypes)
   }
 

@@ -23,6 +23,9 @@ export class SumType extends Type {
   constructor(typeMap) {
     assertMap(typeMap)
 
+    if(typeMap.size === 0)
+      throw new TypeError('size of type map must be at least one')
+
     for(const [tag, type] of typeMap.entries()) {
       assertString(tag)
       assertInstanceOf(type, Type)

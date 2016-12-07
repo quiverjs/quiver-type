@@ -77,3 +77,6 @@ export class BodyTerm extends CommonBodyTerm {
     return ['body-compiler', argTermsRep, returnTypeRep]
   }
 }
+
+export const body = (argTerms, returnType, compiler) =>
+  new BodyTerm(argTerms, returnType, compiler)

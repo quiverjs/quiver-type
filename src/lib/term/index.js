@@ -12,6 +12,8 @@ export { TermLambdaTerm } from './term-lambda'
 
 export { TermApplicationTerm } from './term-application'
 
+export { LetTerm } from './let'
+
 export { TypeLambdaTerm } from './type-lambda'
 
 export { TypeApplicationTerm } from './type-application'

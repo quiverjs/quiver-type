@@ -120,7 +120,6 @@ export class TermLambdaTerm extends Term {
     return bodyTerm.validateTVarKind(typeVar, kind)
   }
 
-  // bindTerm :: TermVariable -> Term
   bindTerm(termVar, term) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(term, Term)
@@ -129,19 +128,27 @@ export class TermLambdaTerm extends Term {
 
     if(termVar === argVar) return this
 
-    if(term.freeTermVariables().has(termVar)) {
+    if(term.freeTermVariables().has(argVar)) {
       const argVar2 = new TermVariable(argVar.name)
-      const bodyTerm2 = bodyTerm.bindTerm(argVar, argVar2)
+      const argTerm2 = new VariableTerm(argVar2, argType)
+
+      const bodyTerm2 = bodyTerm.bindTerm(argVar, argTerm2)
       const newBodyTerm = bodyTerm2.bindTerm(termVar, term)
 
-      return new TermLambdaTerm(argVar2, argType, newBodyTerm)
+      if(newBodyTerm !== bodyTerm2) {
+        return new TermLambdaTerm(argVar2, argType, newBodyTerm)
+      } else {
+        return this
+      }
 
     } else {
       const newBodyTerm = bodyTerm.bindTerm(termVar, term)
 
-      if(newBodyTerm === bodyTerm) return this
-
-      return new TermLambdaTerm(argVar, argType, newBodyTerm)
+      if(newBodyTerm !== bodyTerm) {
+        return new TermLambdaTerm(argVar, argType, newBodyTerm)
+      } else {
+        return this
+      }
     }
   }
 
@@ -211,3 +218,9 @@ export class TermLambdaTerm extends Term {
     return ['lambda', [varRep, argTypeRep], bodyRep]
   }
 }
+
+export const lambda = (argSpecs, bodyTerm) =>
+  argSpecs.reduceRight(
+    (bodyTerm, [argVar, argType]) =>
+      new TermLambdaTerm(argVar, argType, bodyTerm),
+      bodyTerm)

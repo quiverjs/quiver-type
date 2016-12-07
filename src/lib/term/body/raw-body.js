@@ -68,3 +68,6 @@ export class RawBodyTerm extends CommonBodyTerm {
     return ['raw-body', argTermsRep, returnTypeRep]
   }
 }
+
+export const rawBody = (argTerms, returnType, func) =>
+  new RawBodyTerm(argTerms, returnType, func)

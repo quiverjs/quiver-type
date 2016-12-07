@@ -1,5 +1,5 @@
 import { mapUnique } from '../../core/util'
-import { unionMap } from '../../core/container'
+import { unionMap, IMap, IList } from '../../core/container'
 import { TermVariable, TypeVariable } from '../../core/variable'
 
 import { Type } from '../../type/type'
@@ -251,3 +251,9 @@ export class ProductTerm extends BaseProductTerm {
     return ['product-term', [...fieldTermsRep]]
   }
 }
+
+export const product = fieldTerms =>
+  new ProductTerm(IList(fieldTerms))
+
+export const record = fieldTerms =>
+  new RecordTerm(IMap(fieldTerms))

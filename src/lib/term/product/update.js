@@ -245,3 +245,9 @@ export class UpdateRecordTerm extends BaseUpdateTerm {
     return ['update-record', fieldKey, recordTermRep, updateTermRep]
   }
 }
+
+export const updateProduct = (productTerm, fieldKey, updateTerm) =>
+  new UpdateProductTerm(productTerm, fieldKey, updateTerm)
+
+export const updateRecord = (recordTerm, fieldKey, updateTerm) =>
+  new UpdateRecordTerm(recordTerm, fieldKey, updateTerm)

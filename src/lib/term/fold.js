@@ -113,3 +113,6 @@ export class FoldTerm extends Term {
     return ['fold', bodyRep]
   }
 }
+
+export const fold = (fixedType, bodyTerm) =>
+  new FoldTerm(fixedType, bodyTerm)
