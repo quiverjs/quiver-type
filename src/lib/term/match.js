@@ -12,7 +12,7 @@ import { Term } from './term'
 import { ArgSpec } from './arg-spec'
 import { VariantTerm } from './variant'
 import { VariableTerm } from './variable'
-import { TermLambdaTerm } from './term-lambda'
+import { ValueLambdaTerm } from './lambda'
 
 import {
   assertMap, assertInstanceOf,
@@ -42,7 +42,7 @@ export class MatchTerm extends Term {
         throw new TypeError('case terms must match all sum types')
       }
 
-      assertInstanceOf(caseTerm, TermLambdaTerm)
+      assertInstanceOf(caseTerm, ValueLambdaTerm)
 
       const termType = caseTerm.termType()
       assertInstanceOf(termType, ArrowType)
@@ -231,7 +231,7 @@ export class MatchTerm extends Term {
     const { tag, bodyTerm } = variantTerm
     const caseTerm = caseTerms.get(tag)
 
-    assertInstanceOf(caseTerm, TermLambdaTerm)
+    assertInstanceOf(caseTerm, ValueLambdaTerm)
 
     return caseTerm.applyTerm(bodyTerm)
   }

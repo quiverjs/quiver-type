@@ -16,7 +16,7 @@ import {
   ProductTerm,
   VariableTerm,
   FixedPointTerm,
-  TermLambdaTerm
+  ValueLambdaTerm
 } from '../lib/term'
 
 import {
@@ -49,7 +49,7 @@ test('fixed point test', assert => {
 
     const fibLambda = new FixedPointTerm(
       fVar, fibType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         xVar, NumberType,
         new BodyTerm(
           IList([
@@ -135,18 +135,18 @@ test('fixed point test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const isNilLambda = new TermLambdaTerm(
+    const isNilLambda = new ValueLambdaTerm(
       xVar, NumListType,
       new MatchTerm(
         new UnfoldTerm(
           new VariableTerm(xVar, NumListType)),
         BooleanType,
         IMap({
-          Nil: new TermLambdaTerm(
+          Nil: new ValueLambdaTerm(
             yVar, unitType,
             new ValueTerm(
               true, BooleanType)),
-          Cons: new TermLambdaTerm(
+          Cons: new ValueLambdaTerm(
             yVar, NumConsType,
             new ValueTerm(
               false, BooleanType))

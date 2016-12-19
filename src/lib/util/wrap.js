@@ -6,7 +6,7 @@ import {
 } from '../core/assert'
 
 import { BodyTerm } from '../term/body'
-import { TermLambdaTerm } from '../term/term-lambda'
+import { ValueLambdaTerm } from '../term/lambda'
 import { VariableTerm } from '../term/variable'
 
 import { Type } from '../type/type'
@@ -33,7 +33,7 @@ export const functionToTerm = (argTypes, returnType, func) => {
 
   const lambdaTerm = argVars.reduceRight(
     (term, [argVar, argType]) =>
-      new TermLambdaTerm(argVar, argType, term),
+      new ValueLambdaTerm(argVar, argType, term),
     bodyTerm)
 
   return lambdaTerm

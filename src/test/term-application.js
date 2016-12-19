@@ -8,7 +8,7 @@ import {
   BodyTerm,
   ValueTerm,
   VariableTerm,
-  TermLambdaTerm,
+  ValueLambdaTerm,
   TermApplicationTerm
 } from '../lib/term'
 
@@ -31,12 +31,12 @@ test('term compilation test', assert => {
       (xCompiledType, yCompiledType) =>
         (x, y) => x+y)
 
-    const addLambda = new TermLambdaTerm(
+    const addLambda = new ValueLambdaTerm(
       xVar, NumberType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         yVar, NumberType, addTerm))
 
-    const addFiveLambda = new TermLambdaTerm(
+    const addFiveLambda = new ValueLambdaTerm(
       zVar, NumberType,
       new TermApplicationTerm(
         new TermApplicationTerm(addLambda,
@@ -64,12 +64,12 @@ test('term compilation test', assert => {
       (xCompiledType, yCompiledType) =>
         (x, y) => x+y)
 
-    const addLambda = new TermLambdaTerm(
+    const addLambda = new ValueLambdaTerm(
       xVar, NumberType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         yVar, NumberType, addTerm))
 
-    const adderLambda = new TermLambdaTerm(
+    const adderLambda = new ValueLambdaTerm(
       zVar, NumberType,
       new TermApplicationTerm(addLambda,
         new VariableTerm(zVar, NumberType)))

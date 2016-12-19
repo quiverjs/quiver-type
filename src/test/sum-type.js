@@ -11,7 +11,7 @@ import {
   ValueTerm,
   VariantTerm,
   VariableTerm,
-  TermLambdaTerm
+  ValueLambdaTerm
 } from '../lib/term'
 
 import {
@@ -63,7 +63,7 @@ test('sum type test', assert => {
 
     const xVar = new TermVariable('x')
 
-    const matchLambda = new TermLambdaTerm(
+    const matchLambda = new ValueLambdaTerm(
       xVar, EitherNumStr,
       new MatchTerm(
         new VariableTerm(xVar, EitherNumStr),

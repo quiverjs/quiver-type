@@ -8,7 +8,7 @@ export { BodyTerm, RawBodyTerm } from './body'
 
 export { VariableTerm } from './variable'
 
-export { TermLambdaTerm } from './term-lambda'
+export { LambdaTerm, TermLambdaTerm, ValueLambdaTerm } from './lambda'
 
 export { TermApplicationTerm } from './term-application'
 

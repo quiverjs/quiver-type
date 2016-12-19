@@ -1,5 +1,6 @@
 import './primitive'
 import './body'
+import './let'
 import './lambda'
 import './term-application'
 import './type-lambda'

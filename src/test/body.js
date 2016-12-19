@@ -7,7 +7,7 @@ import {
 import {
   BodyTerm,
   VariableTerm,
-  TermLambdaTerm
+  ValueLambdaTerm
 } from '../lib/term'
 
 import { compileTerm } from '../lib/util'
@@ -34,9 +34,9 @@ test('term compilation test', assert => {
         }
       })
 
-    const addLambda = new TermLambdaTerm(
+    const addLambda = new ValueLambdaTerm(
       xVar, NumberType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         yVar, NumberType, addTerm))
 
     const compiledFunction = compileTerm(addLambda)

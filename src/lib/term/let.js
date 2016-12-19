@@ -158,7 +158,16 @@ export class LetTerm extends Term {
   }
 
   evaluate() {
-    return this
+    const { boundVar, boundTerm, bodyTerm } = this
+
+    const newBodyTerm = bodyTerm.evaluate()
+    const newBoundTerm = boundTerm.evaluate()
+
+    if(newBoundTerm !== boundTerm || newBodyTerm !== bodyTerm) {
+      return new LetTerm(boundVar, newBoundTerm, newBodyTerm)
+    } else {
+      return this
+    }
   }
 
   compileClosure(closureArgs) {
@@ -168,7 +177,7 @@ export class LetTerm extends Term {
 
     const boundClosure = boundTerm.compileClosure(closureArgs)
 
-    const inArgSpec = new ArgSpec(boundVar, boundTerm.termType())
+    const inArgSpec = new ArgSpec(boundVar, boundTerm.termType().compileType())
     const inClosureArgs = closureArgs.push(inArgSpec)
 
     const bodyClosure = bodyTerm.compileClosure(inClosureArgs)

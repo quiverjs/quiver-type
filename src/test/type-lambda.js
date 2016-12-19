@@ -8,6 +8,7 @@ import {
   VariableTerm,
   TermLambdaTerm,
   TypeLambdaTerm,
+  ValueLambdaTerm,
   TermApplicationTerm,
   TypeApplicationTerm
 } from '../lib/term'
@@ -42,7 +43,7 @@ test('type lambda test', assert => {
 
     assert.equals(idTerm.termType(), aType)
 
-    const idLambda = new TermLambdaTerm(
+    const idLambda = new ValueLambdaTerm(
       xVar, aType, idTerm)
 
     const idLambdaType = idLambda.termType()
@@ -72,7 +73,7 @@ test('type lambda test', assert => {
     assert::termTypeEquals(numIdLambda,
       new ArrowType(NumberType, NumberType))
 
-    assert.ok(numIdLambda instanceof TermLambdaTerm)
+    assert.ok(numIdLambda instanceof ValueLambdaTerm)
 
     const numIdFunc = compileTerm(numIdLambda)
     assert.equals(numIdFunc.call(8), 8)
@@ -98,7 +99,7 @@ test('type lambda test', assert => {
       new ArrowType(StringType, StringType))
 
     const stringIdLambda = stringTypeApp.evaluate()
-    assert.ok(stringIdLambda instanceof TermLambdaTerm)
+    assert.ok(stringIdLambda instanceof ValueLambdaTerm)
 
     const stringIdFunc = compileTerm(stringIdLambda)
 
@@ -135,8 +136,8 @@ test('type lambda test', assert => {
     // first = forall a b . lambda x: a, y: b . x
     const polyFirst = new TypeLambdaTerm(aTVar, unitKind,
       new TypeLambdaTerm(bTVar, unitKind,
-        new TermLambdaTerm(xVar, aType,
-          new TermLambdaTerm(yVar, bType,
+        new ValueLambdaTerm(xVar, aType,
+          new ValueLambdaTerm(yVar, bType,
             new VariableTerm(xVar, aType)))))
 
     // first :: forall a b . a -> b -> a
@@ -187,7 +188,7 @@ test('type lambda test', assert => {
               dType),
             dType))))
 
-    // true :: a -> a -> a
+    // true :: forall a. a -> a -> a
     // true = sameType [forall a b . a] first
     const polyTrue = new TermApplicationTerm(
       new TypeApplicationTerm(
@@ -205,7 +206,7 @@ test('type lambda test', assert => {
       polyTrue, NumberType)
       .evaluate()
 
-    assert.ok(numTrue instanceof TermLambdaTerm)
+    assert.ok(numTrue instanceof ValueLambdaTerm)
     assert::termTypeEquals(numTrue, new ArrowType(
       NumberType, new ArrowType(NumberType, NumberType)))
 

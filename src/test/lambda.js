@@ -9,7 +9,7 @@ import {
   ValueTerm,
   RawBodyTerm,
   VariableTerm,
-  TermLambdaTerm,
+  ValueLambdaTerm,
   TermApplicationTerm
 } from '../lib/term'
 
@@ -32,7 +32,7 @@ test('term lambda test', assert => {
 
     // idNum :: Number -> Number
     // idNum = \x :: Number -> x
-    const idNumLambda = new TermLambdaTerm(
+    const idNumLambda = new ValueLambdaTerm(
       xVar, NumberType, idNumTerm)
 
     assert::equals(idNumLambda.freeTermVariables(), ISet())
@@ -55,9 +55,8 @@ test('term lambda test', assert => {
 
     assert::equals(appliedTerm.freeTermVariables(), ISet())
 
-    const resultTerm = appliedTerm.evaluate()
-    assert.equal(resultTerm, argTerm)
-    assert.equal(resultTerm.value, 3)
+    const result = compileTerm(appliedTerm)
+    assert.equal(result, 3)
 
     const stringArg = new ValueTerm('foo', StringType)
 
@@ -77,7 +76,7 @@ test('term lambda test', assert => {
 
     const constantTerm = new ValueTerm('foo', StringType)
 
-    const constantLambda = new TermLambdaTerm(
+    const constantLambda = new ValueLambdaTerm(
       xVar, NumberType, constantTerm)
 
     const argTerm = new ValueTerm(8, NumberType)
@@ -85,9 +84,8 @@ test('term lambda test', assert => {
     const appliedTerm = new TermApplicationTerm(
       constantLambda, argTerm)
 
-    const resultTerm = appliedTerm.evaluate()
-    assert.equal(resultTerm, constantTerm)
-    assert.equal(resultTerm.value, 'foo')
+    const result = compileTerm(appliedTerm)
+    assert.equal(result, 'foo')
 
     assert.end()
   })
@@ -107,12 +105,12 @@ test('term lambda test', assert => {
         return new ValueTerm(result, NumberType)
       })
 
-    const yPlusLambda = new TermLambdaTerm(
+    const yPlusLambda = new ValueLambdaTerm(
       yVar, NumberType, plusTerm)
 
     assert::equals(yPlusLambda.freeTermVariables(), ISet([xVar]))
 
-    const plusLambda = new TermLambdaTerm(
+    const plusLambda = new ValueLambdaTerm(
       xVar, NumberType, yPlusLambda)
 
     assert::equals(plusLambda.freeTermVariables(), ISet())
@@ -131,16 +129,16 @@ test('term lambda test', assert => {
     const arg2 = new ValueTerm(3, NumberType)
     const result1 = new TermApplicationTerm(
       plusTwoLambda, arg2
-    ).evaluate()
+    )
 
-    assert.equal(result1.value, 5)
+    assert.equal(compileTerm(result1), 5)
 
     const arg3 = new ValueTerm(4, NumberType)
     const result2 = new TermApplicationTerm(
       plusTwoLambda, arg3
     ).evaluate()
 
-    assert.equal(result2.value, 6)
+    assert.equal(compileTerm(result2), 6)
 
     assert.end()
   })
@@ -151,13 +149,13 @@ test('term lambda test', assert => {
 
     const varTerm = new VariableTerm(xVar, NumberType)
 
-    const xLambda = new TermLambdaTerm(
+    const xLambda = new ValueLambdaTerm(
       xVar, NumberType, varTerm)
 
     const func1 = compileTerm(xLambda)
     assert.equals(func1.call(2), 2)
 
-    const yxLambda = new TermLambdaTerm(
+    const yxLambda = new ValueLambdaTerm(
       yVar, NumberType, xLambda)
 
     assert.throws(() => yxLambda.call('foo', 'bar'),
@@ -172,19 +170,19 @@ test('term lambda test', assert => {
     const func2 = compileTerm(yxLambda)
     assert.equals(func2.call(3, 4), 4)
 
-    const yLambda = new TermLambdaTerm(
+    const yLambda = new ValueLambdaTerm(
       yVar, NumberType, varTerm)
 
     assert.throws(() => compileTerm(yLambda),
       'should not able to compile term with free variable')
 
-    const xyLambda = new TermLambdaTerm(
+    const xyLambda = new ValueLambdaTerm(
       xVar, NumberType, yLambda)
 
     const func3 = compileTerm(xyLambda)
     assert.equals(func3.call(1, 2), 1)
 
-    const xyxLambda = new TermLambdaTerm(
+    const xyxLambda = new ValueLambdaTerm(
       xVar, NumberType, yxLambda)
 
     const func4 = compileTerm(xyxLambda)
@@ -201,15 +199,15 @@ test('term lambda test', assert => {
 
     const fType = new ArrowType(NumberType, NumberType)
 
-    const applyLambda = new TermLambdaTerm(
+    const applyLambda = new ValueLambdaTerm(
       fVar, fType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         xVar, NumberType,
         new TermApplicationTerm(
           new VariableTerm(fVar, fType),
           new VariableTerm(xVar, NumberType))))
 
-    const plusTwoLambda = new TermLambdaTerm(
+    const plusTwoLambda = new ValueLambdaTerm(
       yVar, NumberType,
       new BodyTerm(
         IList([

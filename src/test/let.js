@@ -1,0 +1,85 @@
+import test from 'tape'
+
+import {
+  TermVariable, IList
+} from '../lib/core'
+
+import {
+  LetTerm,
+  BodyTerm,
+  ValueTerm,
+  VariableTerm,
+  ValueLambdaTerm,
+  TermApplicationTerm
+} from '../lib/term'
+
+import { compileTerm } from '../lib/util'
+
+import {
+  NumberType, StringType
+} from './util'
+
+test('let term test', assert => {
+  assert.test('basic let', assert => {
+    const xVar = new TermVariable('x')
+    const yVar = new TermVariable('y')
+
+    let counter = 2
+    const counterTerm = new BodyTerm(IList(), NumberType,
+      () => () => {
+        return counter++
+      })
+
+    const multiplyTerm = new ValueLambdaTerm(
+      xVar, NumberType,
+      new ValueLambdaTerm(
+        yVar, NumberType,
+        new BodyTerm(
+          IList([
+            new VariableTerm(xVar, NumberType),
+            new VariableTerm(yVar, NumberType),
+          ]),
+          NumberType,
+          () => (x, y) => {
+            return x * y
+          })))
+
+    const callTwiceTerm = new TermApplicationTerm(
+      new TermApplicationTerm(
+        multiplyTerm,
+        counterTerm),
+      counterTerm)
+
+    // individual term applications should evaluate the
+    // counter term body twice yielding result 2 * 3
+    const callTwiceResult = compileTerm(callTwiceTerm)
+    assert.equals(callTwiceResult, 6)
+
+    const squareTerm = new LetTerm(
+      xVar, counterTerm,
+      new TermApplicationTerm(
+        new TermApplicationTerm(
+          multiplyTerm,
+          new VariableTerm(xVar, NumberType)),
+        new VariableTerm(xVar, NumberType)))
+
+    // let term evaluates the body term once
+    // and use the value in multiple sites that
+    // reference x.
+    const squareResult = compileTerm(squareTerm)
+    assert.equals(squareResult, 16)
+
+    assert.end()
+  })
+
+  assert.test('let term type check', assert => {
+    const xVar = new TermVariable('x')
+
+    assert.throws(() => {
+      new LetTerm(xVar, new ValueTerm(3, NumberType),
+        new VariableTerm(xVar, StringType))
+    }, 'should type check body term have the same variable type')
+
+    assert.end()
+  })
+})

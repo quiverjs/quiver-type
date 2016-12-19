@@ -11,7 +11,7 @@ import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { Term } from './term'
-import { TermLambdaTerm } from './term-lambda'
+import { ValueLambdaTerm } from './lambda'
 
 const $fixedVar = Symbol('@fixedVar')
 const $selfType = Symbol('@selfType')
@@ -21,7 +21,7 @@ export class FixedPointTerm extends Term {
   constructor(fixedVar, selfType, bodyLambda) {
     assertInstanceOf(fixedVar, TermVariable)
     assertInstanceOf(selfType, ArrowType)
-    assertInstanceOf(bodyLambda, TermLambdaTerm)
+    assertInstanceOf(bodyLambda, ValueLambdaTerm)
 
     if(selfType.rightType instanceof ArrowType) {
       throw new TypeError('currently only support fixed point lambda with single argument')

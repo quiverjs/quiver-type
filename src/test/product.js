@@ -10,7 +10,7 @@ import {
   RecordTerm,
   ProductTerm,
   VariableTerm,
-  TermLambdaTerm,
+  ValueLambdaTerm,
   UpdateRecordTerm,
   UpdateProductTerm,
   ProjectRecordTerm,
@@ -75,7 +75,7 @@ test('product type test', assert => {
 
   assert.test('closure product', assert => {
     const xVar = new TermVariable('x')
-    const makePairLambda = new TermLambdaTerm(
+    const makePairLambda = new ValueLambdaTerm(
       xVar, StringType,
       new ProductTerm(IList([
         new ValueTerm(8, NumberType),
@@ -97,7 +97,7 @@ test('product type test', assert => {
   assert.test('closure record', assert => {
     const xVar = new TermVariable('x')
 
-    const makePairLambda = new TermLambdaTerm(
+    const makePairLambda = new ValueLambdaTerm(
       xVar, StringType,
       new RecordTerm(IMap({
         num: new ValueTerm(8, NumberType),
@@ -144,7 +144,7 @@ test('product type test', assert => {
 
     const xVar = new TermVariable('x')
 
-    const firstLambda = new TermLambdaTerm(
+    const firstLambda = new ValueLambdaTerm(
       xVar, numStrType,
       new ProjectProductTerm(
         new VariableTerm(xVar, numStrType),
@@ -187,7 +187,7 @@ test('product type test', assert => {
 
     const xVar = new TermVariable('x')
 
-    const firstLambda = new TermLambdaTerm(
+    const firstLambda = new ValueLambdaTerm(
       xVar, numStrType,
       new ProjectRecordTerm(
         new VariableTerm(xVar, numStrType),
@@ -250,9 +250,9 @@ test('product type test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const updateSecondLambda = new TermLambdaTerm(
+    const updateSecondLambda = new ValueLambdaTerm(
       xVar, numStrType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         yVar, StringType,
         new UpdateProductTerm(
           new VariableTerm(xVar, numStrType),
@@ -299,9 +299,9 @@ test('product type test', assert => {
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 
-    const updateSecondLambda = new TermLambdaTerm(
+    const updateSecondLambda = new ValueLambdaTerm(
       xVar, numStrType,
-      new TermLambdaTerm(
+      new ValueLambdaTerm(
         yVar, StringType,
         new UpdateRecordTerm(
           new VariableTerm(xVar, numStrType),

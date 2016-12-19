@@ -6,6 +6,7 @@ import {
 } from '../lib/core'
 
 import {
+  LetTerm,
   unitTerm,
   BodyTerm,
   unitValue,
@@ -16,6 +17,7 @@ import {
   VariableTerm,
   TypeLambdaTerm,
   TermLambdaTerm,
+  ValueLambdaTerm,
   ProjectRecordTerm,
   TermApplicationTerm,
   TypeApplicationTerm
@@ -103,15 +105,15 @@ test('type class test', assert => {
       aTVar, unitKind,
       new TypeLambdaTerm(
         bTVar, unitKind,
-        new TermLambdaTerm(
+        new ValueLambdaTerm(
           mapVar, ABArrowType,
-          new TermLambdaTerm(
+          new ValueLambdaTerm(
             maybeAVar, MaybeAType,
             new MatchTerm(
               new VariableTerm(maybeAVar, MaybeAType),
               MaybeBType,
               IMap({
-                Just: new TermLambdaTerm(
+                Just: new ValueLambdaTerm(
                   xVar, aType,
                   new VariantTerm(
                     MaybeBType,
@@ -120,7 +122,7 @@ test('type class test', assert => {
                       new VariableTerm(mapVar, ABArrowType),
                       new VariableTerm(xVar, aType)))),
 
-                Nothing: new TermLambdaTerm(
+                Nothing: new ValueLambdaTerm(
                   xVar, unitType,
                   new VariantTerm(
                     MaybeBType,
@@ -153,7 +155,7 @@ test('type class test', assert => {
       ShowClass, StringType)
 
     const StringShowInstance = new RecordTerm(IMap({
-      show: new TermLambdaTerm(
+      show: new ValueLambdaTerm(
         xVar, StringType,
         new BodyTerm(
           IList([
@@ -170,7 +172,7 @@ test('type class test', assert => {
       ShowClass, NumberType)
 
     const NumberShowInstance = new RecordTerm(IMap({
-      show: new TermLambdaTerm(
+      show: new ValueLambdaTerm(
         xVar, NumberType,
         new BodyTerm(
           IList([
@@ -208,37 +210,38 @@ test('type class test', assert => {
       //         Nothing: 'Nothing'
       const MaybeShowInstance = new TypeLambdaTerm(
         aTVar, unitKind,
-        new TermLambdaTerm(
+        new ValueLambdaTerm(
           showAVar, showAType,
           new RecordTerm(IMap({
-            show: new TermLambdaTerm(
+            show: new ValueLambdaTerm(
               maVar, MaybeAType,
               new MatchTerm(
                 new VariableTerm(maVar, MaybeAType),
                 StringType,
                 IMap({
-                  Just: new TermLambdaTerm(
+                  Just: new ValueLambdaTerm(
                     xVar, aType,
-                    new TermApplicationTerm(
-                      new TermLambdaTerm(
-                        xStrVar, StringType,
-                        new BodyTerm(
-                          IList([
-                            new VariableTerm(xStrVar, StringType)
-                          ]),
-                          StringType,
-                          stringCompiledType =>
-                            xStr =>
-                              `Just(${xStr})`
-                        )),
+                    new LetTerm(
+                      xStrVar,
+
                       new TermApplicationTerm(
                         new ProjectRecordTerm(
                           new VariableTerm(
                             showAVar, showAType),
                           'show'),
-                        new VariableTerm(xVar, aType)))),
+                        new VariableTerm(xVar, aType)),
 
-                  Nothing: new TermLambdaTerm(
+                      new BodyTerm(
+                        IList([
+                          new VariableTerm(xStrVar, StringType)
+                        ]),
+                        StringType,
+                        stringCompiledType =>
+                          xStr =>
+                            `Just(${xStr})`
+                      ))),
+
+                  Nothing: new ValueLambdaTerm(
                     xVar, unitType,
                     new ValueTerm('Nothing', StringType))
                 }))),

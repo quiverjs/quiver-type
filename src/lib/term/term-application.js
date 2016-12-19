@@ -13,7 +13,6 @@ import { ArrowType } from '../type/arrow'
 import { isTerminalTerm } from '../util/terminal'
 
 import { Term } from './term'
-import { TermLambdaTerm } from './term-lambda'
 
 const $type = Symbol('@type')
 const $leftTerm = Symbol('@leftTerm')
@@ -165,9 +164,7 @@ export class TermApplicationTerm extends Term {
     const newLeftTerm = leftTerm.evaluate()
     const newRightTerm = rightTerm.evaluate()
 
-    if((newLeftTerm instanceof TermLambdaTerm) &&
-       isTerminalTerm(newRightTerm))
-    {
+    if((newLeftTerm.applyTerm) && isTerminalTerm(newRightTerm)) {
       return newLeftTerm.applyTerm(newRightTerm).evaluate()
 
     } else if(leftTerm === newLeftTerm && rightTerm === newRightTerm) {

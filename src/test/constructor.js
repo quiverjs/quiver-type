@@ -4,8 +4,8 @@ import {
   BodyTerm,
   ValueTerm,
   VariableTerm,
-  TermLambdaTerm,
   TypeLambdaTerm,
+  ValueLambdaTerm,
   TypeApplicationTerm,
   TermApplicationTerm
 } from '../lib/term'
@@ -117,9 +117,9 @@ test('type constructor test', assert => {
       bTVar, unitKind,
       new TypeLambdaTerm(
         cTVar, unitKind,
-        new TermLambdaTerm(
+        new ValueLambdaTerm(
           fVar, fType,
-          new TermLambdaTerm(
+          new ValueLambdaTerm(
             lVar, bListType,
             fmapBody
           ))))
@@ -132,7 +132,7 @@ test('type constructor test', assert => {
 
     const xVar = new TermVariable('x')
 
-    const numToString = new TermLambdaTerm(
+    const numToString = new ValueLambdaTerm(
       xVar, NumberType,
       new BodyTerm(
         IList([ new VariableTerm(xVar, NumberType) ]),

@@ -1,33 +1,21 @@
-import { IList } from '../core/container'
-import { CompiledFunction } from '../compiled-term/function'
-import { TermVariable, TypeVariable } from '../core/variable'
+import { TermVariable, TypeVariable } from '../../core/variable'
 import {
-  assertInstanceOf, assertListContent, assertNoError
-} from '../core/assert'
+  assertInstanceOf, assertNoError
+} from '../../core/assert'
 
-import { Kind } from '../kind/kind'
-import { Type } from '../type/type'
-import { ArrowType } from '../type/arrow'
+import { Kind } from '../../kind/kind'
+import { Type } from '../../type/type'
+import { ArrowType } from '../../type/arrow'
 
-import { Term } from './term'
-import { ArgSpec } from './arg-spec'
-import { VariableTerm } from './variable'
+import { Term } from '../term'
+import { VariableTerm } from '../variable'
 
 const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
 const $bodyTerm = Symbol('@bodyTerm')
 const $type = Symbol('@type')
 
-const closureWrap = (bodyClosure, compiledArrow) =>
-  closureArgs => {
-    const func = (...inArgs) => {
-      return bodyClosure([...closureArgs, ...inArgs])
-    }
-
-    return new CompiledFunction(compiledArrow, func)
-  }
-
-export class TermLambdaTerm extends Term {
+export class LambdaTerm extends Term {
   // constructor :: TermVariable -> Type -> Term -> ()
   constructor(argVar, argType, bodyTerm) {
     assertInstanceOf(argVar, TermVariable)
@@ -74,8 +62,8 @@ export class TermLambdaTerm extends Term {
 
     if(targetTerm === this) return null
 
-    if(!(targetTerm instanceof TermLambdaTerm))
-      return new TypeError('target term must be TermLambdaTerm')
+    if(!(targetTerm instanceof this.constructor))
+      return new TypeError('target term must be same instance of LambdaTerm')
 
     const { argVar, argType, bodyTerm } = this
 
@@ -136,7 +124,7 @@ export class TermLambdaTerm extends Term {
       const newBodyTerm = bodyTerm2.bindTerm(termVar, term)
 
       if(newBodyTerm !== bodyTerm2) {
-        return new TermLambdaTerm(argVar2, argType, newBodyTerm)
+        return new this.constructor(argVar2, argType, newBodyTerm)
       } else {
         return this
       }
@@ -145,7 +133,7 @@ export class TermLambdaTerm extends Term {
       const newBodyTerm = bodyTerm.bindTerm(termVar, term)
 
       if(newBodyTerm !== bodyTerm) {
-        return new TermLambdaTerm(argVar, argType, newBodyTerm)
+        return new this.constructor(argVar, argType, newBodyTerm)
       } else {
         return this
       }
@@ -163,7 +151,7 @@ export class TermLambdaTerm extends Term {
     if((newArgType === argType) && (newBodyTerm === bodyTerm))
       return this
 
-    return new TermLambdaTerm(argVar, newArgType, newBodyTerm)
+    return new this.constructor(argVar, newArgType, newBodyTerm)
   }
 
   evaluate() {
@@ -171,56 +159,16 @@ export class TermLambdaTerm extends Term {
   }
 
   compileClosure(closureArgs) {
-    assertListContent(closureArgs, ArgSpec)
-
-    const bodyClosure = this.compileLambda(closureArgs, IList())
-    const compiledArrow = this.termType().compileType()
-
-    return closureWrap(bodyClosure, compiledArrow)
-  }
-
-  compileLambda(closureSpecs, argSpecs) {
-    assertListContent(closureSpecs, ArgSpec)
-    assertListContent(argSpecs, ArgSpec)
-
-    const { argVar, argType, bodyTerm } = this
-
-    const compiledType = argType.compileType()
-
-    const inArgSpecs = argSpecs.push(new ArgSpec(argVar, compiledType))
-
-    if(bodyTerm instanceof TermLambdaTerm) {
-      return bodyTerm.compileLambda(closureSpecs, inArgSpecs)
-
-    } else {
-      return bodyTerm.compileClosure(closureSpecs.concat(inArgSpecs))
-    }
+    throw new Error('not implemented')
   }
 
   // applyTerm :: Term -> Term
   // Term application to the lambda term
   applyTerm(term) {
-    assertInstanceOf(term, Term)
-
-    const { argVar, argType, bodyTerm } = this
-    assertNoError(argType.typeCheck(term.termType()))
-
-    return bodyTerm.bindTerm(argVar, term)
+    throw new Error('not implemented')
   }
 
   formatTerm() {
-    const { argVar, argType, bodyTerm } = this
-
-    const varRep = argVar.name
-    const argTypeRep = argType.formatType()
-    const bodyRep = bodyTerm.formatTerm()
-
-    return ['lambda', [varRep, argTypeRep], bodyRep]
+    throw new Error('not implemented')
   }
 }
-
-export const lambda = (argSpecs, bodyTerm) =>
-  argSpecs.reduceRight(
-    (bodyTerm, [argVar, argType]) =>
-      new TermLambdaTerm(argVar, argType, bodyTerm),
-      bodyTerm)
