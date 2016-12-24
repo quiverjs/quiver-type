@@ -13,6 +13,10 @@ import {
   TermApplicationTerm
 } from '../lib/term'
 
+import {
+  ArrowType
+} from '../lib/type'
+
 import { compileTerm } from '../lib/util'
 
 import {
@@ -74,11 +78,29 @@ test('let term test', assert => {
 
   assert.test('let term type check', assert => {
     const xVar = new TermVariable('x')
+    const yVar = new TermVariable('x')
 
     assert.throws(() => {
       new LetTerm(xVar, new ValueTerm(3, NumberType),
         new VariableTerm(xVar, StringType))
     }, 'should type check body term have the same variable type')
+
+    const term1 = new LetTerm(
+      xVar, new ValueTerm(2, NumberType),
+      new TermApplicationTerm(
+        new VariableTerm(yVar,
+          new ArrowType(NumberType, NumberType)),
+        new VariableTerm(xVar, NumberType)))
+
+    const freeVars = term1.freeTermVariables()
+    assert.deepEquals([...freeVars], [yVar])
+
+    assert.equals(term1.termType(), NumberType)
+
+    assert.equals(
+      term1.bindTerm(xVar, new ValueTerm(3, NumberType)),
+      term1,
+      'should not able to rebind x var in let')
 
     assert.end()
   })

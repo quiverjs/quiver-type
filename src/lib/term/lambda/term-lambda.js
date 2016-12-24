@@ -37,3 +37,11 @@ export class TermLambdaTerm extends LambdaTerm {
     return ['term-lambda', [varRep, argTypeRep], bodyRep]
   }
 }
+
+export const termLambda = (argTerms, bodyTerm) => {
+  return argTerms.reduceRight(
+    (bodyTerm, [argTerm, argType]) => {
+      return new TermLambdaTerm(argTerm, argType, bodyTerm)
+    },
+    bodyTerm)
+}

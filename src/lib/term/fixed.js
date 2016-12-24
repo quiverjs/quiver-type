@@ -1,44 +1,79 @@
 import {
-  assertInstanceOf, assertListContent, assertNoError
+  isInstanceOf, assertInstanceOf,
+  assertListContent, assertNoError
 } from '../core/assert'
 
 import { ArgSpec } from './arg-spec'
 import { CompiledFunction } from '../compiled-term/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 
-import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
+import {
+  ProductType, RecordType
+} from '../type/product'
 
 import { Term } from './term'
-import { ValueLambdaTerm } from './lambda'
 
-const $fixedVar = Symbol('@fixedVar')
 const $selfType = Symbol('@selfType')
 const $bodyLambda = Symbol('@bodyLambda')
 
-export class FixedPointTerm extends Term {
-  constructor(fixedVar, selfType, bodyLambda) {
-    assertInstanceOf(fixedVar, TermVariable)
-    assertInstanceOf(selfType, ArrowType)
-    assertInstanceOf(bodyLambda, ValueLambdaTerm)
+const validateFixedType = type => {
+  if(isInstanceOf(type, ArrowType))
+    return null
 
-    if(selfType.rightType instanceof ArrowType) {
-      throw new TypeError('currently only support fixed point lambda with single argument')
-    }
-
-    assertNoError(selfType.typeCheck(bodyLambda.termType()))
-    assertNoError(bodyLambda.validateVarType(fixedVar, selfType))
-
-    super()
-
-    this[$fixedVar] = fixedVar
-    this[$selfType] = selfType
-    this[$bodyLambda] = bodyLambda
+  if(!isInstanceOf(type, ProductType) &&
+     !isInstanceOf(type, RecordType))
+  {
+    return new TypeError('fixed type must be either arrow, product, or record type')
   }
 
-  get fixedVar() {
-    return this[$fixedVar]
+  for(const fieldType of type.fieldTypes.values()) {
+    const err = validateFixedType(fieldType)
+    if(err) return err
+  }
+
+  return null
+}
+
+const functionThunk = (compiledType) => {
+  let inFunc
+
+  const thunkFunc = new CompiledFunction(compiledType,
+    (...args) => {
+      if(!inFunc) {
+        throw new Error('concrete function is not yet initialized')
+      }
+
+      return inFunc.call(...args)
+    })
+
+  const setInFunc = func => {
+    if(inFunc) {
+      throw new Error('inFunc is already set')
+    }
+
+    inFunc = func
+  }
+
+  return [thunkFunc, setInFunc]
+}
+
+export class FixedPointTerm extends Term {
+  constructor(bodyLambda) {
+    assertInstanceOf(bodyLambda, Term)
+
+    const bodyType = bodyLambda.termType()
+    assertInstanceOf(bodyType, ArrowType)
+
+    const selfType = bodyType.leftType
+    assertNoError(validateFixedType(selfType))
+    assertNoError(selfType.typeCheck(bodyType.rightType))
+
+    super(validateFixedType)
+
+    this[$selfType] = selfType
+    this[$bodyLambda] = bodyLambda
   }
 
   get selfType() {
@@ -54,63 +89,31 @@ export class FixedPointTerm extends Term {
   }
 
   freeTermVariables() {
-    const { fixedVar, bodyLambda } = this
-
-    return bodyLambda.freeTermVariables()
-      .delete(fixedVar)
+    return this.bodyLambda.freeTermVariables()
   }
 
   termCheck(targetTerm) {
-    assertInstanceOf(targetTerm, Term)
-
-    if(targetTerm === this) return null
-
-    if(!(targetTerm instanceof FixedPointTerm))
-      return new TypeError('target term must be FixedPointTerm')
-
-    if(this.fixedVar !== targetTerm.fixedVar)
-      return new TypeError('target fixed term has different fixed variable')
-
-    return this.bodyLambda.termCheck(targetTerm.bodyLambda)
+    return this.bodyLambda.termCheck(targetTerm)
   }
 
   validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    const { fixedVar, selfType, bodyLambda } = this
-
-    if(termVar === fixedVar)
-      return selfType.typeCheck(type)
-
-    return bodyLambda.validateVarType(termVar, type)
+    return this.bodyLambda.validateVarType(termVar, type)
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    const { selfType, bodyLambda } = this
-
-    const err = selfType.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return bodyLambda.validateTVarKind(typeVar, kind)
+    return this.bodyLambda.validateTVarKind(typeVar, kind)
   }
 
   bindTerm(termVar, term) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(term, Term)
 
-    const { fixedVar, selfType, bodyLambda } = this
-
-    if(termVar === fixedVar)
-      return this
+    const { bodyLambda } = this
 
     const newBodyLambda = bodyLambda.bindTerm(termVar, term)
 
     if(newBodyLambda !== bodyLambda) {
-      return new FixedPointTerm(fixedVar, selfType, newBodyLambda)
+      return new FixedPointTerm(newBodyLambda)
     } else {
       return this
     }
@@ -120,13 +123,12 @@ export class FixedPointTerm extends Term {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(type, Type)
 
-    const { fixedVar, selfType, bodyLambda } = this
+    const { bodyLambda } = this
 
-    const newSelfType = selfType.bindType(typeVar, type)
     const newBodyLambda = bodyLambda.bindType(typeVar, type)
 
-    if(selfType !== newSelfType || newBodyLambda !== bodyLambda) {
-      return new FixedPointTerm(fixedVar, newSelfType, newBodyLambda)
+    if(newBodyLambda !== bodyLambda) {
+      return new FixedPointTerm(newBodyLambda)
     } else {
       return this
     }
@@ -139,40 +141,53 @@ export class FixedPointTerm extends Term {
   compileClosure(closureSpecs) {
     assertListContent(closureSpecs, ArgSpec)
 
-    const { fixedVar, selfType, bodyLambda } = this
+    const { selfType, bodyLambda } = this
 
     const compiledSelfType = selfType.compileType()
+    const bodyClosure = bodyLambda.compileClosure(closureSpecs)
 
-    const inClosureSpecs = closureSpecs.push(
-      new ArgSpec(fixedVar, compiledSelfType))
+    if(isInstanceOf(selfType, ArrowType)) {
+      return closureArgs => {
+        const inFunc = bodyClosure(closureArgs)
 
-    const bodyClosure = bodyLambda.compileClosure(inClosureSpecs)
+        const fixedFunc = new CompiledFunction(compiledSelfType,
+          (...args) => {
+            return inFunc.call(fixedFunc, ...args)
+          })
 
-    return closureArgs => {
-      let inFunc
+        return fixedFunc
+      }
 
-      const fixedFunc = new CompiledFunction(compiledSelfType,
-        (...args) => {
-          if(!inFunc)
-            throw new TypeError('inner function has not been initialized')
+    } else {
+      // product/record type
+      return closureArgs => {
+        const inFunc = bodyClosure(closureArgs)
 
-          return inFunc.call(...args)
-        })
+        const fieldThunks = selfType.fieldTypes.map(
+          fieldType => {
+            const compiledType = fieldType.compileType()
+            return functionThunk(compiledType)
+          })
 
-      inFunc = bodyClosure([...closureArgs, fixedFunc])
+        const fixedProduct = fieldThunks.map(([thunkFunc]) => thunkFunc)
+        const inProduct = inFunc.call(fixedProduct)
 
-      return inFunc
+        for(const [fieldKey, [, setFunc]] of fieldThunks.entries()) {
+          const fieldFunc = inProduct.get(fieldKey)
+          setFunc(fieldFunc)
+        }
+
+        return inProduct
+      }
     }
   }
 
   formatTerm() {
-    const { fixedVar, selfType, bodyLambda } = this
+    const { bodyLambda } = this
 
-    const varRep = fixedVar.name
-    const typeRep = selfType.formatType()
     const bodyRep = bodyLambda.formatTerm()
 
-    return ['fixed', [varRep, typeRep], bodyRep]
+    return ['fixed', bodyRep]
   }
 }
 

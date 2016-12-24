@@ -11,7 +11,7 @@ import { unitType } from '../type/unit'
 import { Term } from './term'
 import { ArgSpec } from './arg-spec'
 
-const unitValue = Symbol('unit')
+export const unitValue = Symbol('unit')
 
 export class UnitTerm extends Term {
   constructor() {

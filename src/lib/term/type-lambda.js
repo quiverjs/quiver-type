@@ -160,3 +160,11 @@ export class TypeLambdaTerm extends Term {
     return ['type-lambda', [argTVarRep, argKindRep], bodyRep]
   }
 }
+
+export const typeLambda = (argTypes, bodyTerm) => {
+  return argTypes.reduceRight(
+    (bodyTerm, [argType, argKind]) => {
+      return new TypeLambdaTerm(argType, argKind, bodyTerm)
+    },
+    bodyTerm)
+}

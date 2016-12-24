@@ -8,6 +8,7 @@ import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 
 import { Term } from './term'
+import { ValueTerm } from './value'
 import { ArgSpec } from './arg-spec'
 import { VariableTerm } from './variable'
 
@@ -164,7 +165,16 @@ export class LetTerm extends Term {
     const newBoundTerm = boundTerm.evaluate()
 
     if(newBoundTerm !== boundTerm || newBodyTerm !== bodyTerm) {
-      return new LetTerm(boundVar, newBoundTerm, newBodyTerm)
+      return new LetTerm(boundVar, newBoundTerm, newBodyTerm).evaluate()
+
+    } else if(
+      isInstanceOf(boundTerm, VariableTerm) ||
+      isInstanceOf(boundTerm, ValueTerm))
+    {
+      // bind body term directly if the bound term is variable
+      // or value, which are safe to evaluate multiple times.
+      return bodyTerm.bindTerm(boundVar, boundTerm).evaluate()
+
     } else {
       return this
     }

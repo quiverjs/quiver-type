@@ -60,7 +60,7 @@ export class ValueLambdaTerm extends LambdaTerm {
       return bodyTerm.bindTerm(argVar, argTerm).evaluate()
 
     } else {
-      return new LetTerm(argVar, argTerm, bodyTerm)
+      return new LetTerm(argVar, argTerm, bodyTerm).evaluate()
     }
   }
 
@@ -73,4 +73,12 @@ export class ValueLambdaTerm extends LambdaTerm {
 
     return ['value-lambda', [varRep, argTypeRep], bodyRep]
   }
+}
+
+export const lambda = (argTerms, bodyTerm) => {
+  return argTerms.reduceRight(
+    (bodyTerm, [argTerm, argType]) => {
+      return new ValueLambdaTerm(argTerm, argType, bodyTerm)
+    },
+    bodyTerm)
 }
