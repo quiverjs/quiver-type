@@ -3,11 +3,14 @@ import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
 
+import { CompiledFixedType, $setConcrete } from '../compiled-type/fixed'
+
 import { Type } from './type'
 
 const $fixedVar = Symbol('@fixedVar')
 const $selfKind = Symbol('@selfKind')
 const $bodyType = Symbol('@bodyType')
+const $compiledType = Symbol('@compiledType')
 
 const $unfoldType = Symbol('@unfoldType')
 
@@ -27,6 +30,7 @@ export class FixedPointType extends Type {
     this[$selfKind] = selfKind
     this[$bodyType] = bodyType
     this[$unfoldType] = null
+    this[$compiledType] = null
   }
 
   get fixedVar() {
@@ -42,13 +46,14 @@ export class FixedPointType extends Type {
   }
 
   unfoldType() {
-    let unfoldType = this[$unfoldType]
-
-    if(!unfoldType) {
-      const { fixedVar, bodyType } = this
-      unfoldType = bodyType.bindType(fixedVar, this)
-      this[$unfoldType] = unfoldType
+    if(this[$unfoldType]) {
+      return this[$unfoldType]
     }
+
+    const { fixedVar, bodyType } = this
+
+    const unfoldType = bodyType.bindType(fixedVar, this)
+    this[$unfoldType] = unfoldType
 
     return unfoldType
   }
@@ -113,7 +118,17 @@ export class FixedPointType extends Type {
   }
 
   compileType() {
-    throw new Error('not yet implemented')
+    if(this[$compiledType]) {
+      return this[$compiledType]
+    }
+
+    const compiledType = new CompiledFixedType(this)
+    this[$compiledType] = compiledType
+
+    const concreteType = this.unfoldType().compileType()
+    compiledType[$setConcrete](concreteType)
+
+    return concreteType
   }
 
   formatType() {

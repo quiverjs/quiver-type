@@ -39,6 +39,12 @@ class VariantValue {
   get value() {
     return this[$value]
   }
+
+  inspect() {
+    const { tag, value } = this
+
+    return [tag, value]
+  }
 }
 
 export class CompiledSumType extends CompiledType {

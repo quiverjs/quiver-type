@@ -1,5 +1,7 @@
 import test from 'tape'
 
+import { IList } from '../lib/core'
+
 import {
   termVar, typeVar,
   lets, unitTerm, body, fold, match,
@@ -8,7 +10,7 @@ import {
   sumType, unitType, arrow, forall,
   recordType, productType, varType,
   fixedType, applicationType,
-  unitKind
+  unitKind, unit
 } from '../lib/dsl'
 
 import { compileTerm } from '../lib/util'
@@ -159,7 +161,7 @@ test('fixed point test', assert => {
         UnfoldNumList,
         'Cons',
         product(
-          value(1, NumberType),
+          value(2, NumberType),
           oneList)))
 
     // console.log(twoList)
@@ -182,7 +184,29 @@ test('fixed point test', assert => {
             value(false, BooleanType))
         }))
 
-    // console.log('isNilLambda:', isNilLambda)
+    const compiledList = NumListType.compileType()
+
+    const nil = compileTerm(nilList)
+    const list1 = compileTerm(oneList)
+    const list2 = compileTerm(twoList)
+
+    assert.notOk(compiledList.typeCheck(nil))
+    assert.notOk(compiledList.typeCheck(list1))
+    assert.notOk(compiledList.typeCheck(list2))
+
+    const nil2 = compiledList.construct('Nil', unit)
+    const list3 = compiledList.construct('Cons', IList([3, list2]))
+
+    assert.notOk(compiledList.typeCheck(nil2))
+    assert.notOk(compiledList.typeCheck(list3))
+
+    const isNilFn = compileTerm(isNilLambda)
+
+    assert.equals(isNilFn.call(nil), true)
+    assert.equals(isNilFn.call(nil2), true)
+    assert.equals(isNilFn.call(list1), false)
+    assert.equals(isNilFn.call(list2), false)
+    assert.equals(isNilFn.call(list3), false)
 
     assert.end()
   })
