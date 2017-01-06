@@ -25,3 +25,4 @@ export {
 } from './kind/dsl'
 
 export { termVar, typeVar } from './core/variable'
+export { varGen } from './core/vargen'
