@@ -38,3 +38,23 @@ export const assertMap = (map, message) => {
 export const assertNoError = err => {
   if(err) throw err
 }
+
+export const assertArray = (array, message) => {
+  if(!Array.isArray(array)) {
+    const errMessage = message || 'argument must be an array'
+    throw new TypeError(errMessage)
+  }
+}
+
+export const assertPairArray = (array, message) => {
+  assertArray(array)
+
+  for(const pair of array) {
+    assertArray(pair)
+
+    if(pair.length !== 2) {
+      const errMessage = message || 'argument must be 2-element array pair'
+      throw new TypeError(errMessage)
+    }
+  }
+}

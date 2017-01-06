@@ -1,7 +1,8 @@
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
   isInstanceOf, assertInstanceOf,
-  assertListContent, assertNoError
+  assertListContent, assertNoError,
+  assertPairArray
 } from '../core/assert'
 
 import { Kind } from '../kind/kind'
@@ -211,9 +212,7 @@ export class LetTerm extends Term {
 }
 
 export const lets = (bindings, bodyTerm) => {
-  if(!Array.isArray(bindings)) {
-    throw new TypeError('bindings in lets must be an array')
-  }
+  assertPairArray(bindings)
 
   return bindings.reduceRight(
     (bodyTerm, [boundVar, boundTerm]) => {

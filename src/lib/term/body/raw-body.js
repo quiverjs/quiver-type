@@ -1,5 +1,5 @@
 import {
-  assertInstanceOf,
+  assertInstanceOf, assertArray,
   assertFunction, assertNoError
 } from '../../core/assert'
 
@@ -69,5 +69,8 @@ export class RawBodyTerm extends CommonBodyTerm {
   }
 }
 
-export const rawBody = (argTerms, returnType, func) =>
-  new RawBodyTerm(IList(argTerms), returnType, func)
+export const rawBody = (argTerms, returnType, func) => {
+  assertArray(argTerms)
+
+  return new RawBodyTerm(IList(argTerms), returnType, func)
+}

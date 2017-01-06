@@ -1,5 +1,5 @@
 export {
-  body, rawBody,
+  body, rawBody, compiledBody,
   lambda, termLambda,
   product, record,
   projectProduct, projectRecord,

@@ -2,7 +2,8 @@ import { IList } from '../../core/container'
 import { CompiledFunction } from '../../compiled-term/function'
 import {
   isInstanceOf, assertInstanceOf,
-  assertListContent, assertNoError
+  assertListContent, assertNoError,
+  assertPairArray
 } from '../../core/assert'
 
 import { Term } from '../term'
@@ -76,9 +77,7 @@ export class ValueLambdaTerm extends LambdaTerm {
 }
 
 export const lambda = (argTerms, bodyTerm) => {
-  if(!Array.isArray(argTerms)) {
-    throw new TypeError('argTerms in lets must be an array')
-  }
+  assertPairArray(argTerms)
 
   return argTerms.reduceRight(
     (bodyTerm, [argTerm, argType]) => {

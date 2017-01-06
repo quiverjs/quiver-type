@@ -1,7 +1,8 @@
 import { ArgSpec } from '../arg-spec'
 
 import {
-  assertListContent, assertInstanceOf, assertFunction
+  assertListContent, assertInstanceOf,
+  assertFunction, assertArray
 } from '../../core/assert'
 
 import { IList } from '../../core/container'
@@ -80,6 +81,12 @@ export class BodyTerm extends CommonBodyTerm {
   }
 }
 
-export const body = (argTerms, returnType, compiler) => {
+export const compiledBody = (argTerms, returnType, compiler) => {
+  assertArray(argTerms)
+
   return new BodyTerm(IList(argTerms), returnType, compiler)
+}
+
+export const body = (argTerms, returnType, func) => {
+  return compiledBody(argTerms, returnType, () => func)
 }

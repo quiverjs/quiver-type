@@ -1,4 +1,8 @@
-import { assertInstanceOf, assertNoError } from '../core/assert'
+import {
+  assertInstanceOf, assertNoError,
+  assertPairArray
+} from '../core/assert'
+
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -162,6 +166,8 @@ export class TypeLambdaTerm extends Term {
 }
 
 export const typeLambda = (argTypes, bodyTerm) => {
+  assertPairArray(argTypes)
+  
   return argTypes.reduceRight(
     (bodyTerm, [argType, argKind]) => {
       return new TypeLambdaTerm(argType, argKind, bodyTerm)

@@ -2,7 +2,8 @@ import { Term } from '../term'
 import { ArgSpec } from '../arg-spec'
 
 import {
-  assertInstanceOf, assertListContent, assertNoError
+  assertInstanceOf, assertListContent,
+  assertNoError, assertPairArray
 } from '../../core/assert'
 
 import { LambdaTerm } from './common'
@@ -39,6 +40,8 @@ export class TermLambdaTerm extends LambdaTerm {
 }
 
 export const termLambda = (argTerms, bodyTerm) => {
+  assertPairArray(argTerms)
+  
   return argTerms.reduceRight(
     (bodyTerm, [argTerm, argType]) => {
       return new TermLambdaTerm(argTerm, argType, bodyTerm)

@@ -134,8 +134,7 @@ test('type class test', assert => {
         body(
           [varTerm(xVar, StringType)],
           StringType,
-          (CompiledStrinType) =>
-            str => `str(${str})`))
+          str => `str(${str})`))
     })
 
     assert::termTypeEquals(StringShowInstance, StringShowClass)
@@ -149,8 +148,7 @@ test('type class test', assert => {
         body(
           [varTerm(xVar, NumberType)],
           StringType,
-          (CompiledNumberType) =>
-            num => `num(${num})`))
+          num => `num(${num})`))
     })
 
     assert::termTypeEquals(NumberShowInstance, NumberShowClass)
@@ -204,9 +202,8 @@ test('type class test', assert => {
                       body(
                         [varTerm(xStrVar, StringType)],
                         StringType,
-                        stringCompiledType =>
-                          xStr =>
-                            `Just(${xStr})`
+                        xStr =>
+                          `Just(${xStr})`
                       ))),
 
                   Nothing: lambda(

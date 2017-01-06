@@ -1,4 +1,4 @@
-export { body, rawBody } from './body'
+export { body, rawBody, compiledBody } from './body'
 
 export { lambda, termLambda } from './lambda'
 
