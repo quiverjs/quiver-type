@@ -19,10 +19,9 @@ import {
 
 import { compileTerm } from '../lib/util'
 
-import {
-  StringType, NumberType,
-  termTypeEquals
-} from './util'
+import { NumberType, StringType } from '../lib/builtin'
+
+import { termTypeEquals } from './util'
 
 test('type class test', assert => {
   assert.test('basic functor', assert => {

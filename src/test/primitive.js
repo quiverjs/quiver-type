@@ -10,20 +10,14 @@ import {
   VariableTerm
 } from '../lib/term'
 
-import {
-  LiteralType
-} from '../lib/type'
-
 import { compileTerm } from '../lib/util'
 
-import {
-  NumberType, assertNumber, assertString, equals
-} from './util'
+import { NumberType, StringType } from '../lib/builtin'
+
+import { equals } from './util'
 
 test('primitive type test', assert => {
   assert.test('value term', assert => {
-    const NumberType = new LiteralType('Number', assertNumber)
-
     const valueTerm = new ValueTerm(8, NumberType)
 
     assert.equal(valueTerm.termType(), NumberType)
@@ -58,9 +52,6 @@ test('primitive type test', assert => {
   })
 
   assert.test('function term', assert => {
-    const NumberType = new LiteralType('Number', assertNumber)
-    const StringType = new LiteralType('String', assertString)
-
     const xVar = new TermVariable('x')
     const yVar = new TermVariable('y')
 

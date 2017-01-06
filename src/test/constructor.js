@@ -30,8 +30,9 @@ import {
   wrapFunction, compileTerm
 } from '../lib/util'
 
+import { NumberType, StringType } from '../lib/builtin'
+
 import {
-  NumberType, StringType,
   termTypeEquals, typeKindEquals
 } from './util'
 

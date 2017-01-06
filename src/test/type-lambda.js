@@ -25,9 +25,9 @@ import {
 
 import { compileTerm } from '../lib/util'
 
-import {
-  NumberType, StringType, termTypeEquals, typeKindEquals
-} from './util'
+import { NumberType, StringType } from '../lib/builtin'
+
+import { termTypeEquals, typeKindEquals } from './util'
 
 test('type lambda test', assert => {
   assert.test('identity test', assert => {

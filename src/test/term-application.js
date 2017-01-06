@@ -14,7 +14,7 @@ import {
 
 import { compileTerm } from '../lib/util'
 
-import { NumberType } from './util'
+import { NumberType } from '../lib/builtin'
 
 test('term compilation test', assert => {
   assert.test('term application test', assert => {

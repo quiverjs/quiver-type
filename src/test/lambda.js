@@ -16,9 +16,10 @@ import {
 import { ArrowType } from '../lib/type'
 import { wrapFunction, compileTerm } from '../lib/util'
 
+import { NumberType, StringType } from '../lib/builtin'
+
 import {
-  equals, termTypeEquals,
-  NumberType, StringType
+  equals, termTypeEquals
 } from './util'
 
 test('term lambda test', assert => {

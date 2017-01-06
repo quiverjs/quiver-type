@@ -24,9 +24,7 @@ import {
 
 import { compileTerm } from '../lib/util'
 
-import {
-  NumberType, StringType
-} from './util'
+import { NumberType, StringType } from '../lib/builtin'
 
 test('product type test', assert => {
   assert.test('basic product', assert => {

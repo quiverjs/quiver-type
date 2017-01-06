@@ -19,8 +19,7 @@ import {
   VariableTerm,
   FixedPointTerm,
   ValueLambdaTerm,
-  ProjectRecordTerm,
-  TermApplicationTerm
+  ProjectRecordTerm
 } from '../lib/term'
 
 import {
@@ -43,7 +42,7 @@ import { compileTerm } from '../lib/util'
 
 import {
   NumberType, BooleanType
-} from './util'
+} from '../lib/builtin'
 
 test('fixed point test', assert => {
   assert.test('basic fixed term', assert => {

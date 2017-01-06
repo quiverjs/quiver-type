@@ -29,9 +29,7 @@ import {
   functionToTerm, compileTerm
 } from '../lib/util'
 
-import {
-  NumberType, StringType
-} from './util'
+import { NumberType, StringType } from '../lib/builtin'
 
 test('sum type test', assert => {
   assert.test('basic sum type', assert => {
