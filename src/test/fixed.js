@@ -1,42 +1,15 @@
 import test from 'tape'
 
 import {
-  TermVariable, TypeVariable,
-  IList, IMap
-} from '../lib/core'
-
-import {
-  LetTerm,
-  unitTerm,
-  BodyTerm,
-  FoldTerm,
-  MatchTerm,
-  ValueTerm,
-  RecordTerm,
-  UnfoldTerm,
-  VariantTerm,
-  ProductTerm,
-  VariableTerm,
-  FixedPointTerm,
-  ValueLambdaTerm,
-  ProjectRecordTerm
-} from '../lib/term'
-
-import {
-  SumType,
-  unitType,
-  ArrowType,
-  ForAllType,
-  RecordType,
-  ProductType,
-  VariableType,
-  FixedPointType,
-  ApplicationType
-} from '../lib/type'
-
-import {
+  termVar, typeVar,
+  lets, unitTerm, body, fold, match,
+  value, record, unfold, variant, product,
+  varTerm, fixed, lambda, projectRecord,
+  sumType, unitType, arrow, forall,
+  recordType, productType, varType,
+  fixedType, applicationType,
   unitKind
-} from '../lib/kind'
+} from '../lib/dsl'
 
 import { compileTerm } from '../lib/util'
 
@@ -46,29 +19,25 @@ import {
 
 test('fixed point test', assert => {
   assert.test('basic fixed term', assert => {
-    const fVar = new TermVariable('f')
-    const xVar = new TermVariable('x')
+    const fVar = termVar('f')
+    const xVar = termVar('x')
 
-    const fibType = new ArrowType(NumberType, NumberType)
+    const fibType = arrow(NumberType, NumberType)
 
-    const fibLambda = new FixedPointTerm(
-      new ValueLambdaTerm(
-        fVar, fibType,
-        new ValueLambdaTerm(
-          xVar, NumberType,
-          new BodyTerm(
-            IList([
-              new VariableTerm(fVar, fibType),
-              new VariableTerm(xVar, NumberType)
-            ]),
-            NumberType,
-            (compiledFibType, compiledNumType) =>
-              (fib, x) => {
-                if(x === 0) return 0
-                if(x === 1) return 1
+    const fibLambda = fixed(
+      lambda(
+        [[fVar, fibType],
+         [xVar, NumberType]],
+        body(
+          [varTerm(fVar, fibType),
+           varTerm(xVar, NumberType)],
+          NumberType,
+            (fib, x) => {
+              if(x === 0) return 0
+              if(x === 1) return 1
 
-                return fib.call(x-1) + fib.call(x-2)
-              }))))
+              return fib.call(x-1) + fib.call(x-2)
+            })))
 
     const compiledFib = compileTerm(fibLambda)
 
@@ -78,59 +47,53 @@ test('fixed point test', assert => {
   })
 
   assert.test('mutually recursive lambda', assert => {
-    const predType = new ArrowType(NumberType, BooleanType)
-    const ieioType = new RecordType(IMap({
+    const predType = arrow(NumberType, BooleanType)
+    const ieioType = recordType({
       isOdd: predType,
       isEven: predType
-    }))
+    })
 
-    const xVar = new TermVariable('x')
-    const isOddVar = new TermVariable('isOdd')
-    const isEvenVar = new TermVariable('isEven')
-    const ieioVar = new TermVariable('ieio')
+    const xVar = termVar('x')
+    const isOddVar = termVar('isOdd')
+    const isEvenVar = termVar('isEven')
+    const ieioVar = termVar('ieio')
 
-    const ieioTerm = new FixedPointTerm(
-      new ValueLambdaTerm(
-        ieioVar, ieioType,
+    const ieioTerm = fixed(
+      lambda(
+        [[ieioVar, ieioType]],
+        lets(
+          [[isOddVar,
+            projectRecord(
+              varTerm(ieioVar, ieioType),
+              'isOdd')],
+           [isEvenVar,
+            projectRecord(
+              varTerm(ieioVar, ieioType),
+              'isEven')]],
 
-        new LetTerm(
-          isOddVar,
-          new ProjectRecordTerm(
-            new VariableTerm(ieioVar, ieioType),
-            'isOdd'),
-          new LetTerm(
-            isEvenVar,
-            new ProjectRecordTerm(
-              new VariableTerm(ieioVar, ieioType),
-              'isEven'),
+          record({
+            isOdd: lambda(
+              [[xVar, NumberType]],
+              body(
+                [varTerm(isEvenVar, predType),
+                 varTerm(xVar, NumberType)],
+                BooleanType,
+                (isEven, x) => {
+                  if(x == 0) return false
+                  return isEven.call(x-1)
+                })),
 
-            new RecordTerm(IMap({
-              isOdd: new ValueLambdaTerm(
-                xVar, NumberType,
-                new BodyTerm(
-                  IList([
-                    new VariableTerm(isEvenVar, predType),
-                    new VariableTerm(xVar, NumberType)
-                  ]),
-                  BooleanType,
-                  () => (isEven, x) => {
-                    if(x == 0) return false
-                    return isEven.call(x-1)
-                  })),
-
-              isEven: new ValueLambdaTerm(
-                xVar, NumberType,
-                new BodyTerm(
-                  IList([
-                    new VariableTerm(isOddVar, predType),
-                    new VariableTerm(xVar, NumberType)
-                  ]),
-                  BooleanType,
-                  () => (isOdd, x) => {
-                    if(x == 0) return true
-                    return isOdd.call(x-1)
-                  }))
-            }))))))
+            isEven: lambda(
+              [[xVar, NumberType]],
+              body(
+                [varTerm(isOddVar, predType),
+                 varTerm(xVar, NumberType)],
+                BooleanType,
+                (isOdd, x) => {
+                  if(x == 0) return true
+                  return isOdd.call(x-1)
+                }))
+          }))))
 
     const ieio = compileTerm(ieioTerm)
     const isOdd = ieio.get('isOdd')
@@ -149,84 +112,75 @@ test('fixed point test', assert => {
   })
 
   assert.test('fixed point type', assert => {
-    const aTVar = new TypeVariable('a')
-    const lTVar = new TypeVariable('l')
+    const aTVar = typeVar('a')
+    const lTVar = typeVar('l')
 
-    const aType = new VariableType(aTVar, unitKind)
-    const lType = new VariableType(lTVar, unitKind)
+    const aType = varType(aTVar, unitKind)
+    const lType = varType(lTVar, unitKind)
 
     // ListType = forall a . fixed l .
     //     Nil () |
     //     Cons l a
-    const ListType = new ForAllType(
-      aTVar, unitKind,
-      new FixedPointType(
+    const ListType = forall(
+      [[aTVar, unitKind]],
+      fixedType(
         lTVar, unitKind,
-        new SumType(IMap({
+        sumType({
           Nil: unitType,
-          Cons: new ProductType(
-            IList([
-              aType,
-              lType
-            ]))
-        }))))
+          Cons: productType(aType, lType)
+        })))
 
-    const NumListType = new ApplicationType(
+    const NumListType = applicationType(
       ListType, NumberType)
 
     const UnfoldNumList = NumListType.unfoldType()
-    const NumConsType = new ProductType(IList(
-      [NumberType, NumListType]))
+    const NumConsType = productType(NumberType, NumListType)
 
-    const nilList = new FoldTerm(
+    const nilList = fold(
       NumListType,
-      new VariantTerm(
+      variant(
         UnfoldNumList,
         'Nil',
         unitTerm))
 
     // oneList :: List number
-    const oneList = new FoldTerm(
+    const oneList = fold(
       NumListType,
-      new VariantTerm(
+      variant(
         UnfoldNumList,
         'Cons',
-        new ProductTerm(IList([
-          new ValueTerm(1, NumberType),
-          nilList
-        ]))))
+        product(
+          value(1, NumberType),
+          nilList)))
 
-    const twoList = new FoldTerm(
+    const twoList = fold(
       NumListType,
-      new VariantTerm(
+      variant(
         UnfoldNumList,
         'Cons',
-        new ProductTerm(IList([
-          new ValueTerm(1, NumberType),
-          oneList
-        ]))))
+        product(
+          value(1, NumberType),
+          oneList)))
 
     // console.log(twoList)
 
-    const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
+    const xVar = termVar('x')
+    const yVar = termVar('y')
 
-    const isNilLambda = new ValueLambdaTerm(
-      xVar, NumListType,
-      new MatchTerm(
-        new UnfoldTerm(
-          new VariableTerm(xVar, NumListType)),
+    const isNilLambda = lambda(
+      [[xVar, NumListType]],
+      match(
+        unfold(
+          varTerm(xVar, NumListType)),
         BooleanType,
-        IMap({
-          Nil: new ValueLambdaTerm(
-            yVar, unitType,
-            new ValueTerm(
-              true, BooleanType)),
-          Cons: new ValueLambdaTerm(
-            yVar, NumConsType,
-            new ValueTerm(
-              false, BooleanType))
-        })))
+        {
+          Nil: lambda(
+            [[yVar, unitType]],
+            value(true, BooleanType)),
+          Cons: lambda(
+            [[yVar, NumConsType]],
+            value(false, BooleanType))
+        }))
 
     // console.log('isNilLambda:', isNilLambda)
 

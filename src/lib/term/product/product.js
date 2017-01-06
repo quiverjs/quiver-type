@@ -252,7 +252,7 @@ export class ProductTerm extends BaseProductTerm {
   }
 }
 
-export const product = fieldTerms =>
+export const product = (...fieldTerms) =>
   new ProductTerm(IList(fieldTerms))
 
 export const record = fieldTerms =>

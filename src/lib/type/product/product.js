@@ -48,6 +48,6 @@ export class ProductType extends BaseProductType {
   }
 }
 
-export const productType = (fieldTypes) => {
+export const productType = (...fieldTypes) => {
   return new ProductType(IList(fieldTypes))
 }
