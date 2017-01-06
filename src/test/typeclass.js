@@ -1,42 +1,21 @@
 import test from 'tape'
 
 import {
-  IMap, IList,
-  TermVariable, TypeVariable
-} from '../lib/core'
-
-import {
-  LetTerm,
-  unitTerm,
-  BodyTerm,
-  unitValue,
-  ValueTerm,
-  MatchTerm,
-  RecordTerm,
-  VariantTerm,
-  VariableTerm,
-  TypeLambdaTerm,
-  TermLambdaTerm,
-  ValueLambdaTerm,
-  ProjectRecordTerm,
-  TermApplicationTerm,
-  TypeApplicationTerm
-} from '../lib/term'
-
-import {
-  SumType,
-  unitType,
-  ArrowType,
-  ForAllType,
-  RecordType,
-  VariableType,
-  ApplicationType
-} from '../lib/type'
-
-import {
-  unitKind,
-  ArrowKind
-} from '../lib/kind'
+  termVar, typeVar,
+  lets, body,
+  unit, unitTerm,
+  value, match, record,
+  variant, varTerm,
+  lambda, typeLambda,
+  termLambda,
+  projectRecord,
+  apply, applyType,
+  sumType, unitType,
+  arrow, forall,
+  recordType, varType,
+  applicationType,
+  unitKind, arrowKind
+} from '../lib/dsl'
 
 import { compileTerm } from '../lib/util'
 
@@ -47,53 +26,51 @@ import {
 
 test('type class test', assert => {
   assert.test('basic functor', assert => {
-    const aTVar = new TypeVariable('a')
-    const bTVar = new TypeVariable('b')
-    const kTVar = new TypeVariable('k')
-    const sTVar = new TypeVariable('s')
-    const fTVar = new TypeVariable('f')
+    const aTVar = typeVar('a')
+    const bTVar = typeVar('b')
+    const kTVar = typeVar('k')
+    const sTVar = typeVar('s')
+    const fTVar = typeVar('f')
 
-    const arrowKind = new ArrowKind(unitKind, unitKind)
+    const unitArrow = arrowKind(unitKind, unitKind)
 
-    const aType = new VariableType(aTVar, unitKind)
-    const bType = new VariableType(bTVar, unitKind)
-    const kType = new VariableType(kTVar, unitKind)
-    const sType = new VariableType(sTVar, unitKind)
-    const fType = new VariableType(fTVar, arrowKind)
+    const aType = varType(aTVar, unitKind)
+    const bType = varType(bTVar, unitKind)
+    const kType = varType(kTVar, unitKind)
+    const sType = varType(sTVar, unitKind)
+    const fType = varType(fTVar, unitArrow)
 
     // Maybe = forall k. Just k | Nothing
-    const MaybeType = new ForAllType(
-      kTVar, unitKind,
-      new SumType(IMap({
+    const MaybeType = forall(
+      [[kTVar, unitKind]],
+      sumType({
         Just: kType,
         Nothing: unitType
-      })))
+      }))
 
     // fmap = forall a b. (a -> b) -> f a -> f b
-    const fmapType = new ForAllType(
-      aTVar, unitKind,
-      new ForAllType(
-        bTVar, unitKind,
-          new ArrowType(
-            new ArrowType(aType, bType),
-            new ArrowType(
-              new ApplicationType(fType, aType),
-              new ApplicationType(fType, bType)))))
+    const fmapType = forall(
+      [[aTVar, unitKind],
+       [bTVar, unitKind]],
+      arrow(
+        arrow(aType, bType),
+        applicationType(fType, aType),
+        applicationType(fType, bType)))
 
     // Functor = forall f. { fmap }
-    const FunctorClass = new ForAllType(
-      fTVar, arrowKind,
-      new RecordType(IMap({
+    const FunctorClass = forall(
+      [[fTVar, unitArrow]],
+      recordType({
         fmap: fmapType
-      })))
+      }))
 
-    const xVar = new TermVariable('x')
-    const mapVar = new TermVariable('map')
-    const maybeAVar = new TermVariable('maybeA')
+    const xVar = termVar('x')
+    const mapVar = termVar('map')
+    const maybeAVar = termVar('maybeA')
 
-    const MaybeAType = new ApplicationType(MaybeType, aType)
-    const MaybeBType = new ApplicationType(MaybeType, bType)
-    const ABArrowType = new ArrowType(aType, bType)
+    const MaybeAType = applicationType(MaybeType, aType)
+    const MaybeBType = applicationType(MaybeType, bType)
+    const ABArrowType = arrow(aType, bType)
 
     // maybeFmap =
     //   Lambda a b .
@@ -101,105 +78,98 @@ test('type class test', assert => {
     //       match maybeA
     //         Just x -> MaybeB.Just map x
     //         Nothing -> MaybeB.Nothing
-    const maybeFmap = new TypeLambdaTerm(
-      aTVar, unitKind,
-      new TypeLambdaTerm(
-        bTVar, unitKind,
-        new ValueLambdaTerm(
-          mapVar, ABArrowType,
-          new ValueLambdaTerm(
-            maybeAVar, MaybeAType,
-            new MatchTerm(
-              new VariableTerm(maybeAVar, MaybeAType),
-              MaybeBType,
-              IMap({
-                Just: new ValueLambdaTerm(
-                  xVar, aType,
-                  new VariantTerm(
-                    MaybeBType,
-                    'Just',
-                    new TermApplicationTerm(
-                      new VariableTerm(mapVar, ABArrowType),
-                      new VariableTerm(xVar, aType)))),
+    const maybeFmap = typeLambda(
+      [[aTVar, unitKind],
+       [bTVar, unitKind]],
+      lambda(
+        [[mapVar, ABArrowType],
+         [maybeAVar, MaybeAType]],
+        match(
+          varTerm(maybeAVar, MaybeAType),
+          MaybeBType,
+          {
+            Just: lambda(
+              [[xVar, aType]],
+              variant(
+                MaybeBType,
+                'Just',
+                apply(
+                  varTerm(mapVar, ABArrowType),
+                  varTerm(xVar, aType)))),
 
-                Nothing: new ValueLambdaTerm(
-                  xVar, unitType,
-                  new VariantTerm(
-                    MaybeBType,
-                    'Nothing',
-                    unitTerm))
-              }))))))
+            Nothing: lambda(
+              [[xVar, unitType]],
+              variant(
+                MaybeBType,
+                'Nothing',
+                unitTerm))
+          })))
 
-
-    const MaybeFunctorClass = new ApplicationType(
+    const MaybeFunctorClass = applicationType(
       FunctorClass, MaybeType)
 
-    const MaybeFunctorInstance = new RecordTerm(IMap({
+    const MaybeFunctorInstance = record({
       fmap: maybeFmap
-    }))
+    })
 
     assert::termTypeEquals(MaybeFunctorInstance, MaybeFunctorClass)
 
-    const showType = new ArrowType(sType, StringType)
+    const showType = arrow(sType, StringType)
 
-    const ShowClass = new ForAllType(
-      sTVar, unitKind,
-      new RecordType(IMap({
+    const ShowClass = forall(
+      [[sTVar, unitKind]],
+      recordType({
         show: showType
-      })))
+      }))
 
-    const showAVar = new TermVariable('showA')
-    const showAType = new ApplicationType(ShowClass, aType)
+    const showAVar = termVar('showA')
+    const showAType = applicationType(ShowClass, aType)
 
-    const StringShowClass = new ApplicationType(
+    const StringShowClass = applicationType(
       ShowClass, StringType)
 
-    const StringShowInstance = new RecordTerm(IMap({
-      show: new ValueLambdaTerm(
-        xVar, StringType,
-        new BodyTerm(
-          IList([
-            new VariableTerm(xVar, StringType)
-          ]),
+    const StringShowInstance = record({
+      show: lambda(
+        [[xVar, StringType]],
+        body(
+          [varTerm(xVar, StringType)],
           StringType,
           (CompiledStrinType) =>
             str => `str(${str})`))
-    }))
+    })
 
     assert::termTypeEquals(StringShowInstance, StringShowClass)
 
-    const NumberShowClass = new ApplicationType(
+    const NumberShowClass = applicationType(
       ShowClass, NumberType)
 
-    const NumberShowInstance = new RecordTerm(IMap({
-      show: new ValueLambdaTerm(
-        xVar, NumberType,
-        new BodyTerm(
-          IList([
-            new VariableTerm(xVar, NumberType)
-          ]),
+    const NumberShowInstance = record({
+      show: lambda(
+        [[xVar, NumberType]],
+        body(
+          [varTerm(xVar, NumberType)],
           StringType,
           (CompiledNumberType) =>
             num => `num(${num})`))
-    }))
+    })
 
     assert::termTypeEquals(NumberShowInstance, NumberShowClass)
 
-    const MaybeNum = new ApplicationType(
+    const MaybeNum = applicationType(
       MaybeType, NumberType)
 
     const CompiledMaybeNum = MaybeNum.compileType()
 
     assert.test('maybe show 1', assert => {
-      const MaybeShowClass = new ForAllType(
-        aTVar, unitKind,
-        new ApplicationType(
+      const MaybeShowClass = forall(
+        [[aTVar, unitKind]],
+        applicationType(
           ShowClass,
-          new ApplicationType(
+          applicationType(
             MaybeType, aType)))
 
-      const maVar = new TermVariable('ma')
-      const xStrVar = new TermVariable('xStr')
+      const maVar = termVar('ma')
+      const xStrVar = termVar('xStr')
 
       // MaybeShowInstance =
       //   Λ a :: * .
@@ -208,53 +178,51 @@ test('type class test', assert => {
       //       show ma = match ma
       //         Just x: `Just ${ showA.show x }`
       //         Nothing: 'Nothing'
-      const MaybeShowInstance = new TypeLambdaTerm(
-        aTVar, unitKind,
-        new ValueLambdaTerm(
-          showAVar, showAType,
-          new RecordTerm(IMap({
-            show: new ValueLambdaTerm(
-              maVar, MaybeAType,
-              new MatchTerm(
-                new VariableTerm(maVar, MaybeAType),
+      const MaybeShowInstance = typeLambda(
+        [[aTVar, unitKind]],
+        lambda(
+          [[showAVar, showAType]],
+          record({
+            show: lambda(
+              [[maVar, MaybeAType]],
+              match(
+                varTerm(maVar, MaybeAType),
                 StringType,
-                IMap({
-                  Just: new ValueLambdaTerm(
-                    xVar, aType,
-                    new LetTerm(
-                      xStrVar,
+                {
+                  Just: lambda(
+                    [[xVar, aType]],
+                    lets(
+                      [[xStrVar,
+                        apply(
+                          projectRecord(
+                            varTerm(
+                              showAVar, showAType),
+                            'show'),
+                          varTerm(xVar, aType))
+                      ]],
 
-                      new TermApplicationTerm(
-                        new ProjectRecordTerm(
-                          new VariableTerm(
-                            showAVar, showAType),
-                          'show'),
-                        new VariableTerm(xVar, aType)),
-
-                      new BodyTerm(
-                        IList([
-                          new VariableTerm(xStrVar, StringType)
-                        ]),
+                      body(
+                        [varTerm(xStrVar, StringType)],
                         StringType,
                         stringCompiledType =>
                           xStr =>
                             `Just(${xStr})`
                       ))),
 
-                  Nothing: new ValueLambdaTerm(
-                    xVar, unitType,
-                    new ValueTerm('Nothing', StringType))
-                }))),
-          }))))
+                  Nothing: lambda(
+                    [[xVar, unitType]],
+                    value('Nothing', StringType))
+                })),
+          })))
 
-      const MaybeStringShowInstance = new TermApplicationTerm(
-        new TypeApplicationTerm(
+      const MaybeStringShowInstance = apply(
+        applyType(
           MaybeShowInstance, StringType),
         StringShowInstance)
 
       const showMaybeStr = compileTerm(MaybeStringShowInstance).get('show')
 
-      const MaybeString = new ApplicationType(
+      const MaybeString = applicationType(
         MaybeType, StringType)
 
       const CompiledMaybeStr = MaybeString.compileType()
@@ -262,11 +230,11 @@ test('type class test', assert => {
       const justFoo = CompiledMaybeStr.construct('Just', 'foo')
       assert.equals(showMaybeStr.call(justFoo), 'Just(str(foo))')
 
-      const nothingStr = CompiledMaybeStr.construct('Nothing', unitValue)
+      const nothingStr = CompiledMaybeStr.construct('Nothing', unit)
       assert.equals(showMaybeStr.call(nothingStr), 'Nothing')
 
-      const MaybeNumShowInstance = new TermApplicationTerm(
-        new TypeApplicationTerm(
+      const MaybeNumShowInstance = apply(
+        applyType(
           MaybeShowInstance, NumberType),
         NumberShowInstance)
 
@@ -275,7 +243,7 @@ test('type class test', assert => {
       const justOne = CompiledMaybeNum.construct('Just', 1)
       assert.equals(showMaybeNum.call(justOne), 'Just(num(1))')
 
-      const nothingNum = CompiledMaybeNum.construct('Nothing', unitValue)
+      const nothingNum = CompiledMaybeNum.construct('Nothing', unit)
       assert.equals(showMaybeNum.call(nothingNum), 'Nothing')
 
       assert.throws(() => showMaybeNum.call(nothingStr))
@@ -284,8 +252,8 @@ test('type class test', assert => {
     })
 
     assert.test('Maybe show 2', assert => {
-      const functorFVar = new TermVariable('functorF')
-      const functorFType = new ApplicationType(FunctorClass, fType)
+      const functorFVar = termVar('functorF')
+      const functorFType = applicationType(FunctorClass, fType)
 
       // fmapShow =
       //   Λ f :: * -> * .
@@ -294,33 +262,29 @@ test('type class test', assert => {
       //     λ functorF : Functor f .
       //       functorF.fmap [a, String] showA.show
 
-      const fmapShow = new TypeLambdaTerm(
-        fTVar, arrowKind,
-        new TypeLambdaTerm(
-          aTVar, unitKind,
-          new TermLambdaTerm(
-            showAVar, showAType,
-            new TermLambdaTerm(
-              functorFVar, functorFType,
-              new TermApplicationTerm(
-                new TypeApplicationTerm(
-                  new TypeApplicationTerm(
-                    new ProjectRecordTerm(
-                      new VariableTerm(functorFVar, functorFType),
-                      'fmap'),
-                    aType),
-                  StringType),
-                new ProjectRecordTerm(
-                  new VariableTerm(showAVar, showAType),
-                  'show'))))))
+      const fmapShow = typeLambda(
+        [[fTVar, unitArrow],
+         [aTVar, unitKind]],
+        termLambda(
+          [[showAVar, showAType],
+           [functorFVar, functorFType]],
+          apply(
+            applyType(
+              projectRecord(
+                varTerm(functorFVar, functorFType),
+                'fmap'),
+              aType,
+              StringType),
+            projectRecord(
+              varTerm(showAVar, showAType),
+              'show'))))
 
-      const fmapShowMaybeNumTerm = new TermApplicationTerm(
-        new TermApplicationTerm(
-          new TypeApplicationTerm(
-            new TypeApplicationTerm(
-              fmapShow, MaybeType),
-            NumberType),
-          NumberShowInstance),
+      const fmapShowMaybeNumTerm = apply(
+        applyType(
+          fmapShow,
+          MaybeType,
+          NumberType),
+        NumberShowInstance,
         MaybeFunctorInstance)
 
       const fmapShowMaybeNum = compileTerm(fmapShowMaybeNumTerm)

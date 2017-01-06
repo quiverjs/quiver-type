@@ -210,8 +210,14 @@ export class LetTerm extends Term {
   }
 }
 
-export const lets = (bindings, bodyTerm) =>
-  bindings.reduceRight(
-    ([boundVar, boundTerm], bodyTerm) =>
-      new LetTerm(boundVar, boundTerm, bodyTerm),
+export const lets = (bindings, bodyTerm) => {
+  if(!Array.isArray(bindings)) {
+    throw new TypeError('bindings in lets must be an array')
+  }
+
+  return bindings.reduceRight(
+    (bodyTerm, [boundVar, boundTerm]) => {
+      return new LetTerm(boundVar, boundTerm, bodyTerm)
+    },
     bodyTerm)
+}

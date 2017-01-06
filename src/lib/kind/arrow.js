@@ -49,3 +49,7 @@ export class ArrowKind extends Kind {
     return ['arrow-kind', leftRep, rightRep]
   }
 }
+
+export const arrowKind = (leftKind, rightKind) => {
+  return new ArrowKind(leftKind, rightKind)
+}

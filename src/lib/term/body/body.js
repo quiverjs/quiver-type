@@ -4,6 +4,8 @@ import {
   assertListContent, assertInstanceOf, assertFunction
 } from '../../core/assert'
 
+import { IList } from '../../core/container'
+
 import { CommonBodyTerm, $newInstance } from './common'
 
 const $compiler = Symbol('@compiler')
@@ -78,5 +80,6 @@ export class BodyTerm extends CommonBodyTerm {
   }
 }
 
-export const body = (argTerms, returnType, compiler) =>
-  new BodyTerm(argTerms, returnType, compiler)
+export const body = (argTerms, returnType, compiler) => {
+  return new BodyTerm(IList(argTerms), returnType, compiler)
+}

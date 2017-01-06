@@ -2,6 +2,8 @@ import {
   assertListContent, assertInstanceOf
 } from '../../core/assert'
 
+import { IList } from '../../core/container'
+
 import { Type } from '../../type/type'
 
 import { CompiledProductType } from '../../compiled-type/product'
@@ -44,4 +46,8 @@ export class ProductType extends BaseProductType {
 
     return ['product-type', [...fieldReps.values()]]
   }
+}
+
+export const productType = (fieldTypes) => {
+  return new ProductType(IList(fieldTypes))
 }

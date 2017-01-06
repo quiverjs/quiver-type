@@ -95,3 +95,17 @@ export class ArrowType extends Type {
     return ['arrow-type', leftRep, rightRep]
   }
 }
+
+export const arrow = (...argTypes) => {
+  if(argTypes.length < 2) {
+    throw new TypeError('arrow type must have at least 2 arg types')
+  }
+
+  const rightType = argTypes[argTypes.length-1]
+  const restTypes = argTypes.slice(0, -1)
+
+  return restTypes.reduceRight(
+    (rightType, leftType) => {
+      return new ArrowType(leftType, rightType)
+    }, rightType)
+}

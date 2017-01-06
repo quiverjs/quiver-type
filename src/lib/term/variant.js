@@ -161,3 +161,7 @@ export class VariantTerm extends Term {
     return ['variant', tag, bodyRep]
   }
 }
+
+export const variant = (sumType, tag, bodyTerm) => {
+  return new VariantTerm(sumType, tag, bodyTerm)
+}

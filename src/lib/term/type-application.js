@@ -152,3 +152,11 @@ export class TypeApplicationTerm extends Term {
     return ['type-app', leftRep, rightRep]
   }
 }
+
+export const applyType = (leftTerm, ...argTypes) => {
+  return argTypes.reduce(
+    (leftTerm, argType) => {
+      return new TypeApplicationTerm(leftTerm, argType)
+    },
+    leftTerm)
+}

@@ -3,6 +3,8 @@ import {
   assertString, assertNoError
 } from '../core/assert'
 
+import { IMap } from '../core/container'
+
 import { TypeVariable } from '../core/variable'
 
 import { mapUnique } from '../core/util'
@@ -117,4 +119,8 @@ export class SumType extends Type {
 
     return ['sum-type', [...repMap.entries()]]
   }
+}
+
+export const sumType = (typeMap) => {
+  return new SumType(IMap(typeMap))
 }

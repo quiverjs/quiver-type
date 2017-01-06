@@ -114,3 +114,7 @@ export class TypeConstructor extends Type {
     return unitKind
   }
 }
+
+export const typeConstructor = (argTypes, typeCheckerBuilder) => {
+  return new TypeConstructor(argTypes, typeCheckerBuilder)
+}

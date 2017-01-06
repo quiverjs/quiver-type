@@ -1,2 +1,2 @@
-export { BodyTerm } from './body'
-export { RawBodyTerm } from './raw-body'
+export { BodyTerm, body } from './body'
+export { RawBodyTerm, rawBody } from './raw-body'

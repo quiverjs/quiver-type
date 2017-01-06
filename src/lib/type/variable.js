@@ -48,7 +48,7 @@ export class VariableType extends Type {
 
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
-    
+
     if(targetType === this) return null
 
     if(!(targetType instanceof VariableType))
@@ -94,4 +94,8 @@ export class VariableType extends Type {
 
     return ['tvar', typeVarRep]
   }
+}
+
+export const varType = (typeVar, kind) => {
+  return new VariableType(typeVar, kind)
 }

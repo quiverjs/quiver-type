@@ -126,3 +126,7 @@ export class FixedPointType extends Type {
     return ['fixed-type', [varRep, kindRep], bodyRep]
   }
 }
+
+export const fixedType = (fixedVar, selfKind, bodyType) => {
+  return new FixedPointType(fixedVar, selfKind, bodyType)
+}

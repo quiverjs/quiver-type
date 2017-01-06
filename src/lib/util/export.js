@@ -1,4 +1,5 @@
 import { Term } from '../term/term'
+import { ValueTerm } from '../term/value'
 import { assertInstanceOf } from '../core/assert'
 
 import { compileTerm } from './compile'

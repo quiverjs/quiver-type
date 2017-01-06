@@ -4,7 +4,7 @@ import {
 } from '../../core/assert'
 
 import { Term } from '../../term'
-
+import { IList } from '../../core/container'
 import { isTerminalTerm } from '../../util/terminal'
 
 import { CommonBodyTerm, $newInstance } from './common'
@@ -70,4 +70,4 @@ export class RawBodyTerm extends CommonBodyTerm {
 }
 
 export const rawBody = (argTerms, returnType, func) =>
-  new RawBodyTerm(argTerms, returnType, func)
+  new RawBodyTerm(IList(argTerms), returnType, func)

@@ -10,7 +10,6 @@ import {
 import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
-import { isTerminalTerm } from '../util/terminal'
 
 import { Term } from './term'
 import { LambdaTerm } from './lambda'

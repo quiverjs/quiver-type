@@ -107,3 +107,7 @@ export class ValueTerm extends Term {
     return ['value', value]
   }
 }
+
+export const value = (value, type) => {
+  return new ValueTerm(value, type)
+}

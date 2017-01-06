@@ -82,3 +82,5 @@ export class UnitTerm extends Term {
 }
 
 export const unitTerm = new UnitTerm()
+
+export const unit = unitValue

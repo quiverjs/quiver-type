@@ -76,6 +76,10 @@ export class ValueLambdaTerm extends LambdaTerm {
 }
 
 export const lambda = (argTerms, bodyTerm) => {
+  if(!Array.isArray(argTerms)) {
+    throw new TypeError('argTerms in lets must be an array')
+  }
+
   return argTerms.reduceRight(
     (bodyTerm, [argTerm, argType]) => {
       return new ValueLambdaTerm(argTerm, argType, bodyTerm)

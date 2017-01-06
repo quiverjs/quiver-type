@@ -146,3 +146,7 @@ export class VariableTerm extends Term {
     return ['var', varRep]
   }
 }
+
+export const varTerm = (termVar, varType) => {
+  return new VariableTerm(termVar, varType)
+}

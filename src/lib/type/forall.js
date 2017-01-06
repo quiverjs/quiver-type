@@ -51,7 +51,7 @@ export class ForAllType extends Type {
 
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
-    
+
     if(targetType === this) return null
 
     if(!(targetType instanceof ForAllType))
@@ -126,4 +126,12 @@ export class ForAllType extends Type {
 
     return ['for-all', [argTVarRep, argKindRep], bodyTypeRep]
   }
+}
+
+export const forall = (bindings, bodyType) => {
+  return bindings.reduceRight(
+    (bodyType, [argTVar, argKind]) => {
+      return new ForAllType(argTVar, argKind, bodyType)
+    },
+    bodyType)
 }

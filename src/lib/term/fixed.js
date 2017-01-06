@@ -191,5 +191,5 @@ export class FixedPointTerm extends Term {
   }
 }
 
-export const fixed = (fixedVar, selfType, bodyLambda) =>
-  new FixedPointTerm(fixedVar, selfType, bodyLambda)
+export const fixed = (bodyLambda) =>
+  new FixedPointTerm(bodyLambda)

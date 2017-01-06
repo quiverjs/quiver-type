@@ -72,3 +72,7 @@ export class LiteralType extends Type {
     return ['type', typeName]
   }
 }
+
+export const literalType = (name, typeChecker) => {
+  return new LiteralType(name, typeChecker)
+}

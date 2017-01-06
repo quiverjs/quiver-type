@@ -1,2 +1,2 @@
-export { ProductType } from './product'
-export { RecordType } from './record'
+export { ProductType, productType } from './product'
+export { RecordType, recordType } from './record'

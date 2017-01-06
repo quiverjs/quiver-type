@@ -1,5 +1,14 @@
-export { ProductTerm, RecordTerm } from './product'
+export {
+  ProductTerm, RecordTerm,
+  product, record
+} from './product'
 
-export { ProjectProductTerm, ProjectRecordTerm } from './project'
+export {
+  ProjectProductTerm, ProjectRecordTerm,
+  projectProduct, projectRecord
+} from './project'
 
-export { UpdateProductTerm, UpdateRecordTerm } from './update'
+export {
+  UpdateProductTerm, UpdateRecordTerm,
+  updateProduct, updateRecord
+} from './update'

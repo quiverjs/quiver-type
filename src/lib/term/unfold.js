@@ -110,3 +110,7 @@ export class UnfoldTerm extends Term {
     return ['unfold', bodyRep]
   }
 }
+
+export const unfold = bodyTerm => {
+  return new UnfoldTerm(bodyTerm)
+}

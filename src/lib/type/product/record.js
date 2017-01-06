@@ -2,6 +2,8 @@ import {
   assertMap, assertString, assertInstanceOf
 } from '../../core/assert'
 
+import { IMap } from '../../core/container'
+
 import { Type } from '../../type/type'
 import { CompiledRecordType } from '../../compiled-type/product'
 
@@ -45,4 +47,8 @@ export class RecordType extends BaseProductType {
 
     return ['record-type', [...fieldReps.entries()]]
   }
+}
+
+export const recordType = (fieldTypes) => {
+  return new RecordType(IMap(fieldTypes))
 }
