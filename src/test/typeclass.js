@@ -158,13 +158,6 @@ test('type class test', assert => {
     const CompiledMaybeNum = MaybeNum.compileType()
 
     assert.test('maybe show 1', assert => {
-      const MaybeShowClass = forall(
-        [[aTVar, unitKind]],
-        applicationType(
-          ShowClass,
-          applicationType(
-            MaybeType, aType)))
-
       const maVar = termVar('ma')
       const xStrVar = termVar('xStr')
 

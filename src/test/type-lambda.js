@@ -1,27 +1,23 @@
 import test from 'tape'
 
 import {
-  TermVariable, TypeVariable
-} from '../lib/core'
+  termVar, typeVar,
+  varTerm, termLambda,
+  typeLambda, lambda,
+  apply, applyType,
+  arrow, varType, forall,
+  unitKind, arrowKind
+} from '../lib/dsl'
 
 import {
-  VariableTerm,
-  TermLambdaTerm,
-  TypeLambdaTerm,
   ValueLambdaTerm,
-  TermApplicationTerm,
-  TypeApplicationTerm
+  TypeLambdaTerm
 } from '../lib/term'
 
 import {
   ArrowType,
-  VariableType,
-  ForAllType
+  ForAllType,
 } from '../lib/type'
-
-import {
-  unitKind, ArrowKind
-} from '../lib/kind'
 
 import { compileTerm } from '../lib/util'
 
@@ -31,20 +27,21 @@ import { termTypeEquals, typeKindEquals } from './util'
 
 test('type lambda test', assert => {
   assert.test('identity test', assert => {
-    const xVar = new TermVariable('x')
-    const aTVar = new TypeVariable('a')
+    const xVar = termVar('x')
+    const aTVar = typeVar('a')
 
-    const aType = new VariableType(aTVar, unitKind)
+    const aType = varType(aTVar, unitKind)
     assert.throws(() => aType.compileType())
 
     assert.equals(aType.bindType(aTVar, NumberType), NumberType)
 
-    const idTerm = new VariableTerm(xVar, aType)
+    const idTerm = varTerm(xVar, aType)
 
     assert.equals(idTerm.termType(), aType)
 
-    const idLambda = new ValueLambdaTerm(
-      xVar, aType, idTerm)
+    const idLambda = lambda(
+      [[xVar, aType]],
+      idTerm)
 
     const idLambdaType = idLambda.termType()
 
@@ -54,24 +51,26 @@ test('type lambda test', assert => {
 
     assert.throws(() => compileTerm(idLambdaType))
 
-    const typeLambda = new TypeLambdaTerm(
-      aTVar, unitKind, idLambda)
+    const typeLambdaTerm = typeLambda(
+      [[aTVar, unitKind]],
+      idLambda)
 
-    assert::termTypeEquals(typeLambda,
-      new ForAllType(aTVar, unitKind,
-        new ArrowType(aType, aType)))
+    assert::termTypeEquals(typeLambdaTerm,
+      forall(
+        [[aTVar, unitKind]],
+        arrow(aType, aType)))
 
-    assert.ok(typeLambda.termType() instanceof ForAllType)
+    assert.ok(typeLambdaTerm.termType() instanceof ForAllType)
 
-    const numTypeApp = new TypeApplicationTerm(
-      typeLambda, NumberType)
+    const numTypeApp = applyType(
+      typeLambdaTerm, NumberType)
 
     assert::termTypeEquals(numTypeApp,
-      new ArrowType(NumberType, NumberType))
+      arrow(NumberType, NumberType))
 
     const numIdLambda = numTypeApp.evaluate()
     assert::termTypeEquals(numIdLambda,
-      new ArrowType(NumberType, NumberType))
+      arrow(NumberType, NumberType))
 
     assert.ok(numIdLambda instanceof ValueLambdaTerm)
 
@@ -80,23 +79,25 @@ test('type lambda test', assert => {
 
     assert.throws(() => numIdFunc.call('foo'))
 
-    const bTVar = new TypeVariable('b')
-    const bType = new VariableType(bTVar, unitKind)
+    const bTVar = typeVar('b')
+    const bType = varType(bTVar, unitKind)
 
-    const bTypeApp = new TypeApplicationTerm(
-      typeLambda, bType)
+    const bTypeApp = applyType(
+      typeLambdaTerm, bType)
 
-    assert::termTypeEquals(bTypeApp, new ArrowType(bType, bType))
+    assert::termTypeEquals(bTypeApp, arrow(bType, bType))
 
     assert.equals(bTypeApp.evaluate(), bTypeApp,
       'type application applied to non terminal type should not be evaluated')
 
-    const stringTypeApp = new TypeApplicationTerm(
-      new TypeLambdaTerm(bTVar, unitKind, bTypeApp),
+    const stringTypeApp = applyType(
+      typeLambda(
+        [[bTVar, unitKind]],
+        bTypeApp),
       StringType)
 
     assert::termTypeEquals(stringTypeApp,
-      new ArrowType(StringType, StringType))
+      arrow(StringType, StringType))
 
     const stringIdLambda = stringTypeApp.evaluate()
     assert.ok(stringIdLambda instanceof ValueLambdaTerm)
@@ -110,57 +111,58 @@ test('type lambda test', assert => {
   })
 
   assert.test('kinded type lambda test', assert => {
-    const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
-    const zVar = new TermVariable('z')
+    const xVar = termVar('x')
+    const yVar = termVar('y')
+    const zVar = termVar('z')
 
-    const aTVar = new TypeVariable('a')
-    const bTVar = new TypeVariable('b')
-    const cTVar = new TypeVariable('c')
-    const dTVar = new TypeVariable('d')
+    const aTVar = typeVar('a')
+    const bTVar = typeVar('b')
+    const cTVar = typeVar('c')
+    const dTVar = typeVar('d')
 
-    const aType = new VariableType(aTVar, unitKind)
-    const bType = new VariableType(bTVar, unitKind)
+    const aType = varType(aTVar, unitKind)
+    const bType = varType(bTVar, unitKind)
 
-    assert.ok(new TypeLambdaTerm(aTVar, unitKind,
-      new VariableTerm(xVar,
-        new VariableType(aTVar, unitKind))))
+    assert.ok(typeLambda(
+      [[aTVar, unitKind]],
+      varTerm(xVar,
+        varType(aTVar, unitKind))))
 
     assert.throws(() =>
-      new TypeLambdaTerm(aTVar, unitKind,
-        new VariableTerm(xVar,
-          new VariableType(aTVar,
-            new ArrowKind(unitKind, unitKind)))),
+      typeLambda(
+        [[aTVar, unitKind]],
+        varTerm(xVar,
+          varType(aTVar,
+            arrowKind(unitKind, unitKind)))),
       'should not construct if type variable have mismatch kind in body')
 
     // first = forall a b . lambda x: a, y: b . x
-    const polyFirst = new TypeLambdaTerm(aTVar, unitKind,
-      new TypeLambdaTerm(bTVar, unitKind,
-        new ValueLambdaTerm(xVar, aType,
-          new ValueLambdaTerm(yVar, bType,
-            new VariableTerm(xVar, aType)))))
+    const polyFirst = typeLambda(
+      [[aTVar, unitKind],
+       [bTVar, unitKind]],
+      lambda(
+        [[xVar, aType],
+         [yVar, bType]],
+        varTerm(xVar, aType)))
 
     // first :: forall a b . a -> b -> a
     assert::termTypeEquals(polyFirst,
-      new ForAllType(aTVar, unitKind,
-        new ForAllType(bTVar, unitKind,
-          new ArrowType(aType,
-            new ArrowType(bType, aType)))))
+      forall(
+        [[aTVar, unitKind],
+         [bTVar, unitKind]],
+          arrow(aType, bType, aType)))
 
     // * -> * -> *
-    const twoArrowKind = new ArrowKind(unitKind,
-      new ArrowKind(unitKind, unitKind))
+    const twoArrowKind = arrowKind(unitKind, unitKind, unitKind)
 
     // first ::: * -> * -> *
     assert::typeKindEquals(polyFirst.termType(), twoArrowKind)
 
-    const firstNumStr = new TypeApplicationTerm(
-      new TypeApplicationTerm(
-        polyFirst, NumberType),
-      StringType)
+    const firstNumStr = applyType(
+      polyFirst, NumberType, StringType)
 
-    assert::termTypeEquals(firstNumStr, new ArrowType(
-      NumberType, new ArrowType(StringType, NumberType)))
+    assert::termTypeEquals(firstNumStr,
+      arrow(NumberType, StringType, NumberType))
 
     const firstNumFunc = compileTerm(firstNumStr.evaluate())
 
@@ -168,47 +170,46 @@ test('type lambda test', assert => {
     assert.throws(() => firstNumFunc.call('foo', 1))
     assert.throws(() => firstNumFunc.call(1, 2))
 
-    const cType = new VariableType(cTVar, twoArrowKind)
-    const dType = new VariableType(dTVar, unitKind)
+    const cType = varType(cTVar, twoArrowKind)
+    const dType = varType(dTVar, unitKind)
 
     // sameType = TLambda c :: * -> * -> * .
     //               lambda z : c .
     //                  TLambda d :: * .
     //                      z [d] [d]
-    const sameTypeLambda = new TypeLambdaTerm(
-      cTVar, twoArrowKind,
-      new TermLambdaTerm(
-        zVar, cType,
-        new TypeLambdaTerm(
-          dTVar, unitKind,
-          new TypeApplicationTerm(
-            new TypeApplicationTerm(
-              new VariableTerm(
-                zVar, cType),
-              dType),
+    const sameTypeLambda = typeLambda(
+      [[cTVar, twoArrowKind]],
+      termLambda(
+        [[zVar, cType]],
+        typeLambda(
+          [[dTVar, unitKind]],
+          applyType(
+            varTerm(
+              zVar, cType),
+            dType,
             dType))))
 
     // true :: forall a. a -> a -> a
     // true = sameType [forall a b . a] first
-    const polyTrue = new TermApplicationTerm(
-      new TypeApplicationTerm(
+    const polyTrue = apply(
+      applyType(
         sameTypeLambda,
         polyFirst.termType()),
       polyFirst)
       .evaluate()
 
     assert.ok(polyTrue instanceof TypeLambdaTerm)
-    assert::termTypeEquals(polyTrue, new ForAllType(
-      dTVar, unitKind,
-      new ArrowType(dType, new ArrowType(dType, dType))))
+    assert::termTypeEquals(polyTrue, forall(
+      [[dTVar, unitKind]],
+      arrow(dType, dType, dType)))
 
-    const numTrue = new TypeApplicationTerm(
+    const numTrue = applyType(
       polyTrue, NumberType)
       .evaluate()
 
     assert.ok(numTrue instanceof ValueLambdaTerm)
-    assert::termTypeEquals(numTrue, new ArrowType(
-      NumberType, new ArrowType(NumberType, NumberType)))
+    assert::termTypeEquals(numTrue,
+      arrow(NumberType, NumberType, NumberType))
 
     const trueFn = compileTerm(numTrue)
     assert.equals(trueFn.call(1, 2), 1)

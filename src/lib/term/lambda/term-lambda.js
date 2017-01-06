@@ -41,7 +41,7 @@ export class TermLambdaTerm extends LambdaTerm {
 
 export const termLambda = (argTerms, bodyTerm) => {
   assertPairArray(argTerms)
-  
+
   return argTerms.reduceRight(
     (bodyTerm, [argTerm, argType]) => {
       return new TermLambdaTerm(argTerm, argType, bodyTerm)

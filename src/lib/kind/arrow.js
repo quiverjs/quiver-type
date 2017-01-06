@@ -50,6 +50,16 @@ export class ArrowKind extends Kind {
   }
 }
 
-export const arrowKind = (leftKind, rightKind) => {
-  return new ArrowKind(leftKind, rightKind)
+export const arrowKind = (...argKinds) => {
+  if(argKinds.length < 2) {
+    throw new TypeError('arrow kinds must have at least 2 arg kinds')
+  }
+
+  const rightKind = argKinds[argKinds.length-1]
+  const restKinds = argKinds.slice(0, -1)
+
+  return restKinds.reduceRight(
+    (rightKind, leftKind) => {
+      return new ArrowKind(leftKind, rightKind)
+    }, rightKind)
 }

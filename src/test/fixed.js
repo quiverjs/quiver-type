@@ -164,8 +164,6 @@ test('fixed point test', assert => {
           value(2, NumberType),
           oneList)))
 
-    // console.log(twoList)
-
     const xVar = termVar('x')
     const yVar = termVar('y')
 
