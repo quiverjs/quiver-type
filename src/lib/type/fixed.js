@@ -3,7 +3,7 @@ import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
 
-import { CompiledFixedType, $setConcrete } from '../compiled-type/fixed'
+import { CompiledFixedType, $setConcrete } from '../compiled/fixed'
 
 import { Type } from './type'
 

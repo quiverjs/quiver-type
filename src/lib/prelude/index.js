@@ -1,4 +1,4 @@
 export {
   NumberType, IntegerType, StringType,
-  BooleanType, ObjectType
+  BooleanType, ObjectType, AnyType
 } from './primitive'

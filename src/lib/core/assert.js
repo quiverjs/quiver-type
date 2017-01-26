@@ -46,6 +46,14 @@ export const assertArray = (array, message) => {
   }
 }
 
+export const assertArrayContent = (array, ElementType, message) => {
+  assertArray(array)
+
+  for(const element of array) {
+    assertInstanceOf(element, ElementType, message)
+  }
+}
+
 export const assertPairArray = (array, message) => {
   assertArray(array)
 

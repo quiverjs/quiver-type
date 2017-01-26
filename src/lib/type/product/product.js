@@ -6,7 +6,7 @@ import { IList } from '../../core/container'
 
 import { Type } from '../../type/type'
 
-import { CompiledProductType } from '../../compiled-type/product'
+import { CompiledProductType } from '../../compiled/product'
 
 import { BaseProductType } from './base'
 

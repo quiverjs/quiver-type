@@ -1,6 +1,6 @@
 import { IList } from '../core/container'
 import { ArgSpec } from './arg-spec'
-import { CompiledFunction } from '../compiled-term/function'
+import { TypedFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 import {
   assertInstanceOf, isInstanceOf,
@@ -42,7 +42,7 @@ const compilePartialTermApplication = (closure, closureSpecs, argExtractors, par
 
     const partialFunc = partialWrap(func, partialArgs)
 
-    return new CompiledFunction(partialArrow, partialFunc)
+    return new TypedFunction(partialArrow, partialFunc)
   }
 
 export class TermApplicationTerm extends Term {

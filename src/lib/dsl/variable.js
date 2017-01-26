@@ -1,8 +1,13 @@
 import { VariableTerm } from '../term/variable'
 import { VariableType } from '../type/variable'
 
-import { assertString } from './assert'
-import { TermVariable, TypeVariable } from './variable'
+import { assertString } from '../core/assert'
+
+import { TermVariable, TypeVariable } from '../core/variable'
+
+export const termVar = name => new TermVariable(name)
+
+export const typeVar = name => new TypeVariable(name)
 
 const makeVarGen = Variable =>
   () => {

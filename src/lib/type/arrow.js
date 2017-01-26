@@ -3,7 +3,7 @@ import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
 import { unitKind } from '../kind/unit'
-import { CompiledArrowType } from '../compiled-type/arrow'
+import { CompiledArrowType } from '../compiled/arrow'
 
 import { Type } from './type'
 

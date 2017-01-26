@@ -1,7 +1,7 @@
 import { assertInstanceOf } from '../core/assert'
 import { TermVariable } from '../core/variable'
 
-import { CompiledType } from '../compiled-type/type'
+import { CompiledType } from '../compiled/type'
 
 const $termVar = Symbol('@termVar')
 const $compiledType = Symbol('@compiledType')

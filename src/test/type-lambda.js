@@ -6,7 +6,8 @@ import {
   typeLambda, lambda,
   apply, applyType,
   arrow, varType, forall,
-  unitKind, arrowKind
+  unitKind, arrowKind,
+  compile
 } from '../lib/dsl'
 
 import {
@@ -19,9 +20,7 @@ import {
   ForAllType,
 } from '../lib/type'
 
-import { compileTerm } from '../lib/util'
-
-import { NumberType, StringType } from '../lib/builtin'
+import { NumberType, StringType } from '../lib/prelude'
 
 import { termTypeEquals, typeKindEquals } from './util'
 
@@ -49,7 +48,7 @@ test('type lambda test', assert => {
     assert.equals(idLambdaType.leftType, aType)
     assert.equals(idLambdaType.rightType, aType)
 
-    assert.throws(() => compileTerm(idLambdaType))
+    assert.throws(() => compile(idLambdaType))
 
     const typeLambdaTerm = typeLambda(
       [[aTVar, unitKind]],
@@ -74,7 +73,7 @@ test('type lambda test', assert => {
 
     assert.ok(numIdLambda instanceof ValueLambdaTerm)
 
-    const numIdFunc = compileTerm(numIdLambda)
+    const numIdFunc = compile(numIdLambda)
     assert.equals(numIdFunc.call(8), 8)
 
     assert.throws(() => numIdFunc.call('foo'))
@@ -102,7 +101,7 @@ test('type lambda test', assert => {
     const stringIdLambda = stringTypeApp.evaluate()
     assert.ok(stringIdLambda instanceof ValueLambdaTerm)
 
-    const stringIdFunc = compileTerm(stringIdLambda)
+    const stringIdFunc = compile(stringIdLambda)
 
     assert.equals(stringIdFunc.call('foo'), 'foo')
     assert.throws(() => stringIdFunc.call(9))
@@ -164,7 +163,7 @@ test('type lambda test', assert => {
     assert::termTypeEquals(firstNumStr,
       arrow(NumberType, StringType, NumberType))
 
-    const firstNumFunc = compileTerm(firstNumStr.evaluate())
+    const firstNumFunc = compile(firstNumStr.evaluate())
 
     assert.equals(firstNumFunc.call(1, 'foo'), 1)
     assert.throws(() => firstNumFunc.call('foo', 1))
@@ -211,7 +210,7 @@ test('type lambda test', assert => {
     assert::termTypeEquals(numTrue,
       arrow(NumberType, NumberType, NumberType))
 
-    const trueFn = compileTerm(numTrue)
+    const trueFn = compile(numTrue)
     assert.equals(trueFn.call(1, 2), 1)
 
     assert.end()

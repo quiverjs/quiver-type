@@ -1,6 +1,6 @@
 export { productType, recordType } from './product'
 
-export { applicationType } from './application'
+export { typeApp } from './application'
 
 export { arrow } from './arrow'
 

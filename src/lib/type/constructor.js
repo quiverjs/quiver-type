@@ -1,8 +1,11 @@
-import { ISet } from '../core/container'
+import { IList, ISet } from '../core/container'
 import { TypeVariable } from '../core/variable'
-import { assertListContent, assertInstanceOf, assertFunction } from '../core/assert'
+import {
+  assertListContent, assertInstanceOf,
+  assertFunction, assertArray 
+} from '../core/assert'
 
-import { DynamicCompiledType } from '../compiled-type/dynamic'
+import { DynamicCompiledType } from '../compiled/dynamic'
 
 import { unitKind } from '../kind/unit'
 
@@ -116,5 +119,7 @@ export class TypeConstructor extends Type {
 }
 
 export const typeConstructor = (argTypes, typeCheckerBuilder) => {
-  return new TypeConstructor(argTypes, typeCheckerBuilder)
+  assertArray(argTypes)
+
+  return new TypeConstructor(IList(argTypes), typeCheckerBuilder)
 }

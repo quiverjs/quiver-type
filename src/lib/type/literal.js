@@ -2,7 +2,7 @@ import { ISet } from '../core/container'
 import { assertInstanceOf, assertFunction, assertString } from '../core/assert'
 
 import { unitKind } from '../kind/unit'
-import { DynamicCompiledType } from '../compiled-type/dynamic'
+import { DynamicCompiledType } from '../compiled/dynamic'
 
 import { Type } from './type'
 

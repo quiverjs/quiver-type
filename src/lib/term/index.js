@@ -33,3 +33,5 @@ export { FixedPointTerm } from './fixed'
 export { FoldTerm } from './fold'
 
 export { UnfoldTerm } from './unfold'
+
+export { compileTerm } from './compile'

@@ -1,90 +1,63 @@
 import test from 'tape'
 
 import {
-  IMap, IList,
-  TermVariable, TypeVariable
-} from '../lib/core'
+  varGen, body, match,
+  value, variant, lambda,
+  forall, sumType, typeApp,
+  unitKind, arrowKind,
+  functionTerm, compile
+} from '../lib/dsl'
 
-import {
-  BodyTerm,
-  MatchTerm,
-  ValueTerm,
-  VariantTerm,
-  VariableTerm,
-  ValueLambdaTerm
-} from '../lib/term'
-
-import {
-  VariableType,
-  ForAllType,
-  SumType,
-  ApplicationType
-} from '../lib/type'
-
-import {
-  unitKind, ArrowKind
-} from '../lib/kind'
-
-import {
-  functionToTerm, compileTerm
-} from '../lib/util'
-
-import { NumberType, StringType } from '../lib/builtin'
+import { NumberType, StringType } from '../lib/prelude'
 
 test('sum type test', assert => {
   assert.test('basic sum type', assert => {
-    const aTVar = new TypeVariable('a')
-    const bTVar = new TypeVariable('b')
+    const { termVar, typeVar, varTerm, varType } = varGen()
 
-    const aType = new VariableType(aTVar, unitKind)
-    const bType = new VariableType(bTVar, unitKind)
+    const aType = varType('a', unitKind)
+    const bType = varType('b', unitKind)
 
     // Either = forall a b. a | b
-    const EitherType = new ForAllType(
-      aTVar, unitKind,
-      new ForAllType(
-        bTVar, unitKind,
-        new SumType(IMap({
-          Left: aType,
-          Right: bType
-        }))))
+    const EitherType = forall(
+      [[typeVar('a'), unitKind],
+       [typeVar('b'), unitKind]],
+      sumType({
+        Left: aType,
+        Right: bType
+      }))
 
     // EitherNumStr = Number | String
-    const EitherNumStr = new ApplicationType(
-      new ApplicationType(
-        EitherType, NumberType),
-      StringType)
+    const EitherNumStr = typeApp(
+      EitherType, NumberType, StringType)
 
-    const numVariantTerm = new VariantTerm(
+    const numVariantTerm = variant(
       EitherNumStr, 'Left',
-      new ValueTerm(3, NumberType))
+      value(3, NumberType))
 
-    const xVar = new TermVariable('x')
-
-    const matchLambda = new ValueLambdaTerm(
-      xVar, EitherNumStr,
-      new MatchTerm(
-        new VariableTerm(xVar, EitherNumStr),
+    const matchLambda = lambda(
+      [[termVar('x'), EitherNumStr]],
+      match(
+        varTerm('x', EitherNumStr),
         StringType,
-        IMap({
-          Left: functionToTerm(
-            IList([NumberType]),
+        {
+          Left: functionTerm(
+            [NumberType],
             StringType,
             x => `num(${x})`),
-          Right: functionToTerm(
-            IList([StringType]),
+          Right: functionTerm(
+            [StringType],
             StringType,
             x => `str(${x})`)
-        })))
+        }))
 
     const matchNumTerm = matchLambda.applyTerm(numVariantTerm)
-    assert.equals(compileTerm(matchNumTerm), 'num(3)')
+    assert.equals(compile(matchNumTerm), 'num(3)')
 
     const compiledEitherNumStr = EitherNumStr.compileType()
 
-    const matchFn = compileTerm(matchLambda)
+    const matchFn = compile(matchLambda)
 
-    const numVariant = compileTerm(numVariantTerm)
+    const numVariant = compile(numVariantTerm)
 
     assert.equals(matchFn.call(numVariant), 'num(3)')
 
@@ -96,98 +69,94 @@ test('sum type test', assert => {
   })
 
   assert.test('error sum types', assert => {
+    const { varTerm, varType } = varGen()
+
     assert.throws(() => {
-      new SumType(IMap({
+      sumType({
         Left: NumberType,
-        Right: new VariableType(
-          new TypeVariable('a'),
-          new ArrowKind(unitKind, unitKind))
-      }))
+        Right: varType('a', arrowKind(unitKind, unitKind))
+      })
     }, 'should not allow non unit kind in sum type member')
 
-    const EitherNumStr = new SumType(IMap({
+    const EitherNumStr = sumType({
       Left: NumberType,
       Right: StringType
-    }))
-
-    const xVar = new TermVariable('x')
+    })
 
     assert.throws(() => {
-      new MatchTerm(
-        new VariableTerm(xVar, EitherNumStr),
+      match(
+        varTerm('x', EitherNumStr),
         StringType,
-        IMap({
-          Left: functionToTerm(
-            IList([NumberType]),
+        {
+          Left: functionTerm(
+            [NumberType],
             StringType,
             x => `num(${x})`)
-        }))
+        })
     }, 'should not allow match term that doesn\'t match all cases')
 
     assert.throws(() => {
-      new MatchTerm(
-        new VariableTerm(xVar, EitherNumStr),
+      match(
+        varTerm('x', EitherNumStr),
         StringType,
-        IMap({
-          foo: functionToTerm(
-            IList([NumberType]),
+        {
+          foo: functionTerm(
+            [NumberType],
             StringType,
             x => `num(${x})`),
-          bar: functionToTerm(
-            IList([StringType]),
+          bar: functionTerm(
+            [StringType],
             StringType,
             x => `str(${x})`)
-        }))
+        })
     }, 'should not allow match term that have wrong variant tags')
 
     assert.throws(() => {
-      new MatchTerm(
-        new VariableTerm(xVar, EitherNumStr),
+      match(
+        varTerm('x', EitherNumStr),
         StringType,
-        IMap({
-          Left: functionToTerm(
-            IList([StringType]),
+        {
+          Left: functionTerm(
+            [StringType],
             StringType,
             x => `num(${x})`),
-          Right: functionToTerm(
-            IList([NumberType]),
+          Right: functionTerm(
+            [NumberType],
             StringType,
             x => `str(${x})`)
-        }))
+        })
     }, 'should not allow match term with wrong lambda type in tag')
 
     assert.throws(() => {
-      new MatchTerm(
-        new VariableTerm(xVar, EitherNumStr),
+      match(
+        varTerm('x', EitherNumStr),
         StringType,
-        IMap({
-          Left: functionToTerm(
-            IList([NumberType]),
+        {
+          Left: functionTerm(
+            [NumberType],
             StringType,
             x => `num(${x})`),
-          Right: functionToTerm(
-            IList([StringType]),
+          Right: functionTerm(
+            [StringType],
             NumberType,
             x => `str(${x})`)
-        }))
+        })
     }, 'should not allow match term with mismatched return type')
 
     assert.throws(() => {
-      new MatchTerm(
-        new VariableTerm(xVar, EitherNumStr),
+      match(
+        varTerm('x', EitherNumStr),
         StringType,
-        IMap({
-          Left: functionToTerm(
-            IList([NumberType]),
+        {
+          Left: functionTerm(
+            [NumberType],
             StringType,
             x => `num(${x})`),
-          Right: new BodyTerm(
-            IList([
-              new VariableTerm(xVar, NumberType),
-            ]),
+          Right: body(
+            [varTerm('x', NumberType)],
             StringType,
-            () => x => `str(${x})`)
-        }))
+            x => `str(${x})`)
+        })
     }, 'should not allow match term with non lambda term case handler')
 
     assert.end()

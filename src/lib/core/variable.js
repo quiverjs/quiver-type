@@ -29,7 +29,3 @@ class Variable {
 export class TermVariable extends Variable { }
 
 export class TypeVariable extends Variable { }
-
-export const termVar = name => new TermVariable(name)
-
-export const typeVar = name => new TypeVariable(name)

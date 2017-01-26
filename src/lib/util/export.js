@@ -1,8 +1,7 @@
 import { Term } from '../term/term'
 import { ValueTerm } from '../term/value'
+import { compileTerm } from '../term/compile'
 import { assertInstanceOf } from '../core/assert'
-
-import { compileTerm } from './compile'
 
 export const exportTerm = term => {
   assertInstanceOf(term, Term)

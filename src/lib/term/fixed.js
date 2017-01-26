@@ -4,7 +4,7 @@ import {
 } from '../core/assert'
 
 import { ArgSpec } from './arg-spec'
-import { CompiledFunction } from '../compiled-term/function'
+import { TypedFunction } from '../compiled/function'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -39,7 +39,7 @@ const validateFixedType = type => {
 const functionThunk = (compiledType) => {
   let inFunc
 
-  const thunkFunc = new CompiledFunction(compiledType,
+  const thunkFunc = new TypedFunction(compiledType,
     (...args) => {
       if(!inFunc) {
         throw new Error('concrete function is not yet initialized')
@@ -150,7 +150,7 @@ export class FixedPointTerm extends Term {
       return closureArgs => {
         const inFunc = bodyClosure(closureArgs)
 
-        const fixedFunc = new CompiledFunction(compiledSelfType,
+        const fixedFunc = new TypedFunction(compiledSelfType,
           (...args) => {
             return inFunc.call(fixedFunc, ...args)
           })

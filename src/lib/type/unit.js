@@ -5,7 +5,7 @@ import { assertInstanceOf } from '../core/assert'
 import { Kind } from '../kind/kind'
 import { unitKind } from '../kind/unit'
 
-import { CompiledUnitType } from '../compiled-type/unit'
+import { CompiledUnitType } from '../compiled/unit'
 
 import { Type } from './type'
 

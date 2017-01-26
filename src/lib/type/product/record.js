@@ -5,7 +5,7 @@ import {
 import { IMap } from '../../core/container'
 
 import { Type } from '../../type/type'
-import { CompiledRecordType } from '../../compiled-type/product'
+import { CompiledRecordType } from '../../compiled/product'
 
 import { BaseProductType } from './base'
 

@@ -8,21 +8,23 @@ export {
   match, apply,
   applyType, typeLambda,
   unfold, unit, unitTerm,
-  value, varTerm, variant
-} from './term/dsl'
+  value, varTerm, variant,
+  compile
+} from '../term/dsl'
 
 export {
   productType, recordType,
-  applicationType, arrow,
+  typeApp, arrow,
   typeConstructor,
   fixedType, forall,
   literalType, sumType,
   unitType, varType
-} from './type/dsl'
+} from '../type/dsl'
 
 export {
   arrowKind, unitKind
-} from './kind/dsl'
+} from '../kind/dsl'
 
-export { termVar, typeVar } from './core/variable'
-export { varGen } from './core/vargen'
+export { varGen, termVar, typeVar } from './variable'
+
+export { functionTerm, typedFunction } from './function'

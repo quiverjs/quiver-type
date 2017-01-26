@@ -1,36 +1,21 @@
 import test from 'tape'
 
-import {
-  BodyTerm,
-  ValueTerm,
-  VariableTerm,
-  TypeLambdaTerm,
-  ValueLambdaTerm,
-  TypeApplicationTerm,
-  TermApplicationTerm
-} from '../lib/term'
+import { IList } from '../lib/core'
+
+import { TypeConstructor } from '../lib/type'
 
 import {
-  ArrowType,
-  ForAllType,
-  VariableType,
-  TypeConstructor,
-  ApplicationType
-} from '../lib/type'
+  varGen, body, compiledBody,
+  value, lambda, typeLambda,
+  apply, applyType,
+  arrow, forall,
+  typeConstructor,
+  typeApp,
+  unitKind, arrowKind,
+  compile, typedFunction
+} from '../lib/dsl'
 
-import {
-  unitKind, ArrowKind
-} from '../lib/kind'
-
-import {
-  IList, TypeVariable, TermVariable
-} from '../lib/core'
-
-import {
-  wrapFunction, compileTerm
-} from '../lib/util'
-
-import { NumberType, StringType } from '../lib/builtin'
+import { NumberType, StringType } from '../lib/prelude'
 
 import {
   termTypeEquals, typeKindEquals
@@ -38,12 +23,13 @@ import {
 
 test('type constructor test', assert => {
   assert.test('list constructor', assert => {
-    const aTVar = new TypeVariable('a')
+    const { termVar, typeVar, varTerm, varType } = varGen()
 
-    const aType = new VariableType(aTVar, unitKind)
+    const aType = varType('a', unitKind)
 
     const listTypeCheckerBuilder = compiledTypes => {
       assert.equals(compiledTypes.size, 1)
+
       const elementCompiledType = compiledTypes.get(0)
 
       return list => {
@@ -58,21 +44,22 @@ test('type constructor test', assert => {
       }
     }
 
-    const IListConstructor = new TypeConstructor(
-      IList([aType]), listTypeCheckerBuilder)
+    const IListConstructor = typeConstructor(
+      [aType], listTypeCheckerBuilder)
 
     assert::typeKindEquals(IListConstructor, unitKind)
 
-    const IListType = new ForAllType(
-      aTVar, unitKind, IListConstructor)
+    const IListType = forall(
+      [[typeVar('a'), unitKind]],
+      IListConstructor)
 
-    assert::typeKindEquals(IListType, new ArrowKind(unitKind, unitKind))
+    assert::typeKindEquals(IListType, arrowKind(unitKind, unitKind))
 
     assert.throws(() => IListConstructor.compileType())
     assert.throws(() => IListType.compileType())
 
-    const NumberListType = new ApplicationType(IListType, NumberType)
-    const StringListType = new ApplicationType(IListType, StringType)
+    const NumberListType = typeApp(IListType, NumberType)
+    const StringListType = typeApp(IListType, StringType)
 
     assert.ok(NumberListType instanceof TypeConstructor,
       'ApplicationType should return applied type if both types are terminal')
@@ -87,25 +74,19 @@ test('type constructor test', assert => {
     assert.ok(compiledNumListType.typeCheck(stringList))
     assert.ok(compiledNumListType.typeCheck(mixedList))
 
-    const bTVar = new TypeVariable('b')
-    const cTVar = new TypeVariable('c')
+    const bType = varType('b', unitKind)
+    const cType = varType('c', unitKind)
 
-    const bType = new VariableType(bTVar, unitKind)
-    const cType = new VariableType(cTVar, unitKind)
+    const fType = arrow(bType, cType)
 
-    const fVar = new TermVariable('f')
-    const fType = new ArrowType(bType, cType)
+    const bListType = typeApp(IListType, bType)
+    const cListType = typeApp(IListType, cType)
 
-    const lVar = new TermVariable('l')
-    const bListType = new ApplicationType(IListType, bType)
-
-    const cListType = new ApplicationType(IListType, cType)
-
-    const fmapBody = new BodyTerm(
-      IList([
-        new VariableTerm(fVar, fType),
-        new VariableTerm(lVar, bListType)
-      ]),
+    const fmapBody = compiledBody(
+      [
+        varTerm('f', fType),
+        varTerm('l', bListType)
+      ],
       cListType,
       (mapperCType, bListCType) =>
         (mapper, list) =>
@@ -114,38 +95,28 @@ test('type constructor test', assert => {
 
     // fmap :: forall b :: *, c :: * .
     //          (b -> c) -> IList b -> IList c
-    const fmapTerm = new TypeLambdaTerm(
-      bTVar, unitKind,
-      new TypeLambdaTerm(
-        cTVar, unitKind,
-        new ValueLambdaTerm(
-          fVar, fType,
-          new ValueLambdaTerm(
-            lVar, bListType,
-            fmapBody
-          ))))
+    const fmapTerm = typeLambda(
+      [[typeVar('b'), unitKind],
+       [typeVar('c'), unitKind]],
+      lambda(
+          [[termVar('f'), fType],
+           [termVar('l'), bListType]],
+          fmapBody))
 
-    const fmapNumStr = new TypeApplicationTerm(
-      new TypeApplicationTerm(
-        fmapTerm, NumberType),
-      StringType)
-      .evaluate()
+    const fmapNumStr = applyType(
+      fmapTerm, NumberType, StringType)
 
-    const xVar = new TermVariable('x')
-
-    const numToString = new ValueLambdaTerm(
-      xVar, NumberType,
-      new BodyTerm(
-        IList([ new VariableTerm(xVar, NumberType) ]),
+    const numToString = lambda(
+      [[termVar('x'), NumberType]],
+      body(
+        [ varTerm('x', NumberType) ],
         StringType,
-        NumberCType =>
-          num => `${num}`))
+        num => `${num}`))
 
-    const numToStrListTerm = new TermApplicationTerm(
+    const numToStrListTerm = apply(
       fmapNumStr, numToString)
-      .evaluate()
 
-    const numToStrListFn = compileTerm(numToStrListTerm)
+    const numToStrListFn = compile(numToStrListTerm)
 
     assert.deepEquals(
       numToStrListFn.call(IList([1, 2, 3])).toArray(),
@@ -155,21 +126,22 @@ test('type constructor test', assert => {
     assert.throws(() => numToStrListFn.call([1, 2, 3]))
     assert.throws(() => numToStrListFn.call(1))
 
-    const strListTerm = new TermApplicationTerm(
+    const strListTerm = apply(
       numToStrListTerm,
-      new ValueTerm(
+      value(
         IList([1, 2, 3]),
         NumberListType))
 
     assert::termTypeEquals(strListTerm, StringListType)
-    assert.deepEquals(compileTerm(strListTerm).toArray(),
+    assert.deepEquals(compile(strListTerm).toArray(),
       ['1', '2', '3'])
 
-    const fmapNumStrFn = compileTerm(fmapNumStr)
+    const fmapNumStrFn = compile(fmapNumStr)
 
-    const squareStrFn = wrapFunction(
-      num => `${num*num}`,
-      IList([NumberType]), StringType)
+    const squareStrFn = typedFunction(
+      [NumberType],
+      StringType,
+      num => `${num*num}`)
 
     assert.deepEquals(
       fmapNumStrFn.call(squareStrFn, IList([1, 2, 3])).toArray(),

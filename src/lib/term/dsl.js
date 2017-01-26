@@ -31,3 +31,5 @@ export { value } from './value'
 export { varTerm } from './variable'
 
 export { variant } from './variant'
+
+export { compileTerm as compile } from './compile'

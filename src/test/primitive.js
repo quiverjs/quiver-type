@@ -1,108 +1,102 @@
 import test from 'tape'
 
-import {
-  TermVariable, ISet, IList
-} from '../lib/core'
+import { ISet } from '../lib/core'
+
+import { ValueTerm } from '../lib/term'
 
 import {
-  ValueTerm,
-  RawBodyTerm,
-  VariableTerm
-} from '../lib/term'
+  varGen, value, rawBody,
+  termVar, varTerm, compile
+} from '../lib/dsl'
 
-import { compileTerm } from '../lib/util'
-
-import { NumberType, StringType } from '../lib/builtin'
+import { NumberType, StringType } from '../lib/prelude'
 
 import { equals } from './util'
 
 test('primitive type test', assert => {
   assert.test('value term', assert => {
-    const valueTerm = new ValueTerm(8, NumberType)
+    const valueTerm = value(8, NumberType)
 
     assert.equal(valueTerm.termType(), NumberType)
     assert.equal(valueTerm.evaluate(), valueTerm)
     assert.equal(valueTerm.value, 8)
 
     assert.throws(() => {
-      new ValueTerm('foo', NumberType)
+      value('foo', NumberType)
     })
 
-    const x = new TermVariable('x')
-    const y = new TermVariable('y')
+    const xVar = termVar('x')
+    const yVar = termVar('y')
 
-    const varTerm = new VariableTerm(x, NumberType)
+    const xTerm = varTerm(xVar, NumberType)
 
-    assert.ok(varTerm.freeTermVariables().equals(ISet([x])))
+    assert.ok(xTerm.freeTermVariables().equals(ISet([xVar])))
 
-    assert.equal(varTerm.termType(), NumberType)
+    assert.equal(xTerm.termType(), NumberType)
 
-    assert.equal(varTerm.evaluate(), varTerm)
-    assert.equal(varTerm.bindTerm(y, valueTerm), varTerm)
+    assert.equal(xTerm.evaluate(), xTerm)
+    assert.equal(xTerm.bindTerm(yVar, valueTerm), xTerm)
 
-    const x2 = new TermVariable('x')
-    assert.equal(varTerm.bindTerm(x2, valueTerm), varTerm,
+    const x2Var = termVar('x')
+    assert.equal(xTerm.bindTerm(x2Var, valueTerm), xTerm,
       'term variable of same name but different instance should be distinguish')
 
-    const varTerm2 = varTerm.bindTerm(x, valueTerm)
-    assert.notEqual(varTerm2, varTerm)
-    assert.equal(varTerm2, valueTerm)
+    const xTerm2 = xTerm.bindTerm(xVar, valueTerm)
+    assert.notEqual(xTerm2, xTerm)
+    assert.equal(xTerm2, valueTerm)
 
     assert.end()
   })
 
   assert.test('function term', assert => {
-    const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
+    const { termVar, varTerm } = varGen()
 
-    const argTerms = IList([
-      new VariableTerm(xVar, NumberType),
-      new VariableTerm(yVar, NumberType)
-    ])
+    const plusTerm = rawBody(
+      [varTerm('x', NumberType),
+       varTerm('y', NumberType)],
+      NumberType,
+      (xTerm, yTerm) => {
+        assert.ok(xTerm instanceof ValueTerm)
+        assert.ok(yTerm instanceof ValueTerm)
 
-    const doPlus = (xTerm, yTerm) => {
-      const x = xTerm.value
-      const y = yTerm.value
+        const x = xTerm.value
+        const y = yTerm.value
 
-      assert.equal(x, 3)
-      assert.equal(y, 2)
+        assert.equal(x, 3)
+        assert.equal(y, 2)
 
-      const result = x+y
-      return new ValueTerm(result, NumberType)
-    }
+        const result = x+y
 
-    const plusTerm = new RawBodyTerm(
-      argTerms, NumberType, doPlus)
+        return value(result, NumberType)
+      })
 
     assert::equals(plusTerm.freeTermVariables(),
-      ISet([xVar, yVar]))
+      ISet([termVar('x'), termVar('y')]))
 
     assert.equals(plusTerm.evaluate(), plusTerm)
 
-    const xArg = new ValueTerm(3, NumberType)
-
-    const plusTerm2 = plusTerm.bindTerm(xVar, xArg)
+    const plusTerm2 = plusTerm.bindTerm(
+      termVar('x'), value(3, NumberType))
 
     assert.notEqual(plusTerm2, plusTerm)
 
     assert::equals(plusTerm.freeTermVariables(),
-      ISet([xVar, yVar]),
+      ISet([termVar('x'), termVar('y')]),
       'original term should not be modified')
 
     assert::equals(plusTerm2.freeTermVariables(),
-      ISet([yVar]),
+      ISet([termVar('y')]),
       'new term should only have y not bounded')
 
     assert.equals(plusTerm2.evaluate(), plusTerm2)
 
     assert.throws(() => {
-      const arg = new ValueTerm('foo', StringType)
-      plusTerm2.bindTerm(yVar, arg)
+      plusTerm2.bindTerm(
+        termVar('y'), value('foo', StringType))
     })
 
-    const yArg = new ValueTerm(2, NumberType)
-
-    const plusTerm3 = plusTerm2.bindTerm(yVar, yArg)
+    const plusTerm3 = plusTerm2.bindTerm(
+      termVar('y'), value(2, NumberType))
 
     assert::equals(plusTerm3.freeTermVariables(),
       ISet(),
@@ -117,18 +111,18 @@ test('primitive type test', assert => {
   })
 
   assert.test('compile constant term', assert => {
-    const valueTerm = new ValueTerm(8, NumberType)
-    const compiled = compileTerm(valueTerm)
+    const valueTerm = value(8, NumberType)
+    const compiled = compile(valueTerm)
 
     assert.equals(compiled, 8)
     assert.end()
   })
 
   assert.test('compile variable term', assert => {
-    const xVar = new TermVariable('x')
-    const varTerm = new VariableTerm(xVar, NumberType)
+    const xVar = termVar('x')
+    const xTerm = varTerm(xVar, NumberType)
 
-    assert.throws(() => compileTerm(varTerm))
+    assert.throws(() => compile(xTerm))
 
     assert.end()
   })

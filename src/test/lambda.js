@@ -1,22 +1,14 @@
 import test from 'tape'
 
-import {
-  TermVariable, ISet, IList
-} from '../lib/core'
+import { ISet } from '../lib/core'
 
 import {
-  BodyTerm,
-  ValueTerm,
-  RawBodyTerm,
-  VariableTerm,
-  ValueLambdaTerm,
-  TermApplicationTerm
-} from '../lib/term'
+  varGen, body, rawBody,
+  value, lambda, apply, arrow,
+  typedFunction, compile
+} from '../lib/dsl'
 
-import { ArrowType } from '../lib/type'
-import { wrapFunction, compileTerm } from '../lib/util'
-
-import { NumberType, StringType } from '../lib/builtin'
+import { NumberType, StringType } from '../lib/prelude'
 
 import {
   equals, termTypeEquals
@@ -24,169 +16,169 @@ import {
 
 test('term lambda test', assert => {
   assert.test('identity test', assert => {
-    const xVar = new TermVariable('x')
+    const { termVar, varTerm } = varGen()
 
-    const idNumTerm = new RawBodyTerm(
-      IList([new VariableTerm(xVar, NumberType)]),
+    const idNumTerm = rawBody(
+      [varTerm('x', NumberType)],
       NumberType,
       x => x)
 
     // idNum :: Number -> Number
     // idNum = \x :: Number -> x
-    const idNumLambda = new ValueLambdaTerm(
-      xVar, NumberType, idNumTerm)
+    const idNumLambda = lambda(
+      [[termVar('x'), NumberType]],
+      idNumTerm)
 
     assert::equals(idNumLambda.freeTermVariables(), ISet())
 
     assert.equal(
-      idNumLambda.bindTerm(xVar, new ValueTerm(1, NumberType)),
+      idNumLambda.bindTerm(termVar('x'), value(1, NumberType)),
       idNumLambda,
       'should not affect binding inside lambda')
 
-    const argTerm = new ValueTerm(3, NumberType)
+    const argTerm = value(3, NumberType)
 
-    const appliedTerm = new TermApplicationTerm(
-      idNumLambda, argTerm)
+    const appliedTerm = apply(idNumLambda, argTerm)
 
     // should not affect binding inside lambda
     assert.equal(
-      appliedTerm.bindTerm(xVar, new ValueTerm(5, NumberType)),
+      appliedTerm.bindTerm(
+        termVar('x'),
+        value(5, NumberType)),
       appliedTerm,
       'should not affect binding inside lambda')
 
     assert::equals(appliedTerm.freeTermVariables(), ISet())
 
-    const result = compileTerm(appliedTerm)
+    const result = compile(appliedTerm)
     assert.equal(result, 3)
 
-    const stringArg = new ValueTerm('foo', StringType)
+    const stringArg = value('foo', StringType)
 
     assert.throws(() => {
-      new TermApplicationTerm(idNumLambda, stringArg)
+      apply(idNumLambda, stringArg)
     }, 'type check should reject accept string argument')
 
     assert.throws(() => {
-      new TermApplicationTerm(idNumLambda, idNumLambda)
+      apply(idNumLambda, idNumLambda)
     }, 'type check should reject accept lambda argument')
 
     assert.end()
   })
 
   assert.test('ignored variable lambda', assert => {
-    const xVar = new TermVariable('x')
+    const { termVar } = varGen()
 
-    const constantTerm = new ValueTerm('foo', StringType)
+    const constantTerm = value('foo', StringType)
 
-    const constantLambda = new ValueLambdaTerm(
-      xVar, NumberType, constantTerm)
+    const constantLambda = lambda(
+      [[termVar('x'), NumberType]],
+      constantTerm)
 
-    const argTerm = new ValueTerm(8, NumberType)
+    const argTerm = value(8, NumberType)
 
-    const appliedTerm = new TermApplicationTerm(
-      constantLambda, argTerm)
+    const appliedTerm = apply(constantLambda, argTerm)
 
-    const result = compileTerm(appliedTerm)
+    const result = compile(appliedTerm)
     assert.equal(result, 'foo')
 
     assert.end()
   })
 
   assert.test('two variables lambda', assert => {
-    const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
+    const { termVar, varTerm } = varGen()
 
-    const plusTerm = new RawBodyTerm(
-      IList([
-        new VariableTerm(xVar, NumberType),
-        new VariableTerm(yVar, NumberType)
-      ]),
+    const plusTerm = rawBody(
+      [
+        varTerm('x', NumberType),
+        varTerm('y', NumberType)
+      ],
       NumberType,
       (xTerm, yTerm) => {
         const result = xTerm.value + yTerm.value
-        return new ValueTerm(result, NumberType)
+        return value(result, NumberType)
       })
 
-    const yPlusLambda = new ValueLambdaTerm(
-      yVar, NumberType, plusTerm)
+    const yPlusLambda = lambda(
+      [[termVar('y'), NumberType]],
+      plusTerm)
 
-    assert::equals(yPlusLambda.freeTermVariables(), ISet([xVar]))
+    assert::equals(yPlusLambda.freeTermVariables(), ISet([termVar('x')]))
 
-    const plusLambda = new ValueLambdaTerm(
-      xVar, NumberType, yPlusLambda)
+    const plusLambda = lambda(
+      [[termVar('x'), NumberType]],
+      yPlusLambda)
 
     assert::equals(plusLambda.freeTermVariables(), ISet())
 
-    const plusType = new ArrowType(NumberType, new ArrowType(NumberType, NumberType))
+    const plusType = arrow(NumberType, NumberType, NumberType)
     assert::termTypeEquals(plusLambda, plusType)
 
-    const arg1 = new ValueTerm(2, NumberType)
-    const plusTwoLambda = new TermApplicationTerm(
-      plusLambda, arg1
-    ).evaluate()
+    const arg1 = value(2, NumberType)
+    const plusTwoLambda = apply(plusLambda, arg1)
 
-    const plusTwoType = new ArrowType(NumberType, NumberType)
+    const plusTwoType = arrow(NumberType, NumberType)
     assert::termTypeEquals(plusTwoLambda, plusTwoType)
 
-    const arg2 = new ValueTerm(3, NumberType)
-    const result1 = new TermApplicationTerm(
-      plusTwoLambda, arg2
-    )
+    const arg2 = value(3, NumberType)
+    const result1 = apply(plusTwoLambda, arg2)
 
-    assert.equal(compileTerm(result1), 5)
+    assert.equal(compile(result1), 5)
 
-    const arg3 = new ValueTerm(4, NumberType)
-    const result2 = new TermApplicationTerm(
-      plusTwoLambda, arg3
-    ).evaluate()
+    const arg3 = value(4, NumberType)
+    const result2 = apply(plusTwoLambda, arg3)
 
-    assert.equal(compileTerm(result2), 6)
+    assert.equal(compile(result2), 6)
 
     assert.end()
   })
 
   assert.test('lambda compilation', assert => {
-    const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
+    const { termVar, varTerm } = varGen()
 
-    const varTerm = new VariableTerm(xVar, NumberType)
+    const xLambda = lambda(
+      [[termVar('x'), NumberType]],
+      varTerm('x', NumberType))
 
-    const xLambda = new ValueLambdaTerm(
-      xVar, NumberType, varTerm)
-
-    const func1 = compileTerm(xLambda)
+    const func1 = compile(xLambda)
     assert.equals(func1.call(2), 2)
 
-    const yxLambda = new ValueLambdaTerm(
-      yVar, NumberType, xLambda)
+    const yxLambda = lambda(
+      [[termVar('y'), NumberType]],
+      xLambda)
 
-    assert.throws(() => yxLambda.call('foo', 'bar'),
+    const func2 = compile(yxLambda)
+
+    assert.throws(() => func2.call('foo', 'bar'),
       'should type check arguments before calling compiled function')
 
-    assert.throws(() => yxLambda.call(1),
+    assert.throws(() => func2.call(1),
       'should check argument size')
 
-    assert.throws(() => yxLambda.call(1, 2, 3),
+    assert.throws(() => func2.call(1, 2, 3),
       'should check argument size')
 
-    const func2 = compileTerm(yxLambda)
     assert.equals(func2.call(3, 4), 4)
 
-    const yLambda = new ValueLambdaTerm(
-      yVar, NumberType, varTerm)
+    const yLambda = lambda(
+      [[termVar('y'), NumberType]],
+      varTerm('x', NumberType))
 
-    assert.throws(() => compileTerm(yLambda),
+    assert.throws(() => compile(yLambda),
       'should not able to compile term with free variable')
 
-    const xyLambda = new ValueLambdaTerm(
-      xVar, NumberType, yLambda)
+    const xyLambda = lambda(
+      [[termVar('x'), NumberType]],
+      yLambda)
 
-    const func3 = compileTerm(xyLambda)
+    const func3 = compile(xyLambda)
     assert.equals(func3.call(1, 2), 1)
 
-    const xyxLambda = new ValueLambdaTerm(
-      xVar, NumberType, yxLambda)
+    const xyxLambda = lambda(
+      [[termVar('x'), NumberType]],
+      yxLambda)
 
-    const func4 = compileTerm(xyxLambda)
+    const func4 = compile(xyxLambda)
 
     assert.equals(func4.call(2, 3, 4), 4)
 
@@ -194,33 +186,27 @@ test('term lambda test', assert => {
   })
 
   assert.test('higher order function', assert => {
-    const fVar = new TermVariable('f')
-    const xVar = new TermVariable('x')
-    const yVar = new TermVariable('y')
+    const { termVar, varTerm } = varGen()
 
-    const fType = new ArrowType(NumberType, NumberType)
+    const fType = arrow(NumberType, NumberType)
 
-    const applyLambda = new ValueLambdaTerm(
-      fVar, fType,
-      new ValueLambdaTerm(
-        xVar, NumberType,
-        new TermApplicationTerm(
-          new VariableTerm(fVar, fType),
-          new VariableTerm(xVar, NumberType))))
+    const applyLambda = lambda(
+      [[termVar('f'), fType],
+       [termVar('x'), NumberType]],
+      apply(
+        varTerm('f', fType),
+        varTerm('x', NumberType)))
 
-    const plusTwoLambda = new ValueLambdaTerm(
-      yVar, NumberType,
-      new BodyTerm(
-        IList([
-          new VariableTerm(yVar, NumberType)
-        ]),
+    const plusTwoLambda = lambda(
+      [[termVar('y'), NumberType]],
+      body(
+        [varTerm('y', NumberType)],
         NumberType,
-        yType =>
-          y => y + 2
+        y => y + 2
       ))
 
-    const applyFunc = compileTerm(applyLambda)
-    const plusTwoFunc = compileTerm(plusTwoLambda)
+    const applyFunc = compile(applyLambda)
+    const plusTwoFunc = compile(plusTwoLambda)
 
     assert.equals(plusTwoFunc.call(3), 5)
     assert.equals(applyFunc.call(plusTwoFunc, 3), 5)
@@ -228,10 +214,10 @@ test('term lambda test', assert => {
     assert.throws(() => applyFunc.call(x => x+2, 3),
       'should not accept raw function')
 
-    const wrappedFunc = wrapFunction(
-      x => x + 3,
-      IList([NumberType]),
-      NumberType)
+    const wrappedFunc = typedFunction(
+      [NumberType],
+      NumberType,
+      x => x + 3)
 
     assert.equals(wrappedFunc.call(2), 5)
     assert.equals(applyFunc.call(wrappedFunc, 2), 5)
@@ -239,11 +225,10 @@ test('term lambda test', assert => {
     assert.throws(() => applyFunc.call(plusTwoFunc))
     assert.throws(() => applyFunc.call(plusTwoFunc, 'foo'))
 
-    const numStrFunc = wrapFunction(
-      x => `${x}`,
-      IList([NumberType]),
-      StringType
-    )
+    const numStrFunc = typedFunction(
+      [NumberType],
+      StringType,
+      x => `${x}`)
 
     assert.equals(numStrFunc.call(1), '1')
     assert.throws(() => applyFunc.call(numStrFunc, 1),

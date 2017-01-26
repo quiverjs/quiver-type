@@ -121,7 +121,7 @@ export class ApplicationType extends Type {
   }
 }
 
-export const applicationType = (leftType, ...argTypes) => {
+export const typeApp = (leftType, ...argTypes) => {
   return argTypes.reduce(
     (leftType, rightType) => {
       return new ApplicationType(leftType, rightType)

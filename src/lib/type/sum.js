@@ -15,7 +15,7 @@ import { Kind } from '../kind/kind'
 
 import { unitKind } from '../kind/unit'
 
-import { CompiledSumType } from '../compiled-type/sum'
+import { CompiledSumType } from '../compiled/sum'
 
 import { Type } from './type'
 

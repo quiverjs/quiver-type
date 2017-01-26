@@ -7,13 +7,12 @@ import {
   lambda, typeLambda, termLambda,
   projectRecord, apply, applyType,
   sumType, unitType, arrow, forall,
-  recordType, applicationType,
-  unitKind, arrowKind
+  recordType, typeApp,
+  unitKind, arrowKind,
+  compile
 } from '../lib/dsl'
 
-import { compileTerm } from '../lib/util'
-
-import { NumberType, StringType } from '../lib/builtin'
+import { NumberType, StringType } from '../lib/prelude'
 
 import { termTypeEquals } from './util'
 
@@ -43,8 +42,8 @@ test('type class test', assert => {
        [typeVar('b'), unitKind]],
       arrow(
         arrow(aType, bType),
-        applicationType(fType, aType),
-        applicationType(fType, bType)))
+        typeApp(fType, aType),
+        typeApp(fType, bType)))
 
     // Functor = forall f. { fmap }
     const FunctorClass = forall(
@@ -53,8 +52,8 @@ test('type class test', assert => {
         fmap: fmapType
       }))
 
-    const MaybeAType = applicationType(MaybeType, aType)
-    const MaybeBType = applicationType(MaybeType, bType)
+    const MaybeAType = typeApp(MaybeType, aType)
+    const MaybeBType = typeApp(MaybeType, bType)
     const ABArrowType = arrow(aType, bType)
 
     // maybeFmap =
@@ -90,7 +89,7 @@ test('type class test', assert => {
                 unitTerm))
           })))
 
-    const MaybeFunctorClass = applicationType(
+    const MaybeFunctorClass = typeApp(
       FunctorClass, MaybeType)
 
     const MaybeFunctorInstance = record({
@@ -105,9 +104,9 @@ test('type class test', assert => {
         show: arrow(sType, StringType)
       }))
 
-    const showAType = applicationType(ShowClass, aType)
+    const showAType = typeApp(ShowClass, aType)
 
-    const StringShowClass = applicationType(
+    const StringShowClass = typeApp(
       ShowClass, StringType)
 
     const StringShowInstance = record({
@@ -121,7 +120,7 @@ test('type class test', assert => {
 
     assert::termTypeEquals(StringShowInstance, StringShowClass)
 
-    const NumberShowClass = applicationType(
+    const NumberShowClass = typeApp(
       ShowClass, NumberType)
 
     const NumberShowInstance = record({
@@ -135,7 +134,7 @@ test('type class test', assert => {
 
     assert::termTypeEquals(NumberShowInstance, NumberShowClass)
 
-    const MaybeNum = applicationType(
+    const MaybeNum = typeApp(
       MaybeType, NumberType)
 
     const CompiledMaybeNum = MaybeNum.compileType()
@@ -189,9 +188,9 @@ test('type class test', assert => {
           MaybeShowInstance, StringType),
         StringShowInstance)
 
-      const showMaybeStr = compileTerm(MaybeStringShowInstance).get('show')
+      const showMaybeStr = compile(MaybeStringShowInstance).get('show')
 
-      const MaybeString = applicationType(
+      const MaybeString = typeApp(
         MaybeType, StringType)
 
       const CompiledMaybeStr = MaybeString.compileType()
@@ -207,7 +206,7 @@ test('type class test', assert => {
           MaybeShowInstance, NumberType),
         NumberShowInstance)
 
-      const showMaybeNum = compileTerm(MaybeNumShowInstance).get('show')
+      const showMaybeNum = compile(MaybeNumShowInstance).get('show')
 
       const justOne = CompiledMaybeNum.construct('Just', 1)
       assert.equals(showMaybeNum.call(justOne), 'Just(num(1))')
@@ -221,7 +220,7 @@ test('type class test', assert => {
     })
 
     assert.test('Maybe show 2', assert => {
-      const functorFType = applicationType(FunctorClass, fType)
+      const functorFType = typeApp(FunctorClass, fType)
 
       // fmapShow =
       //   Λ f :: * -> * .
@@ -255,7 +254,7 @@ test('type class test', assert => {
         NumberShowInstance,
         MaybeFunctorInstance)
 
-      const fmapShowMaybeNum = compileTerm(fmapShowMaybeNumTerm)
+      const fmapShowMaybeNum = compile(fmapShowMaybeNumTerm)
 
       const justOne = CompiledMaybeNum.construct('Just', 1)
 

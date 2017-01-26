@@ -1,11 +1,11 @@
 import { assertInstanceOf } from '../core/assert'
 
-import { CompiledArrowType } from '../compiled-type/arrow'
+import { CompiledArrowType } from '../compiled/arrow'
 
 const $func = Symbol('@func')
 const $compiledArrow = Symbol('@compiledArrow')
 
-export class CompiledFunction {
+export class TypedFunction {
   // constructor :: Function -> Term -> CompiledType -> ()
   constructor(compiledArrow, func) {
     assertInstanceOf(compiledArrow, CompiledArrowType)

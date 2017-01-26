@@ -1,5 +1,5 @@
 import { IList } from '../../core/container'
-import { CompiledFunction } from '../../compiled-term/function'
+import { TypedFunction } from '../../compiled/function'
 import {
   isInstanceOf, assertInstanceOf,
   assertListContent, assertNoError,
@@ -20,7 +20,7 @@ const closureWrap = (bodyClosure, compiledArrow) =>
       return bodyClosure([...closureArgs, ...inArgs])
     }
 
-    return new CompiledFunction(compiledArrow, func)
+    return new TypedFunction(compiledArrow, func)
   }
 
 export class ValueLambdaTerm extends LambdaTerm {

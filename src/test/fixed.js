@@ -9,15 +9,13 @@ import {
   varTerm, fixed, lambda, projectRecord,
   sumType, unitType, arrow, forall,
   recordType, productType, varType,
-  fixedType, applicationType,
-  unitKind, unit
+  fixedType, typeApp,
+  unitKind, unit, compile
 } from '../lib/dsl'
-
-import { compileTerm } from '../lib/util'
 
 import {
   NumberType, BooleanType
-} from '../lib/builtin'
+} from '../lib/prelude'
 
 test('fixed point test', assert => {
   assert.test('basic fixed term', assert => {
@@ -41,7 +39,7 @@ test('fixed point test', assert => {
               return fib.call(x-1) + fib.call(x-2)
             })))
 
-    const compiledFib = compileTerm(fibLambda)
+    const compiledFib = compile(fibLambda)
 
     assert.equals(compiledFib.call(6), 8)
 
@@ -97,7 +95,7 @@ test('fixed point test', assert => {
                 }))
           }))))
 
-    const ieio = compileTerm(ieioTerm)
+    const ieio = compile(ieioTerm)
     const isOdd = ieio.get('isOdd')
     const isEven = ieio.get('isEven')
 
@@ -132,7 +130,7 @@ test('fixed point test', assert => {
           Cons: productType(aType, lType)
         })))
 
-    const NumListType = applicationType(
+    const NumListType = typeApp(
       ListType, NumberType)
 
     const UnfoldNumList = NumListType.unfoldType()
@@ -184,9 +182,9 @@ test('fixed point test', assert => {
 
     const compiledList = NumListType.compileType()
 
-    const nil = compileTerm(nilList)
-    const list1 = compileTerm(oneList)
-    const list2 = compileTerm(twoList)
+    const nil = compile(nilList)
+    const list1 = compile(oneList)
+    const list2 = compile(twoList)
 
     assert.notOk(compiledList.typeCheck(nil))
     assert.notOk(compiledList.typeCheck(list1))
@@ -198,7 +196,7 @@ test('fixed point test', assert => {
     assert.notOk(compiledList.typeCheck(nil2))
     assert.notOk(compiledList.typeCheck(list3))
 
-    const isNilFn = compileTerm(isNilLambda)
+    const isNilFn = compile(isNilLambda)
 
     assert.equals(isNilFn.call(nil), true)
     assert.equals(isNilFn.call(nil2), true)

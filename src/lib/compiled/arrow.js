@@ -5,7 +5,7 @@ import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { CompiledType } from './type'
-import { CompiledFunction } from '../compiled-term/function'
+import { TypedFunction } from '../compiled/function'
 
 const $argTypes = Symbol('@argTypes')
 const $returnType = Symbol('@returnType')
@@ -53,16 +53,16 @@ export class CompiledArrowType extends CompiledType {
     return this[$returnType]
   }
 
-  typeCheck(compiledFunction) {
-    assertInstanceOf(compiledFunction, CompiledFunction)
+  typeCheck(typedFunction) {
+    assertInstanceOf(typedFunction, TypedFunction)
 
-    return this.srcType.typeCheck(compiledFunction.srcType)
+    return this.srcType.typeCheck(typedFunction.srcType)
   }
 
-  call(compiledFunction, args) {
-    assertNoError(this.typeCheck(compiledFunction))
+  call(typedFunction, args) {
+    assertNoError(this.typeCheck(typedFunction))
 
-    return this.directCall(compiledFunction.func, args)
+    return this.directCall(typedFunction.func, args)
   }
 
   directCall(func, args) {
