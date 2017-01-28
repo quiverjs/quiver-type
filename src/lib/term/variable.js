@@ -1,11 +1,13 @@
 import { ISet } from '../core/container'
-import { TermVariable, TypeVariable } from '../core/variable'
+import { TermVariable } from '../core/variable'
 import {
-  assertInstanceOf, assertListContent, assertNoError
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
 } from '../core/assert'
 
 import { Type } from '../type/type'
-import { Kind } from '../kind/kind'
 
 import { Term } from './term'
 import { ArgSpec } from './arg-spec'
@@ -81,6 +83,29 @@ export class VariableTerm extends Term {
     return varType.typeCheck(targetTerm.varType)
   }
 
+  *subTerms() {
+    // empty
+  }
+
+  *subTypes() {
+    yield this.varType
+  }
+
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
+
+    const { termVar, varType } = this
+
+    const newVarType = typeMapper(varType)
+
+    if(newVarType === varType) {
+      return this
+    } else {
+      return new VariableTerm(termVar, newVarType)
+    }
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)
@@ -89,14 +114,6 @@ export class VariableTerm extends Term {
       return null
 
     return this.varType.typeCheck(type)
-  }
-
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    const { varType } = this
-    return varType.validateTVarKind(typeVar, kind)
   }
 
   bindTerm(termVar, term) {
@@ -110,16 +127,6 @@ export class VariableTerm extends Term {
     assertNoError(this.varType.typeCheck(termType))
 
     return term
-  }
-
-  bindType(typeVar, type) {
-    const { termVar, varType } = this
-
-    const newVarType = varType.bindType(typeVar, type)
-    if(newVarType === varType)
-      return this
-
-    return new VariableTerm(termVar, newVarType)
   }
 
   compileClosure(closureSpecs) {

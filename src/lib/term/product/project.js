@@ -1,10 +1,9 @@
-import { TermVariable, TypeVariable } from '../../core/variable'
-
-import { Type } from '../../type/type'
-
 import {
-  assertInstanceOf, isInstanceOf,
-  assertString, assertListContent
+  isInstanceOf,
+  assertString,
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
 } from '../../core/assert'
 
 import { ProductType, RecordType } from '../../type/product'
@@ -56,40 +55,24 @@ export class BaseProjectTerm extends Term {
     return this.fieldType
   }
 
-  validateVarType(termVar, type) {
-    return this.productTerm.validateVarType(termVar, type)
+  *subTerms() {
+    yield this.productTerm
   }
 
-  validateTVarKind(typeVar, kind) {
-    return this.productTerm.validateTVarKind(typeVar, kind)
+  *subTypes() {
+    // empty
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { productTerm, fieldKey } = this
 
-    const newProductTerm = productTerm.bindTerm(termVar, term)
+    const newProductTerm = termMapper(productTerm)
 
     if(newProductTerm !== productTerm) {
       return new this.constructor(newProductTerm, fieldKey)
-
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { productTerm, fieldKey } = this
-
-    const newProductTerm = productTerm.bindType(typeVar, type)
-
-    if(newProductTerm !== productTerm) {
-      return new ProjectRecordTerm(newProductTerm, fieldKey)
 
     } else {
       return this
@@ -111,9 +94,10 @@ export class BaseProjectTerm extends Term {
   evaluate() {
     const { productTerm, fieldKey } = this
 
+    const ProductTerm = this.productTermClass()
     const newProductTerm = productTerm.evaluate()
 
-    if(newProductTerm instanceof this.productTermClass()) {
+    if(newProductTerm instanceof ProductTerm) {
       return productTerm.getFieldTerm(fieldKey).evaluate()
 
     } else if(newProductTerm !== productTerm) {

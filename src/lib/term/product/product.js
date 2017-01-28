@@ -1,13 +1,14 @@
 import { mapUnique } from '../../core/util'
 import { unionMap, IMap, IList } from '../../core/container'
-import { TermVariable, TypeVariable } from '../../core/variable'
-
-import { Type } from '../../type/type'
-import { Kind } from '../../kind/kind'
 
 import {
-  assertMap, assertListContent, assertString,
-  assertNoError, assertInstanceOf, isInstanceOf
+  assertMap,
+  isInstanceOf,
+  assertString,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
 } from '../../core/assert'
 
 import { ProductType, RecordType } from '../../type/product'
@@ -71,59 +72,23 @@ export class BaseProductTerm extends Term {
     return this.productType
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    const { fieldTerms } = this
-
-    for(const fieldTerm of fieldTerms.values()) {
-      const err = fieldTerm.validateVarType(termVar, type)
-      if(err) return err
-    }
+  *subTerms() {
+    yield* this.fieldTerms.values()
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
+  *subTypes() {
+    yield this.productType
+  }
+
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { productType, fieldTerms } = this
 
-    for(const fieldTerm of fieldTerms.values()) {
-      const err = fieldTerm.validateTVarKind(typeVar, kind)
-      if(err) return err
-    }
+    const newProductType = typeMapper(productType)
 
-    return productType.validateTVarKind(typeVar, kind)
-  }
-
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    const { fieldTerms } = this
-
-    const [newFieldTerms, isModified] = fieldTerms::mapUnique(
-      fieldTerm => fieldTerm.bindTerm(termVar, term))
-
-    if(isModified) {
-      return new this.constructor(newFieldTerms)
-
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { productType, fieldTerms } = this
-
-    const newProductType = productType.bindType(typeVar, type)
-
-    const [newFieldTerms, isModified] = fieldTerms::mapUnique(
-      fieldTerm => fieldTerm.bindType(typeVar, type))
+    const [newFieldTerms, isModified] = fieldTerms::mapUnique(termMapper)
 
     if(isModified || productType !== newProductType) {
       return new this.constructor(newFieldTerms)
@@ -171,17 +136,9 @@ export class BaseProductTerm extends Term {
   }
 
   evaluate() {
-    const { fieldTerms } = this
-
-    const [newFieldTerms, isModified] = fieldTerms::mapUnique(
-      fieldTerm => fieldTerm.evaluate())
-
-    if(isModified) {
-      return new this.constructor(newFieldTerms)
-
-    } else {
-      return this
-    }
+    return this.map(
+      subTerm => subTerm.evaluate(),
+      subType => subType)
   }
 }
 

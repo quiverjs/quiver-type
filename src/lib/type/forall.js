@@ -134,7 +134,7 @@ export class ForAllType extends Type {
 
 export const forall = (bindings, bodyType) => {
   assertPairArray(bindings)
-  
+
   return bindings.reduceRight(
     (bodyType, [argTVar, argKind]) => {
       return new ForAllType(argTVar, argKind, bodyType)

@@ -1,14 +1,14 @@
 import { IList } from '../core/container'
 import { ArgSpec } from './arg-spec'
 import { TypedFunction } from '../compiled/function'
-import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertInstanceOf, isInstanceOf,
-  assertListContent, assertNoError
+  isInstanceOf,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
 } from '../core/assert'
 
-import { Kind } from '../kind/kind'
-import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 
 import { Term } from './term'
@@ -98,59 +98,31 @@ export class TermApplicationTerm extends Term {
     return rightTerm.termCheck(targetTerm.rightTerm)
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    const { leftTerm, rightTerm } = this
-
-    const err = leftTerm.validateVarType(termVar, type)
-    if(err) return err
-
-    return rightTerm.validateVarType(termVar, type)
-  }
-
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    const { leftTerm, rightTerm } = this
-
-    const err = leftTerm.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return rightTerm.validateTVarKind(typeVar, kind)
-  }
-
   freeTermVariables() {
     const { leftTerm, rightTerm } = this
     return leftTerm.freeTermVariables()
       .union(rightTerm.freeTermVariables())
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    if(!this.freeTermVariables().has(termVar))
-      return this
-
+  *subTerms() {
     const { leftTerm, rightTerm } = this
 
-    const newLeftTerm = leftTerm.bindTerm(termVar, term)
-    const newRightTerm = rightTerm.bindTerm(termVar, term)
-
-    return new TermApplicationTerm(newLeftTerm, newRightTerm)
+    yield leftTerm
+    yield rightTerm
   }
 
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  *subTypes() {
+    // empty
+  }
+
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { leftTerm, rightTerm } = this
 
-    const newLeftTerm = leftTerm.bindType(typeVar, type)
-    const newRightTerm = rightTerm.bindType(typeVar, type)
+    const newLeftTerm = termMapper(leftTerm)
+    const newRightTerm = termMapper(rightTerm)
 
     if((newLeftTerm === leftTerm) && (newRightTerm === rightTerm))
       return this
@@ -172,7 +144,6 @@ export class TermApplicationTerm extends Term {
 
     } else {
       return new TermApplicationTerm(newLeftTerm, newRightTerm)
-
     }
   }
 

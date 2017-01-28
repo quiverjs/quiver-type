@@ -1,6 +1,9 @@
 import {
-  isInstanceOf, assertInstanceOf,
-  assertListContent, assertNoError
+  isInstanceOf,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
 } from '../core/assert'
 
 import { ArgSpec } from './arg-spec'
@@ -96,42 +99,45 @@ export class FixedPointTerm extends Term {
     return this.bodyLambda.termCheck(targetTerm)
   }
 
-  validateVarType(termVar, type) {
-    return this.bodyLambda.validateVarType(termVar, type)
+  *subTerms() {
+    yield this.bodyLambda
   }
 
-  validateTVarKind(typeVar, kind) {
-    return this.bodyLambda.validateTVarKind(typeVar, kind)
+  *subTypes() {
+    // empty
+  }
+
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
+
+    const { bodyLambda } = this
+
+    const newBodyLambda = termMapper(bodyLambda)
+
+    if(newBodyLambda !== bodyLambda) {
+      return new FixedPointTerm(newBodyLambda)
+    } else {
+      return this
+    }
   }
 
   bindTerm(termVar, term) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(term, Term)
 
-    const { bodyLambda } = this
-
-    const newBodyLambda = bodyLambda.bindTerm(termVar, term)
-
-    if(newBodyLambda !== bodyLambda) {
-      return new FixedPointTerm(newBodyLambda)
-    } else {
-      return this
-    }
+    return this.map(
+      subTerm => subTerm.bindTerm(termVar, term),
+      subType => subType)
   }
 
   bindType(typeVar, type) {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(type, Type)
 
-    const { bodyLambda } = this
-
-    const newBodyLambda = bodyLambda.bindType(typeVar, type)
-
-    if(newBodyLambda !== bodyLambda) {
-      return new FixedPointTerm(newBodyLambda)
-    } else {
-      return this
-    }
+    return this.map(
+      subTerm => subTerm.bindType(typeVar, type),
+      subType => subType.bindType(typeVar, type))
   }
 
   evaluate() {

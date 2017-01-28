@@ -1,13 +1,13 @@
 import { mapUnique } from '../../core/util'
 import { unionMap } from '../../core/container'
-import { TermVariable, TypeVariable } from '../../core/variable'
 
 import {
-  assertListContent, assertInstanceOf
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
 } from '../../core/assert'
 
 import { Type } from '../../type/type'
-import { Kind } from '../../kind/kind'
 
 import { Term } from '../../term'
 
@@ -68,60 +68,27 @@ export class CommonBodyTerm extends Term {
     return returnType.typeCheck(targetTerm.returnType)
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    for(const term of this.argTerms) {
-      const err = term.validateVarType(termVar, type)
-      if(err) return err
-    }
-
-    return null
+  *subTerms() {
+    yield* this.argTerms
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    for(const term of this.argTerms) {
-      const err = term.validateTVarKind(typeVar, kind)
-      if(err) return err
-    }
-
-    return null
+  *subTypes() {
+    yield this.returnType
   }
 
   [$newInstance](argTerms, returnType) {
     throw new Error('abstract method not implemented')
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { argTerms, returnType } = this
 
-    const [newArgTerms, termModified] = argTerms::mapUnique(
-      argTerm => argTerm.bindTerm(termVar, term))
+    const [newArgTerms, termModified] = argTerms::mapUnique(termMapper)
 
-    if(termModified) {
-      return this[$newInstance](newArgTerms, returnType)
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { argTerms, returnType } = this
-
-    const [newArgTerms, termModified] = argTerms::mapUnique(
-      argTerm => argTerm.bindType(typeVar, type))
-
-    const newReturnType = returnType.bindType(typeVar, type)
+    const newReturnType = typeMapper(returnType)
 
     if(termModified || newReturnType !== returnType) {
       return this[$newInstance](newArgTerms, newReturnType)

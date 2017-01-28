@@ -1,11 +1,14 @@
 import { TermVariable, TypeVariable } from '../core/variable'
+
 import {
-  isInstanceOf, assertInstanceOf,
-  assertListContent, assertNoError,
-  assertPairArray
+  isInstanceOf,
+  assertNoError,
+  assertFunction,
+  assertPairArray,
+  assertInstanceOf,
+  assertListContent
 } from '../core/assert'
 
-import { Kind } from '../kind/kind'
 import { Type } from '../type/type'
 
 import { Term } from './term'
@@ -76,6 +79,17 @@ export class LetTerm extends Term {
     return bodyTerm.termCheck(targetTerm.bodyTerm)
   }
 
+  *subTerms() {
+    const { boundTerm, bodyTerm } = this
+
+    yield boundTerm
+    yield bodyTerm
+  }
+
+  *subTypes() {
+    // empty
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)
@@ -87,21 +101,25 @@ export class LetTerm extends Term {
 
     if(termVar !== boundVar) {
       return bodyTerm.validateVarType(termVar, type)
+    } else {
+      return null
     }
-
-    return null
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
-    const { boundTerm, bodyTerm } = this
+    const { boundVar, boundTerm, bodyTerm } = this
 
-    const err = boundTerm.validateTVarKind(typeVar, kind)
-    if(err) return err
+    const newBoundTerm = termMapper(boundTerm)
+    const newBodyTerm = termMapper(bodyTerm)
 
-    return bodyTerm.validateTVarKind(typeVar, kind)
+    if(newBoundTerm !== boundTerm || newBodyTerm !== bodyTerm) {
+      return new LetTerm(boundVar, newBoundTerm, newBodyTerm)
+    } else {
+      return this
+    }
   }
 
   bindTerm(termVar, term) {
@@ -110,9 +128,9 @@ export class LetTerm extends Term {
 
     const { boundVar, boundTerm, bodyTerm } = this
 
-    const newBoundTerm = boundTerm.bindTerm(termVar, term)
-
     if(termVar === boundVar) {
+      const newBoundTerm = boundTerm.bindTerm(termVar, term)
+
       if(newBoundTerm !== boundTerm) {
         return new LetTerm(boundVar, newBoundTerm, bodyTerm)
       } else {
@@ -122,6 +140,8 @@ export class LetTerm extends Term {
     } else if(term.freeTermVariables().has(boundVar)) {
       const boundVar2 = new TermVariable(boundVar.name)
       const varTerm = new VariableTerm(boundVar2, boundTerm.termType())
+
+      const newBoundTerm = boundTerm.bindTerm(termVar, term)
 
       const bodyTerm2 = bodyTerm.bindTerm(boundVar2, varTerm)
       const newBodyTerm = bodyTerm2.bindTerm(termVar, term)
@@ -133,13 +153,9 @@ export class LetTerm extends Term {
       }
 
     } else {
-      const newBodyTerm = bodyTerm.bindTerm(termVar, term)
-
-      if(newBoundTerm !== boundTerm || newBodyTerm !== bodyTerm) {
-        return new LetTerm(boundVar, newBoundTerm, newBodyTerm)
-      } else {
-        return this
-      }
+      return this.map(
+        subTerm => subTerm.bindTerm(termVar, term),
+        subType => subType)
     }
   }
 
@@ -147,16 +163,9 @@ export class LetTerm extends Term {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(type, Type)
 
-    const { boundVar, boundTerm, bodyTerm } = this
-
-    const newBoundTerm = boundTerm.bindType(typeVar, type)
-    const newBodyTerm = bodyTerm.bindType(typeVar, type)
-
-    if(newBoundTerm !== boundTerm || newBodyTerm !== bodyTerm) {
-      return new LetTerm(boundVar, newBoundTerm, newBodyTerm)
-    } else {
-      return this
-    }
+    return this.map(
+      subTerm => subTerm.bindType(typeVar, type),
+      subType => subType.bindType(typeVar, type))
   }
 
   evaluate() {

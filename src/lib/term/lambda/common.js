@@ -1,9 +1,8 @@
-import { TermVariable, TypeVariable } from '../../core/variable'
+import { TermVariable } from '../../core/variable'
 import {
   assertInstanceOf, assertNoError
 } from '../../core/assert'
 
-import { Kind } from '../../kind/kind'
 import { Type } from '../../type/type'
 import { ArrowType } from '../../type/arrow'
 
@@ -84,6 +83,14 @@ export class LambdaTerm extends Term {
     }
   }
 
+  *subTerms() {
+    yield this.bodyTerm
+  }
+
+  *subTypes() {
+    yield this.argType
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)
@@ -96,16 +103,16 @@ export class LambdaTerm extends Term {
     return bodyTerm.validateVarType(termVar, type)
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
+  map(termMapper, typeMapper) {
+    const { argVar, argType, bodyTerm } = this
 
-    const { argType, bodyTerm } = this
+    const newArgType = typeMapper(argType)
+    const newBodyTerm = termMapper(bodyTerm)
 
-    const err = argType.validateTVarKind(typeVar, kind)
-    if(err) return err
+    if((newArgType === argType) && (newBodyTerm === bodyTerm))
+      return this
 
-    return bodyTerm.validateTVarKind(typeVar, kind)
+    return new this.constructor(argVar, newArgType, newBodyTerm)
   }
 
   bindTerm(termVar, term) {
@@ -116,7 +123,12 @@ export class LambdaTerm extends Term {
 
     if(termVar === argVar) return this
 
-    if(term.freeTermVariables().has(argVar)) {
+    if(!term.freeTermVariables().has(argVar)) {
+      return this.map(
+        subTerm => subTerm.bindTerm(termVar, term),
+        subType => subType)
+
+    } else {
       const argVar2 = new TermVariable(argVar.name)
       const argTerm2 = new VariableTerm(argVar2, argType)
 
@@ -128,30 +140,7 @@ export class LambdaTerm extends Term {
       } else {
         return this
       }
-
-    } else {
-      const newBodyTerm = bodyTerm.bindTerm(termVar, term)
-
-      if(newBodyTerm !== bodyTerm) {
-        return new this.constructor(argVar, argType, newBodyTerm)
-      } else {
-        return this
-      }
     }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { argVar, argType, bodyTerm } = this
-    const newArgType = argType.bindType(typeVar, type)
-    const newBodyTerm = bodyTerm.bindType(typeVar, type)
-
-    if((newArgType === argType) && (newBodyTerm === bodyTerm))
-      return this
-
-    return new this.constructor(argVar, newArgType, newBodyTerm)
   }
 
   evaluate() {

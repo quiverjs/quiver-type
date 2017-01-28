@@ -2,7 +2,6 @@ import { assertInstanceOf, assertNoError } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
-import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
 
 import { isTerminalType } from '../util/terminal'
@@ -68,6 +67,14 @@ export class TypeApplicationTerm extends Term {
     return rightType.typeCheck(targetTerm.rightType)
   }
 
+  *subTerms() {
+    yield this.leftTerm
+  }
+
+  *subTypes() {
+    yield this.rightType
+  }
+
   validateVarType(termVar, type) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(type, Type)
@@ -77,50 +84,38 @@ export class TypeApplicationTerm extends Term {
     const err = leftTerm.validateVarType(termVar, type)
     if(!err) return null
 
-    const leftType = leftTerm.applyType(rightType)
-    return leftType.validateVarType(termVar, type)
+    const appliedLeftTerm = leftTerm.applyType(rightType)
+    return appliedLeftTerm.validateVarType(termVar, type)
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
+  map(termMapper, typeMapper) {
     const { leftTerm, rightType } = this
 
-    const err = leftTerm.validateTVarKind(typeVar, kind)
-    if(!err) return null
+    const newTerm = termMapper(leftTerm)
+    const newType = typeMapper(rightType)
 
-    const leftType = leftTerm.applyType(rightType).termType()
-    return leftType.validateTVarKind(typeVar, kind)
+    if((newTerm === leftTerm) && (newType === rightType))
+      return this
+
+    return new TypeApplicationTerm(newTerm, newType)
   }
 
   bindTerm(termVar, targetTerm) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(targetTerm, Term)
 
-    const { leftTerm, rightType } = this
-
-    const newTerm = leftTerm.bindTerm(termVar, targetTerm)
-
-    if(newTerm === leftTerm)
-      return this
-
-    return new TypeApplicationTerm(newTerm, rightType)
+    return this.map(
+      subTerm => subTerm.bindTerm(termVar, targetTerm),
+      subType => subType)
   }
 
   bindType(typeVar, targetType) {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(targetType, Type)
 
-    const { leftTerm, rightType } = this
-
-    const newTerm = leftTerm.bindType(typeVar, targetType)
-    const newType = rightType.bindType(typeVar, targetType)
-
-    if((newTerm === leftTerm) && (newType === rightType))
-      return this
-
-    return new TypeApplicationTerm(newTerm, newType)
+    return this.map(
+      subTerm => subTerm.bindType(typeVar, targetType),
+      subType => subType.bindType(typeVar, targetType))
   }
 
   evaluate() {

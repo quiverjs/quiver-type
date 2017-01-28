@@ -1,10 +1,9 @@
-import { TermVariable, TypeVariable } from '../../core/variable'
-
-import { Type } from '../../type/type'
-
 import {
-  assertInstanceOf, isInstanceOf,
-  assertString, assertNoError,
+  isInstanceOf,
+  assertString,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
   assertListContent
 } from '../../core/assert'
 
@@ -64,49 +63,25 @@ export class BaseUpdateTerm extends Term {
     return this.productTerm.termType()
   }
 
-  validateVarType(termVar, type) {
+  *subTerms() {
     const { productTerm, updateTerm } = this
 
-    const err = productTerm.validateVarType(termVar, type)
-    if(err) return err
-
-    return updateTerm.validateVarType(termVar, type)
+    yield productTerm
+    yield updateTerm
   }
 
-  validateTVarKind(typeVar, kind) {
-    const { productTerm, updateTerm } = this
-
-    const err = productTerm.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return updateTerm.validateTVarKind(typeVar, kind)
+  *subTypes() {
+    // empty
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { productTerm, fieldKey, updateTerm } = this
 
-    const newProductTerm = productTerm.bindTerm(termVar, term)
-    const newUpdateTerm = updateTerm.bindterm(termVar, term)
-
-    if(newProductTerm !== productTerm || newUpdateTerm !== updateTerm) {
-      return new this.constructor(newProductTerm, fieldKey, newUpdateTerm)
-
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { productTerm, fieldKey, updateTerm } = this
-
-    const newProductTerm = productTerm.bindType(typeVar, type)
-    const newUpdateTerm = updateTerm.bindType(typeVar, type)
+    const newProductTerm = termMapper(productTerm)
+    const newUpdateTerm = termMapper(updateTerm)
 
     if(newProductTerm !== productTerm || newUpdateTerm !== updateTerm) {
       return new this.constructor(newProductTerm, fieldKey, newUpdateTerm)

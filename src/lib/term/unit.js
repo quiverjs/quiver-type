@@ -1,10 +1,9 @@
 import { ISet } from '../core/container'
-import { assertInstanceOf, assertListContent } from '../core/assert'
-
-import { TermVariable, TypeVariable } from '../core/variable'
-
-import { Type } from '../type/type'
-import { Kind } from '../kind/kind'
+import {
+  assertFunction,
+  assertInstanceOf,
+  assertListContent
+} from '../core/assert'
 
 import { unitType } from '../type/unit'
 
@@ -38,30 +37,17 @@ export class UnitTerm extends Term {
     }
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    return null
+  *subTerms() {
+    // empty
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    return null
+  *subTypes() {
+    // empty
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    return this
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     return this
   }

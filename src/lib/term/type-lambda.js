@@ -3,7 +3,7 @@ import {
   assertPairArray
 } from '../core/assert'
 
-import { TermVariable, TypeVariable } from '../core/variable'
+import { TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { ForAllType } from '../type/forall'
@@ -85,8 +85,12 @@ export class TypeLambdaTerm extends Term {
     }
   }
 
-  validateVarType(termVar, type) {
-    return this.bodyTerm.validateVarType(termVar, type)
+  *subTerms() {
+    yield this.bodyTerm
+  }
+
+  *subTypes() {
+    // empty
   }
 
   validateTVarKind(typeVar, kind) {
@@ -101,16 +105,10 @@ export class TypeLambdaTerm extends Term {
     return bodyTerm.validateTVarKind(typeVar, kind)
   }
 
-  bindType(targetTypeVar, type) {
-    assertInstanceOf(targetTypeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
+  map(termMapper, typeMapper) {
     const { argTVar, argKind, bodyTerm } = this
 
-    if(targetTypeVar === argTVar)
-      return this
-
-    const newBodyTerm = bodyTerm.bindType(targetTypeVar, type)
+    const newBodyTerm = termMapper(bodyTerm)
 
     if(newBodyTerm === bodyTerm)
       return this
@@ -118,18 +116,34 @@ export class TypeLambdaTerm extends Term {
     return new TypeLambdaTerm(argTVar, argKind, newBodyTerm)
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
+  bindType(typeVar, type) {
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
 
     const { argTVar, argKind, bodyTerm } = this
 
-    const newBodyTerm = bodyTerm.bindTerm(termVar, term)
-
-    if(newBodyTerm === bodyTerm)
+    if(typeVar === argTVar)
       return this
 
-    return new TypeLambdaTerm(argTVar, argKind, newBodyTerm)
+    if(!type.freeTypeVariables().has(argTVar)) {
+      return this.map(
+        subTerm => subTerm.bindType(typeVar, type),
+        subType => subType.bindType(typeVar, type))
+
+    } else {
+      const argTVar2 = new TypeVariable(argTVar.name)
+      const argType2 = new VariableType(argTVar2, argKind)
+
+      const bodyTerm2 = bodyTerm.bindType(argTVar, argType2)
+      const newBodyTerm = bodyTerm2.bindType(typeVar, type)
+
+      if(newBodyTerm !== bodyTerm2) {
+        return new TypeLambdaTerm(argTVar2, argKind, newBodyTerm)
+
+      } else {
+        return this
+      }
+    }
   }
 
   evaluate() {
@@ -167,7 +181,7 @@ export class TypeLambdaTerm extends Term {
 
 export const typeLambda = (argTypes, bodyTerm) => {
   assertPairArray(argTypes)
-  
+
   return argTypes.reduceRight(
     (bodyTerm, [argType, argKind]) => {
       return new TypeLambdaTerm(argType, argKind, bodyTerm)

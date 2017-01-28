@@ -1,14 +1,12 @@
 import { ISet } from '../core/container'
 import {
   assertNoError,
+  assertFunction,
   assertInstanceOf,
   assertListContent
 } from '../core/assert'
 
-import { TermVariable, TypeVariable } from '../core/variable'
-
 import { Type } from '../type/type'
-import { Kind } from '../kind/kind'
 
 import { Term } from './term'
 import { ArgSpec } from './arg-spec'
@@ -63,30 +61,17 @@ export class ValueTerm extends Term {
       return new TypeError('value mismatch in value term')
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    return null
+  *subTerms() {
+    // empty
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    return null
+  *subTypes() {
+    // empty
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    return this
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     return this
   }

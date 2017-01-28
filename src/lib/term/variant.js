@@ -1,14 +1,12 @@
 import {
-  assertInstanceOf, assertListContent,
-  assertString, assertNoError
+  assertString,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
+  assertListContent,
 } from '../core/assert'
 
-import { Type } from '../type/type'
 import { SumType } from '../type/sum'
-
-import { Kind } from '../kind/kind'
-
-import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Term } from './term'
 import { ArgSpec } from './arg-spec'
@@ -77,46 +75,22 @@ export class VariantTerm extends Term {
     return this.bodyTerm.freeTermVariables()
   }
 
-  validateVarType(termVar, type) {
-    return this.bodyTerm.validateVarType(termVar, type)
+  *subTerms() {
+    yield this.bodyTerm
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    const { sumType, bodyTerm } = this
-
-    const err = sumType.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return bodyTerm.validateTVarKind(typeVar, kind)
+  *subTypes() {
+    yield this.sumType
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { sumType, tag, bodyTerm } = this
 
-    const newBodyTerm = bodyTerm.bindTerm(termVar, term)
-
-    if(newBodyTerm !== bodyTerm) {
-      return new VariantTerm(sumType, tag, newBodyTerm)
-
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { sumType, tag, bodyTerm } = this
-
-    const newSumType = sumType.bindType(typeVar, type)
-    const newBodyTerm = bodyTerm.bindType(typeVar, type)
+    const newSumType = typeMapper(sumType)
+    const newBodyTerm = termMapper(bodyTerm)
 
     if(newSumType !== sumType || newBodyTerm !== bodyTerm) {
       return new VariantTerm(newSumType, tag, newBodyTerm)
@@ -141,16 +115,9 @@ export class VariantTerm extends Term {
   }
 
   evaluate() {
-    const { sumType, tag, bodyTerm } = this
-
-    const newBodyTerm = bodyTerm.evaluate()
-
-    if(newBodyTerm !== bodyTerm) {
-      return new VariantTerm(sumType, tag, newBodyTerm)
-
-    } else {
-      return this
-    }
+    return this.map(
+      subTerm => subTerm.evaluate(),
+      subType => subType)
   }
 
   formatTerm() {

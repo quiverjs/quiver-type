@@ -1,12 +1,9 @@
-import { mapUnique } from '../core/util'
 import { IMap, unionMap } from '../core/container'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { SumType } from '../type/sum'
 import { ArrowType } from '../type/arrow'
-
-import { Kind } from '../kind/kind'
 
 import { Term } from './term'
 import { ArgSpec } from './arg-spec'
@@ -102,70 +99,28 @@ export class MatchTerm extends Term {
     }
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
+  *subTerms() {
     const { variantTerm, caseTerms } = this
-
-    for(const term of caseTerms.values()) {
-      const err = term.validateVarType(termVar, type)
-      if(err) return err
-    }
-
-    return variantTerm.validateVarType(termVar, type)
+    yield variantTerm
+    yield* caseTerms.values()
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    const { variantTerm, caseTerms, returnType } = this
-
-    for(const term of caseTerms.values()) {
-      const err = term.validateTVarKind(typeVar, kind)
-      if(err) return err
-    }
-
-    const err = variantTerm.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return returnType.validateTVarKind(typeVar, kind)
+  *subTypes() {
+    yield this.returnType
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    const { variantTerm, caseTerms, returnType } = this
-
-    const [newCaseTerms, termModified] = caseTerms::mapUnique(
-      caseTerm => caseTerm.bindTerm(termVar, term))
-
-    const newvariantTerm = variantTerm.bindTerm(termVar, term)
-
-    if(termModified || newvariantTerm !== variantTerm) {
-      return new MatchTerm(newvariantTerm, returnType, newCaseTerms)
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
+  map(termMapper, typeMapper) {
     const { variantTerm, caseTerms, returnType } = this
 
     let termModified = false
 
-    const newvariantTerm = variantTerm.bindType(typeVar, type)
+    const newVariantTerm = termMapper(variantTerm)
 
-    if(newvariantTerm !== variantTerm)
+    if(newVariantTerm !== variantTerm)
       termModified = true
 
     const newCaseTerms = caseTerms.map(term => {
-      const newTerm = term.bindType(typeVar, type)
+      const newTerm = termMapper(term)
 
       if(newTerm !== term)
         termModified = true
@@ -173,16 +128,34 @@ export class MatchTerm extends Term {
       return newTerm
     })
 
-    const newReturnType = returnType.bindType(typeVar, type)
+    const newReturnType = typeMapper(returnType)
     if(newReturnType !== returnType)
       termModified = true
 
     if(termModified) {
-      return new MatchTerm(newvariantTerm, newReturnType, newCaseTerms)
+      return new MatchTerm(newVariantTerm, newReturnType, newCaseTerms)
 
     } else {
       return this
     }
+  }
+
+  bindTerm(termVar, term) {
+    assertInstanceOf(termVar, TermVariable)
+    assertInstanceOf(term, Term)
+
+    return this.map(
+      subTerm => subTerm.bindTerm(termVar, term),
+      subType => subType)
+  }
+
+  bindType(typeVar, type) {
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
+
+    return this.map(
+      subTerm => subTerm.bindType(typeVar, type),
+      subType => subType.bindType(typeVar, type))
   }
 
   compileClosure(closureSpecs) {
@@ -233,7 +206,9 @@ export class MatchTerm extends Term {
 
     assertInstanceOf(caseTerm, ValueLambdaTerm)
 
-    return caseTerm.applyTerm(bodyTerm)
+    return caseTerm
+      .applyTerm(bodyTerm)
+      .evaluate()
   }
 
   formatTerm() {

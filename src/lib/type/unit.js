@@ -1,6 +1,6 @@
 import { ISet } from '../core/container'
 import { TypeVariable } from '../core/variable'
-import { assertInstanceOf } from '../core/assert'
+import { assertFunction, assertInstanceOf } from '../core/assert'
 
 import { Kind } from '../kind/kind'
 import { unitKind } from '../kind/unit'
@@ -33,6 +33,12 @@ export class UnitType extends Type {
     assertInstanceOf(kind, Kind)
 
     return null
+  }
+
+  map(typeMapper) {
+    assertFunction(typeMapper)
+
+    return this
   }
 
   bindType(typeVar, type) {

@@ -1,9 +1,10 @@
-import { TermVariable, TypeVariable } from '../core/variable'
 import {
-  assertInstanceOf, isInstanceOf, assertNoError
+  isInstanceOf,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf
 } from '../core/assert'
 
-import { Type } from '../type/type'
 import { FixedPointType } from '../type/fixed'
 
 import { Term } from './term'
@@ -54,34 +55,20 @@ export class FoldTerm extends Term {
     return this.bodyTerm.termCheck(targetTerm.bodyTerm)
   }
 
-  validateVarType(termVar, type) {
-    return this.bodyTerm.validateVarType(termVar, type)
+  *subTerms() {
+    yield this.bodyTerm
   }
 
-  validateTVarKind(typeVar, kind) {
-    return this.bodyTerm.validateTVarKind(typeVar, kind)
+  *subTypes() {
+    // empty
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
+  map(termMapper, typeMapper) {
+    assertFunction(termMapper)
+    assertFunction(typeMapper)
 
     const { bodyTerm } = this
-    const newBodyTerm = bodyTerm.bindTerm(termVar, term)
-
-    if(newBodyTerm !== bodyTerm) {
-      return new FoldTerm(newBodyTerm)
-    } else {
-      return this
-    }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    const { bodyTerm } = this
-    const newBodyTerm = bodyTerm.bindType(typeVar, type)
+    const newBodyTerm = termMapper(bodyTerm)
 
     if(newBodyTerm !== bodyTerm) {
       return new FoldTerm(newBodyTerm)
