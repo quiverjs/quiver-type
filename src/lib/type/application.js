@@ -1,7 +1,10 @@
-import { TypeVariable } from '../core/variable'
-import { isInstanceOf, assertInstanceOf, assertNoError } from '../core/assert'
+import {
+  isInstanceOf,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf
+} from '../core/assert'
 
-import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
 
 import { isTerminalType } from '../util/terminal'
@@ -69,31 +72,26 @@ export class ApplicationType extends Type {
     return rightType.typeCheck(targetType.rightType)
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
+  *subTypes() {
     const { leftType, rightType } = this
 
-    const err = leftType.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return rightType.validateTVarKind(typeVar, kind)
+    yield leftType
+    yield rightType
   }
 
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  map(typeMapper) {
+    assertFunction(typeMapper)
 
     const { leftType, rightType } = this
 
-    const newLeftType = leftType.bindType(typeVar, type)
-    const newRightType = rightType.bindType(typeVar, type)
+    const newLeftType = typeMapper(leftType)
+    const newRightType = typeMapper(rightType)
 
-    if((newLeftType === leftType) && (newRightType === rightType))
+    if((newLeftType === leftType) && (newRightType === rightType)) {
       return this
-
-    return new ApplicationType(newLeftType, newRightType)
+    } else {
+      return new ApplicationType(newLeftType, newRightType)
+    }
   }
 
   applyType(targetType) {

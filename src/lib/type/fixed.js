@@ -1,5 +1,11 @@
-import { assertInstanceOf, isInstanceOf, assertNoError } from '../core/assert'
 import { TypeVariable } from '../core/variable'
+
+import {
+  isInstanceOf,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
+} from '../core/assert'
 
 import { Kind } from '../kind/kind'
 
@@ -85,6 +91,10 @@ export class FixedPointType extends Type {
     return bodyType.typeCheck(targetType.bodyType)
   }
 
+  *subTypes() {
+    yield this.bodyType
+  }
+
   validateTVarKind(typeVar, kind) {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(kind, Kind)
@@ -95,6 +105,21 @@ export class FixedPointType extends Type {
       return selfKind.kindCheck(kind)
     } else {
       return bodyType.validateTVarKind(typeVar, kind)
+    }
+  }
+
+  map(typeMapper) {
+    assertFunction(typeMapper)
+
+    const { fixedVar, selfKind, bodyType } = this
+
+    const newBodyType = typeMapper(bodyType)
+
+    if(newBodyType !== bodyType) {
+      return new FixedPointType(fixedVar, selfKind, newBodyType)
+
+    } else {
+      return this
     }
   }
 

@@ -1,6 +1,8 @@
 import { mapUnique } from '../../core/util'
 import { unionMap } from '../../core/container'
 
+import { assertFunction } from '../../core/assert'
+
 import { Type } from '../../type/type'
 
 import { unitKind } from '../../kind/unit'
@@ -49,20 +51,16 @@ export class BaseProductType extends Type {
     return null
   }
 
-  validateTVarKind(typeVar, kind) {
-    const { fieldTypes } = this
-
-    for(const fieldType of fieldTypes.values()) {
-      const err = fieldType.validateTVarKind(typeVar, kind)
-      if(err) return err
-    }
+  *subTypes() {
+    yield* this.fieldTypes.values()
   }
 
-  bindType(typeVar, type) {
+  map(typeMapper) {
+    assertFunction(typeMapper)
+
     const { fieldTypes } = this
 
-    const [newFieldTypes, isModified] = fieldTypes::mapUnique(
-      fieldType => fieldType.bindType(typeVar, type))
+    const [newFieldTypes, isModified] = fieldTypes::mapUnique(typeMapper)
 
     if(isModified) {
       return new this.constructor(newFieldTypes)

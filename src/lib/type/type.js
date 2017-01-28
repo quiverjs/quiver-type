@@ -1,4 +1,7 @@
+import { Kind } from '../kind/kind'
 import { formatLisp } from '../core/util'
+import { TypeVariable } from '../core/variable'
+import { assertInstanceOf } from '../core/assert'
 
 export class Type {
   constructor() {
@@ -11,19 +14,41 @@ export class Type {
     throw new Error('Not implemented')
   }
 
+  subTerms() {
+    throw new Error('Not implemented')
+  }
+
+  subTypes() {
+    throw new Error('Not implemented')
+  }
+
+  map(typeMapper) {
+    throw new Error('Not implemented')
+  }
+
   // typeCheck :: Type -> Maybe Error
   typeCheck(targetType) {
     throw new Error('Not implemented')
   }
 
-  // validateTVarKind :: TypeVariable -> Kind -> MaybeError
   validateTVarKind(typeVar, kind) {
-    throw new Error('not implemented')
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(kind, Kind)
+
+    for (const subType of this.subTypes()) {
+      const err = subType.validateTVarKind(typeVar, kind)
+      if(err) return err
+    }
+
+    return null
   }
 
-  // bindType :: TypeVariable -> Type -> Type
   bindType(typeVar, type) {
-    throw new Error('Not implemented')
+    assertInstanceOf(typeVar, TypeVariable)
+    assertInstanceOf(type, Type)
+
+    return this.map(
+      subType => subType.bindType(typeVar, type))
   }
 
   // typeKind :: () -> Kind

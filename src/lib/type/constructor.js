@@ -1,8 +1,8 @@
+import { mapUnique } from '../core/util'
 import { IList, ISet } from '../core/container'
-import { TypeVariable } from '../core/variable'
 import {
   assertListContent, assertInstanceOf,
-  assertFunction, assertArray 
+  assertFunction, assertArray
 } from '../core/assert'
 
 import { DynamicCompiledType } from '../compiled/dynamic'
@@ -62,37 +62,23 @@ export class TypeConstructor extends Type {
     return null
   }
 
-  validateTVarKind(typeVar, kind) {
-    const { argTypes } = this
-
-    for(const argType of argTypes) {
-      const err = argType.validateTVarKind(typeVar, kind)
-      if(err) return err
-    }
-
-    return null
+  *subTypes() {
+    yield* this.argTypes
   }
 
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  map(typeMapper) {
+    assertFunction(typeMapper)
 
     const { argTypes, typeCheckerBuilder } = this
 
-    let argTypesChanged = false
+    const [ newArgTypes, modified ] = argTypes::mapUnique(typeMapper)
 
-    const newArgTypes = argTypes.map(argType => {
-      const newArgType = argType.bindType(typeVar, type)
+    if(modified) {
+      return new TypeConstructor(newArgTypes, typeCheckerBuilder)
 
-      if(argType !== newArgType)
-        argTypesChanged = true
-
-      return newArgType
-    })
-
-    if(!argTypesChanged) return this
-
-    return new TypeConstructor(newArgTypes, typeCheckerBuilder)
+    } else {
+      return this
+    }
   }
 
   compileType() {

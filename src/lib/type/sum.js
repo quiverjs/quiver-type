@@ -1,17 +1,16 @@
 import {
-  assertInstanceOf, assertMap,
-  assertString, assertNoError
+  assertMap,
+  assertString,
+  assertNoError,
+  assertFunction,
+  assertInstanceOf,
 } from '../core/assert'
 
 import { IMap } from '../core/container'
 
-import { TypeVariable } from '../core/variable'
-
 import { mapUnique } from '../core/util'
 
 import { unionMap } from '../core/container'
-
-import { Kind } from '../kind/kind'
 
 import { unitKind } from '../kind/unit'
 
@@ -75,32 +74,22 @@ export class SumType extends Type {
     return null
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    const { typeMap } = this
-
-    for(const inType of typeMap.values()) {
-      const err = inType.validateTVarKind(typeVar, kind)
-      if(err) return err
-    }
-
-    return null
+  *subTypes() {
+    yield* this.typeMap.values()
   }
 
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  map(typeMapper) {
+    assertFunction(typeMapper)
 
     const { typeMap } = this
 
-    const [newTypeMap, modified] = typeMap::mapUnique(
-      inType => inType.bindType(typeVar, type))
+    const [newTypeMap, modified] = typeMap::mapUnique(typeMapper)
 
-    if(!modified) return this
-
-    return new SumType(newTypeMap)
+    if(modified) {
+      return new SumType(newTypeMap)
+    } else {
+      return this
+    }
   }
 
   typeKind() {

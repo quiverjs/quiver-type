@@ -1,6 +1,8 @@
 import {
-  assertInstanceOf, assertNoError,
-  assertPairArray
+  assertNoError,
+  assertFunction,
+  assertPairArray,
+  assertInstanceOf
 } from '../core/assert'
 
 import { TypeVariable } from '../core/variable'
@@ -73,6 +75,10 @@ export class ForAllType extends Type {
     return bodyType.typeCheck(innerType)
   }
 
+  *subTypes() {
+    yield this.bodyType
+  }
+
   validateTVarKind(typeVar, kind) {
     assertInstanceOf(typeVar, TypeVariable)
     assertInstanceOf(kind, Kind)
@@ -83,6 +89,20 @@ export class ForAllType extends Type {
       return null
 
     return bodyType.validateTVarKind(typeVar, kind)
+  }
+
+  map(typeMapper) {
+    assertFunction(typeMapper)
+    
+    const { argTVar, argKind, bodyType } = this
+
+    const newBodyType = typeMapper(bodyType)
+
+    if(newBodyType === bodyType) {
+      return this
+    } else {
+      return new ForAllType(argTVar, argKind, newBodyType)
+    }
   }
 
   bindType(typeVar, type) {

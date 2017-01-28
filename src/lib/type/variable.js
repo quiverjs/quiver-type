@@ -1,6 +1,10 @@
 import { ISet } from '../core/container'
 import { TypeVariable } from '../core/variable'
-import { assertInstanceOf, assertNoError } from '../core/assert'
+import {
+  assertNoError,
+  assertFunction,
+  assertInstanceOf
+} from '../core/assert'
 
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
@@ -32,6 +36,16 @@ export class VariableType extends Type {
 
   freeTypeVariables() {
     return ISet([this.typeVar])
+  }
+
+  *subTypes() {
+    // empty
+  }
+
+  map(typeMapper) {
+    assertFunction(typeMapper)
+
+    return this
   }
 
   bindType(typeVar, type) {

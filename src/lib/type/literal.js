@@ -45,11 +45,13 @@ export class LiteralType extends Type {
       return new TypeError('target type is different constant type')
   }
 
-  validateTVarKind(typeVar, kind) {
-    return null
+  *subTypes() {
+    // empty
   }
 
-  bindType(typeVar, type) {
+  map(typeMapper) {
+    assertFunction(typeMapper)
+
     return this
   }
 

@@ -1,9 +1,9 @@
-import { assertInstanceOf } from '../core/assert'
-import { TypeVariable } from '../core/variable'
-
-import { Kind } from '../kind/kind'
 import { unitKind } from '../kind/unit'
 import { CompiledArrowType } from '../compiled/arrow'
+import {
+  assertFunction,
+  assertInstanceOf
+} from '../core/assert'
 
 import { Type } from './type'
 
@@ -51,31 +51,26 @@ export class ArrowType extends Type {
     return rightType.typeCheck(targetType.rightType)
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
+  *subTypes() {
     const { leftType, rightType } = this
 
-    const err = leftType.validateTVarKind(typeVar, kind)
-    if(err) return err
-
-    return rightType.validateTVarKind(typeVar, kind)
+    yield leftType
+    yield rightType
   }
 
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
+  map(typeMapper) {
+    assertFunction(typeMapper)
 
     const { leftType, rightType } = this
 
-    const newLeftType = leftType.bindType(typeVar, type)
-    const newRightType = rightType.bindType(typeVar, type)
+    const newLeftType = typeMapper(leftType)
+    const newRightType = typeMapper(rightType)
 
-    if((newLeftType === leftType) && (newRightType === rightType))
+    if((newLeftType === leftType) && (newRightType === rightType)) {
       return this
-
-    return new ArrowType(newLeftType, newRightType)
+    } else {
+      return new ArrowType(newLeftType, newRightType)
+    }
   }
 
   typeKind() {

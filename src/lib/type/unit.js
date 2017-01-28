@@ -1,8 +1,6 @@
 import { ISet } from '../core/container'
-import { TypeVariable } from '../core/variable'
-import { assertFunction, assertInstanceOf } from '../core/assert'
+import { assertFunction } from '../core/assert'
 
-import { Kind } from '../kind/kind'
 import { unitKind } from '../kind/unit'
 
 import { CompiledUnitType } from '../compiled/unit'
@@ -28,22 +26,12 @@ export class UnitType extends Type {
     }
   }
 
-  validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(kind, Kind)
-
-    return null
+  *subTypes() {
+    // empty
   }
 
   map(typeMapper) {
     assertFunction(typeMapper)
-
-    return this
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
 
     return this
   }
