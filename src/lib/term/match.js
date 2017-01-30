@@ -1,5 +1,4 @@
 import { IMap } from '../core/container'
-import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { SumType } from '../type/sum'
@@ -132,24 +131,6 @@ export class MatchTerm extends Term {
     }
   }
 
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    return this.map(
-      subTerm => subTerm.bindTerm(termVar, term),
-      subType => subType)
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    return this.map(
-      subTerm => subTerm.bindType(typeVar, type),
-      subType => subType.bindType(typeVar, type))
-  }
-
   compileClosure(closureSpecs) {
     assertListContent(closureSpecs, ArgSpec)
 
@@ -160,7 +141,7 @@ export class MatchTerm extends Term {
     const caseClosures = caseTerms.map(
       lambdaTerm => {
         const { argType } = lambdaTerm
-        const argVar = new TermVariable('_')
+        const argVar = Symbol('_')
         const argSpec = new ArgSpec(
           argVar, argType.compileType())
 

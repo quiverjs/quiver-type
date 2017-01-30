@@ -1,13 +1,15 @@
 import test from 'tape'
 
 import {
-  varGen,
-  lets, body, unit, unitTerm,
-  value, match, variant,
+  lets, body, value,
+  unit, unitTerm,
+  varTerm, varType,
+  match, variant,
   lambda, typeLambda,
   apply, applyType,
-  sumType, unitType, arrow, forall,
-  typeApp, unitKind, arrowKind,
+  sumType, unitType,
+  arrow, forall, typeApp,
+  unitKind, arrowKind,
   typeclass, classInstance,
   classMethod, deconstraint,
   constraintLambda,
@@ -20,8 +22,6 @@ import { termTypeEquals } from './util'
 
 test('type class test', assert => {
   assert.test('basic functor', assert => {
-    const { termVar, typeVar, varTerm, varType } = varGen()
-
     const unitArrow = arrowKind(unitKind, unitKind)
 
     const aType = varType('a', unitKind)
@@ -32,7 +32,7 @@ test('type class test', assert => {
 
     // Maybe = forall k. Just k | Nothing
     const MaybeType = forall(
-      [[typeVar('k'), unitKind]],
+      [['k', unitKind]],
       sumType({
         Just: kType,
         Nothing: unitType
@@ -40,8 +40,8 @@ test('type class test', assert => {
 
     // fmap = forall a b. (a -> b) -> f a -> f b
     const fmapType = forall(
-      [[typeVar('a'), unitKind],
-       [typeVar('b'), unitKind]],
+      [['a', unitKind],
+       ['b', unitKind]],
       arrow(
         arrow(aType, bType),
         typeApp(fType, aType),
@@ -49,7 +49,7 @@ test('type class test', assert => {
 
     // Functor = forall f. { fmap }
     const FunctorClass = forall(
-      [[typeVar('f'), unitArrow]],
+      [['f', unitArrow]],
       typeclass('Functor', {
         fmap: fmapType
       }))
@@ -65,17 +65,17 @@ test('type class test', assert => {
     //         Just x -> MaybeB.Just map x
     //         Nothing -> MaybeB.Nothing
     const maybeFmap = typeLambda(
-      [[typeVar('a'), unitKind],
-       [typeVar('b'), unitKind]],
+      [['a', unitKind],
+       ['b', unitKind]],
       lambda(
-        [[termVar('map'), ABArrowType],
-         [termVar('maybeA'), MaybeAType]],
+        [['map', ABArrowType],
+         ['maybeA', MaybeAType]],
         match(
           varTerm('maybeA', MaybeAType),
           MaybeBType,
           {
             Just: lambda(
-              [[termVar('x'), aType]],
+              [['x', aType]],
               variant(
                 MaybeBType,
                 'Just',
@@ -84,7 +84,7 @@ test('type class test', assert => {
                   varTerm('x', aType)))),
 
             Nothing: lambda(
-              [[termVar('_'), unitType]],
+              [['_', unitType]],
               variant(
                 MaybeBType,
                 'Nothing',
@@ -103,7 +103,7 @@ test('type class test', assert => {
     assert::termTypeEquals(MaybeFunctorInstance, MaybeFunctorClass)
 
     const ShowClass = forall(
-      [[typeVar('s'), unitKind]],
+      [['s', unitKind]],
       typeclass('Show', {
         show: arrow(sType, StringType)
       }))
@@ -115,7 +115,7 @@ test('type class test', assert => {
       StringShowClass,
       {
         show: lambda(
-          [[termVar('x'), StringType]],
+          [['x', StringType]],
           body(
             [varTerm('x', StringType)],
             StringType,
@@ -131,7 +131,7 @@ test('type class test', assert => {
       NumberShowClass,
       {
         show: lambda(
-          [[termVar('x'), NumberType]],
+          [['x', NumberType]],
           body(
             [varTerm('x', NumberType)],
             StringType,
@@ -157,36 +157,36 @@ test('type class test', assert => {
       //           Just x: `Just ${ showA.show x }`
       //           Nothing: 'Nothing'
       const MaybeShowInstance = typeLambda(
-        [[typeVar('a'), unitKind]],
+        [['a', unitKind]],
         constraintLambda(
           [ShowAClass],
           classInstance(
             ShowMaybeAClass,
             {
               show: lambda(
-                [[termVar('ma'), MaybeAType]],
+                [['ma', MaybeAType]],
                 match(
                   varTerm('ma', MaybeAType),
                   StringType,
                   {
                     Just: lambda(
-                      [[termVar('x'), aType]],
+                      [['x', aType]],
                       lets(
-                        [[termVar('xStr'),
+                        [['x-str',
                           apply(
                             classMethod(ShowAClass, 'show'),
                             varTerm('x', aType))
                         ]],
 
                         body(
-                          [varTerm('xStr', StringType)],
+                          [varTerm('x-str', StringType)],
                           StringType,
                           xStr =>
                             `Just(${xStr})`
                         ))),
 
                     Nothing: lambda(
-                      [[termVar('_'), unitType]],
+                      [['_', unitType]],
                       value('Nothing', StringType))
                   })),
             })))
@@ -237,8 +237,8 @@ test('type class test', assert => {
       //       functorF.fmap [a, String] showA.show
 
       const fmapShow = typeLambda(
-        [[typeVar('f'), unitArrow],
-         [typeVar('a'), unitKind]],
+        [['f', unitArrow],
+         ['a', unitKind]],
         constraintLambda(
           [ShowAClass, FunctorFClass],
           apply(

@@ -1,7 +1,9 @@
 import { formatLisp } from '../core/util'
 import { unionMap } from '../core/container'
-import { assertInstanceOf } from '../core/assert'
-import { TermVariable, TypeVariable } from '../core/variable'
+import {
+  assertKeyword,
+  assertInstanceOf
+} from '../core/assert'
 
 import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
@@ -47,7 +49,7 @@ export class Term {
   }
 
   validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(type, Type)
 
     for(const subTerm of this.subTerms()) {
@@ -57,7 +59,7 @@ export class Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     for (const subTerm of this.subTerms()) {
@@ -74,7 +76,7 @@ export class Term {
   }
 
   bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(term, Term)
 
     return this.map(
@@ -83,7 +85,7 @@ export class Term {
   }
 
   bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(type, Type)
 
     return this.map(

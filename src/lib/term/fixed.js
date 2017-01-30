@@ -8,9 +8,7 @@ import {
 
 import { ArgSpec } from './arg-spec'
 import { TypedFunction } from '../compiled/function'
-import { TermVariable, TypeVariable } from '../core/variable'
 
-import { Type } from '../type/type'
 import { ArrowType } from '../type/arrow'
 import {
   ProductType, RecordType
@@ -91,10 +89,6 @@ export class FixedPointTerm extends Term {
     return this.selfType
   }
 
-  freeTermVariables() {
-    return this.bodyLambda.freeTermVariables()
-  }
-
   termCheck(targetTerm) {
     return this.bodyLambda.termCheck(targetTerm)
   }
@@ -120,24 +114,6 @@ export class FixedPointTerm extends Term {
     } else {
       return this
     }
-  }
-
-  bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(term, Term)
-
-    return this.map(
-      subTerm => subTerm.bindTerm(termVar, term),
-      subType => subType)
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    return this.map(
-      subTerm => subTerm.bindType(typeVar, type),
-      subType => subType.bindType(typeVar, type))
   }
 
   evaluate() {

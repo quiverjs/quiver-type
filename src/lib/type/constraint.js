@@ -1,6 +1,6 @@
 import {
-  assertKey,
   isInstanceOf,
+  assertKeyword,
   assertFunction,
   assertInstanceOf
 } from '../core/assert'
@@ -14,7 +14,7 @@ const $specType = Symbol('@specType')
 
 export class ConstraintType extends Type {
   constructor(constraintName, specType) {
-    assertKey(constraintName)
+    assertKeyword(constraintName)
     assertInstanceOf(specType, Type)
 
     super()

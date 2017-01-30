@@ -1,8 +1,10 @@
 import { Kind } from '../kind/kind'
 import { formatLisp } from '../core/util'
 import { unionMap } from '../core/container'
-import { TypeVariable } from '../core/variable'
-import { assertInstanceOf } from '../core/assert'
+import {
+  assertKeyword,
+  assertInstanceOf
+} from '../core/assert'
 
 export class Type {
   constructor() {
@@ -29,7 +31,7 @@ export class Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     for (const subType of this.subTypes()) {
@@ -41,7 +43,7 @@ export class Type {
   }
 
   bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(type, Type)
 
     return this.map(

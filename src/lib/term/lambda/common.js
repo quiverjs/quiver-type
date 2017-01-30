@@ -1,6 +1,7 @@
-import { TermVariable } from '../../core/variable'
 import {
-  assertInstanceOf, assertNoError
+  assertNoError,
+  assertKeyword,
+  assertInstanceOf,
 } from '../../core/assert'
 
 import { Type } from '../../type/type'
@@ -15,9 +16,9 @@ const $bodyTerm = Symbol('@bodyTerm')
 const $type = Symbol('@type')
 
 export class LambdaTerm extends Term {
-  // constructor :: TermVariable -> Type -> Term -> ()
+  // constructor :: Variable -> Type -> Term -> ()
   constructor(argVar, argType, bodyTerm) {
-    assertInstanceOf(argVar, TermVariable)
+    assertKeyword(argVar)
     assertInstanceOf(argType, Type)
     assertInstanceOf(bodyTerm, Term)
 
@@ -92,7 +93,7 @@ export class LambdaTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(type, Type)
 
     const { argVar, bodyTerm } = this
@@ -116,7 +117,7 @@ export class LambdaTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(term, Term)
 
     const { argVar, argType, bodyTerm } = this
@@ -129,7 +130,7 @@ export class LambdaTerm extends Term {
         subType => subType)
 
     } else {
-      const argVar2 = new TermVariable(argVar.name)
+      const argVar2 = Symbol(argVar.toString())
       const argTerm2 = new VariableTerm(argVar2, argType)
 
       const bodyTerm2 = bodyTerm.bindTerm(argVar, argTerm2)

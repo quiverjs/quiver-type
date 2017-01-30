@@ -39,7 +39,7 @@ test('primitive type test', assert => {
 
     const x2Var = termVar('x')
     assert.equal(xTerm.bindTerm(x2Var, valueTerm), xTerm,
-      'term variable of same name but different instance should be distinguish')
+      'term variables made from termVar() with same name should be distinguish')
 
     const xTerm2 = xTerm.bindTerm(xVar, valueTerm)
     assert.notEqual(xTerm2, xTerm)

@@ -1,15 +1,17 @@
-import { assertInstanceOf } from '../core/assert'
-import { TermVariable } from '../core/variable'
+import {
+  assertKeyword,
+  assertInstanceOf
+} from '../core/assert'
 
 import { CompiledType } from '../compiled/type'
 
 const $termVar = Symbol('@termVar')
 const $compiledType = Symbol('@compiledType')
 
-// type ArgSpec = Pair TermVariable CompiledType
+// type ArgSpec = Pair Variable CompiledType
 export class ArgSpec {
   constructor(termVar, compiledType) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(compiledType, CompiledType)
 
     this[$termVar] = termVar

@@ -1,5 +1,4 @@
 import { assertInstanceOf, assertNoError } from '../core/assert'
-import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { ArrowKind } from '../kind/arrow'
@@ -75,19 +74,6 @@ export class TypeApplicationTerm extends Term {
     yield this.rightType
   }
 
-  validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(type, Type)
-
-    const { leftTerm, rightType } = this
-
-    const err = leftTerm.validateVarType(termVar, type)
-    if(!err) return null
-
-    const appliedLeftTerm = leftTerm.applyType(rightType)
-    return appliedLeftTerm.validateVarType(termVar, type)
-  }
-
   map(termMapper, typeMapper) {
     const { leftTerm, rightType } = this
 
@@ -98,24 +84,6 @@ export class TypeApplicationTerm extends Term {
       return this
 
     return new TypeApplicationTerm(newTerm, newType)
-  }
-
-  bindTerm(termVar, targetTerm) {
-    assertInstanceOf(termVar, TermVariable)
-    assertInstanceOf(targetTerm, Term)
-
-    return this.map(
-      subTerm => subTerm.bindTerm(termVar, targetTerm),
-      subType => subType)
-  }
-
-  bindType(typeVar, targetType) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(targetType, Type)
-
-    return this.map(
-      subTerm => subTerm.bindType(typeVar, targetType),
-      subType => subType.bindType(typeVar, targetType))
   }
 
   evaluate() {

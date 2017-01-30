@@ -1,7 +1,6 @@
-import { TermVariable, TypeVariable } from '../core/variable'
-
 import {
   isInstanceOf,
+  assertKeyword,
   assertNoError,
   assertFunction,
   assertPairArray,
@@ -22,7 +21,7 @@ const $bodyTerm = Symbol('@bodyTerm')
 
 export class LetTerm extends Term {
   constructor(boundVar, boundTerm, bodyTerm) {
-    assertInstanceOf(boundVar, TermVariable)
+    assertKeyword(boundVar)
     assertInstanceOf(boundTerm, Term)
     assertInstanceOf(bodyTerm, Term)
 
@@ -91,7 +90,7 @@ export class LetTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(type, Type)
 
     const { boundVar, boundTerm, bodyTerm } = this
@@ -123,7 +122,7 @@ export class LetTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(term, Term)
 
     const { boundVar, boundTerm, bodyTerm } = this
@@ -138,7 +137,7 @@ export class LetTerm extends Term {
       }
 
     } else if(term.freeTermVariables().has(boundVar)) {
-      const boundVar2 = new TermVariable(boundVar.name)
+      const boundVar2 = Symbol(boundVar.toString())
       const varTerm = new VariableTerm(boundVar2, boundTerm.termType())
 
       const newBoundTerm = boundTerm.bindTerm(termVar, term)
@@ -157,15 +156,6 @@ export class LetTerm extends Term {
         subTerm => subTerm.bindTerm(termVar, term),
         subType => subType)
     }
-  }
-
-  bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
-    assertInstanceOf(type, Type)
-
-    return this.map(
-      subTerm => subTerm.bindType(typeVar, type),
-      subType => subType.bindType(typeVar, type))
   }
 
   evaluate() {

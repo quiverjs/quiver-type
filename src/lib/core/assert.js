@@ -13,10 +13,10 @@ export const assertInstanceOf = (object, type, message) => {
   }
 }
 
-export const assertKey = key => {
-  const keyType = typeof(key)
+export const assertKeyword = keyword => {
+  const keyType = typeof(keyword)
   if(keyType !== 'string' && keyType !== 'symbol') {
-    throw new TypeError('key must be either string or symbol')
+    throw new TypeError('keyword must be either string or symbol')
   }
 }
 

@@ -1,7 +1,7 @@
 import { ISet } from '../core/container'
-import { TermVariable } from '../core/variable'
 import {
   assertNoError,
+  assertKeyword,
   assertFunction,
   assertInstanceOf,
   assertListContent
@@ -42,7 +42,7 @@ const argPicker = index =>
 
 export class VariableTerm extends Term {
   constructor(termVar, varType) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(varType, Type)
 
     super()
@@ -107,7 +107,7 @@ export class VariableTerm extends Term {
   }
 
   validateVarType(termVar, type) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(type, Type)
 
     if(this.termVar !== termVar)
@@ -117,7 +117,7 @@ export class VariableTerm extends Term {
   }
 
   bindTerm(termVar, term) {
-    assertInstanceOf(termVar, TermVariable)
+    assertKeyword(termVar)
     assertInstanceOf(term, Term)
 
     if(this.termVar !== termVar)

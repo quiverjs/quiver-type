@@ -1,7 +1,7 @@
 import { ISet } from '../core/container'
-import { TypeVariable } from '../core/variable'
 import {
   assertNoError,
+  assertKeyword,
   assertFunction,
   assertInstanceOf
 } from '../core/assert'
@@ -17,7 +17,7 @@ const $kind = Symbol('@kind')
 
 export class VariableType extends Type {
   constructor(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     super()
@@ -49,7 +49,7 @@ export class VariableType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(type, Type)
 
     if(typeVar !== this.typeVar)
@@ -74,7 +74,7 @@ export class VariableType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     if(this.typeVar !== typeVar)

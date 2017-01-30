@@ -1,11 +1,10 @@
 import {
   assertNoError,
+  assertKeyword,
   assertFunction,
   assertPairArray,
   assertInstanceOf
 } from '../core/assert'
-
-import { TypeVariable } from '../core/variable'
 
 import { Kind } from '../kind/kind'
 import { ArrowKind } from '../kind/arrow'
@@ -20,7 +19,7 @@ const $kind = Symbol('@kind')
 
 export class ForAllType extends Type {
   constructor(argTVar, argKind, bodyType) {
-    assertInstanceOf(argTVar, TypeVariable)
+    assertKeyword(argTVar)
     assertInstanceOf(argKind, Kind)
     assertInstanceOf(bodyType, Type)
 
@@ -80,7 +79,7 @@ export class ForAllType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     const { argTVar, bodyType } = this
@@ -106,7 +105,7 @@ export class ForAllType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(type, Type)
 
     const { argTVar, argKind, bodyType } = this

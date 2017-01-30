@@ -1,7 +1,6 @@
-import { TypeVariable } from '../core/variable'
-
 import {
   isInstanceOf,
+  assertKeyword,
   assertNoError,
   assertFunction,
   assertInstanceOf,
@@ -22,7 +21,7 @@ const $unfoldType = Symbol('@unfoldType')
 
 export class FixedPointType extends Type {
   constructor(fixedVar, selfKind, bodyType) {
-    assertInstanceOf(fixedVar, TypeVariable)
+    assertKeyword(fixedVar)
     assertInstanceOf(selfKind, Kind)
     assertInstanceOf(bodyType, Type)
 
@@ -96,7 +95,7 @@ export class FixedPointType extends Type {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     const { fixedVar, selfKind, bodyType } = this
@@ -124,7 +123,7 @@ export class FixedPointType extends Type {
   }
 
   bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(type, Type)
 
     const { fixedVar, selfKind, bodyType } = this

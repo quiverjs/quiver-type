@@ -3,7 +3,6 @@ import test from 'tape'
 import { IList } from '../lib/core'
 
 import {
-  termVar, typeVar,
   lets, unitTerm, body, fold, match,
   value, record, unfold, variant, product,
   varTerm, fixed, lambda, projectRecord,
@@ -19,18 +18,15 @@ import {
 
 test('fixed point test', assert => {
   assert.test('basic fixed term', assert => {
-    const fVar = termVar('f')
-    const xVar = termVar('x')
-
     const fibType = arrow(NumberType, NumberType)
 
     const fibLambda = fixed(
       lambda(
-        [[fVar, fibType],
-         [xVar, NumberType]],
+        [['f', fibType],
+         ['x', NumberType]],
         body(
-          [varTerm(fVar, fibType),
-           varTerm(xVar, NumberType)],
+          [varTerm('f', fibType),
+           varTerm('x', NumberType)],
           NumberType,
             (fib, x) => {
               if(x === 0) return 0
@@ -53,30 +49,25 @@ test('fixed point test', assert => {
       isEven: predType
     })
 
-    const xVar = termVar('x')
-    const isOddVar = termVar('isOdd')
-    const isEvenVar = termVar('isEven')
-    const ieioVar = termVar('ieio')
-
     const ieioTerm = fixed(
       lambda(
-        [[ieioVar, ieioType]],
+        [['ieio', ieioType]],
         lets(
-          [[isOddVar,
+          [['is-odd',
             projectRecord(
-              varTerm(ieioVar, ieioType),
+              varTerm('ieio', ieioType),
               'isOdd')],
-           [isEvenVar,
+           ['is-even',
             projectRecord(
-              varTerm(ieioVar, ieioType),
+              varTerm('ieio', ieioType),
               'isEven')]],
 
           record({
             isOdd: lambda(
-              [[xVar, NumberType]],
+              [['x', NumberType]],
               body(
-                [varTerm(isEvenVar, predType),
-                 varTerm(xVar, NumberType)],
+                [varTerm('is-even', predType),
+                 varTerm('x', NumberType)],
                 BooleanType,
                 (isEven, x) => {
                   if(x == 0) return false
@@ -84,10 +75,10 @@ test('fixed point test', assert => {
                 })),
 
             isEven: lambda(
-              [[xVar, NumberType]],
+              [['x', NumberType]],
               body(
-                [varTerm(isOddVar, predType),
-                 varTerm(xVar, NumberType)],
+                [varTerm('is-odd', predType),
+                 varTerm('x', NumberType)],
                 BooleanType,
                 (isOdd, x) => {
                   if(x == 0) return true
@@ -112,19 +103,16 @@ test('fixed point test', assert => {
   })
 
   assert.test('fixed point type', assert => {
-    const aTVar = typeVar('a')
-    const lTVar = typeVar('l')
-
-    const aType = varType(aTVar, unitKind)
-    const lType = varType(lTVar, unitKind)
+    const aType = varType('a', unitKind)
+    const lType = varType('l', unitKind)
 
     // ListType = forall a . fixed l .
     //     Nil () |
     //     Cons l a
     const ListType = forall(
-      [[aTVar, unitKind]],
+      [['a', unitKind]],
       fixedType(
-        lTVar, unitKind,
+        'l', unitKind,
         sumType({
           Nil: unitType,
           Cons: productType(aType, lType)
@@ -162,21 +150,18 @@ test('fixed point test', assert => {
           value(2, NumberType),
           oneList)))
 
-    const xVar = termVar('x')
-    const yVar = termVar('y')
-
     const isNilLambda = lambda(
-      [[xVar, NumListType]],
+      [['x', NumListType]],
       match(
         unfold(
-          varTerm(xVar, NumListType)),
+          varTerm('x', NumListType)),
         BooleanType,
         {
           Nil: lambda(
-            [[yVar, unitType]],
+            [['y', unitType]],
             value(true, BooleanType)),
           Cons: lambda(
-            [[yVar, NumConsType]],
+            [['y', NumConsType]],
             value(false, BooleanType))
         }))
 

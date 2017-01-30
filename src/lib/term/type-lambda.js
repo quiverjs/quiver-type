@@ -1,9 +1,9 @@
 import {
-  assertInstanceOf, assertNoError,
-  assertPairArray
+  assertNoError,
+  assertKeyword,
+  assertPairArray,
+  assertInstanceOf,
 } from '../core/assert'
-
-import { TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { ForAllType } from '../type/forall'
@@ -19,9 +19,9 @@ const $bodyTerm = Symbol('@bodyTerm')
 const $type = Symbol('@type')
 
 export class TypeLambdaTerm extends Term {
-  // constructor :: TypeVariable -> Term -> ()
+  // constructor :: Variable -> Term -> ()
   constructor(argTVar, argKind, bodyTerm) {
-    assertInstanceOf(argTVar, TypeVariable)
+    assertKeyword(argTVar)
     assertInstanceOf(argKind, Kind)
     assertInstanceOf(bodyTerm, Term)
 
@@ -94,7 +94,7 @@ export class TypeLambdaTerm extends Term {
   }
 
   validateTVarKind(typeVar, kind) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(kind, Kind)
 
     const { argTVar, bodyTerm } = this
@@ -117,7 +117,7 @@ export class TypeLambdaTerm extends Term {
   }
 
   bindType(typeVar, type) {
-    assertInstanceOf(typeVar, TypeVariable)
+    assertKeyword(typeVar)
     assertInstanceOf(type, Type)
 
     const { argTVar, argKind, bodyTerm } = this
@@ -131,7 +131,7 @@ export class TypeLambdaTerm extends Term {
         subType => subType.bindType(typeVar, type))
 
     } else {
-      const argTVar2 = new TypeVariable(argTVar.name)
+      const argTVar2 = Symbol(argTVar.toString())
       const argType2 = new VariableType(argTVar2, argKind)
 
       const bodyTerm2 = bodyTerm.bindType(argTVar, argType2)

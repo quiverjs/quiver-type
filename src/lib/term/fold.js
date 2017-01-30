@@ -36,10 +36,6 @@ export class FoldTerm extends Term {
     return this[$bodyTerm]
   }
 
-  freeTermVariables() {
-    return this.bodyTerm.freeTermVariables()
-  }
-
   termType() {
     return this.fixedType
   }
