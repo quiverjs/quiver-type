@@ -17,3 +17,5 @@ export { sumType } from './sum'
 export { unitType } from './unit'
 
 export { varType } from './variable'
+
+export { constraint } from './constraint'

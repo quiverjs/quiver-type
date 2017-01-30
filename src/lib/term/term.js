@@ -1,9 +1,11 @@
 import { formatLisp } from '../core/util'
+import { unionMap } from '../core/container'
 import { assertInstanceOf } from '../core/assert'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
 import { Kind } from '../kind/kind'
+import { ConstraintKind } from '../kind/constraint'
 
 export class Term {
   constructor() {
@@ -11,10 +13,26 @@ export class Term {
       throw new Error('Abstract class Term cannot be instantiated')
   }
 
-  // freeTermVariables :: () -> ISet TermVariable
-  // Unbound term variables in the term
-  freeTermVariables() {
+  subTerms() {
     throw new Error('not implemented')
+  }
+
+  subTypes() {
+    throw new Error('not implemented')
+  }
+
+  map(termMapper, typeMapper) {
+    throw new Error('not implemented')
+  }
+
+  freeTermVariables() {
+    return this.subTerms()::unionMap(
+      subTerm => subTerm.freeTermVariables())
+  }
+
+  freeConstraints() {
+    return this.subTerms()::unionMap(
+      subTerm => subTerm.freeConstraints())
   }
 
   // termType :: () -> Type
@@ -25,14 +43,6 @@ export class Term {
 
   // termCheck :: Term -> Maybe Error
   termCheck(targetTerm) {
-    throw new Error('not implemented')
-  }
-
-  subTerms() {
-    throw new Error('not implemented')
-  }
-
-  subTypes() {
     throw new Error('not implemented')
   }
 
@@ -63,10 +73,6 @@ export class Term {
     return null
   }
 
-  map(termMapper, typeMapper) {
-    throw new Error('not implemented')
-  }
-
   bindTerm(termVar, term) {
     assertInstanceOf(termVar, TermVariable)
     assertInstanceOf(term, Term)
@@ -83,6 +89,16 @@ export class Term {
     return this.map(
       subTerm => subTerm.bindType(typeVar, type),
       subType => subType.bindType(typeVar, type))
+  }
+
+  bindConstraint(constraint) {
+    assertInstanceOf(constraint, Term)
+    assertInstanceOf(constraint.termType().typeKind(), ConstraintKind,
+      'kind of constraint term must be constraint kind')
+
+    return this.map(
+      subTerm => subTerm.bindConstraint(constraint),
+      subType => subType)
   }
 
   // evaluate :: () -> Term

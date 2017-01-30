@@ -34,4 +34,9 @@ export { FoldTerm } from './fold'
 
 export { UnfoldTerm } from './unfold'
 
+export {
+  AbstractTerm, ConstraintLambdaTerm,
+  ProofTerm, DeconstraintTerm
+} from './constraint'
+
 export { compileTerm } from './compile'

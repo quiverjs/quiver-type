@@ -1,5 +1,6 @@
 import { Kind } from '../kind/kind'
 import { formatLisp } from '../core/util'
+import { unionMap } from '../core/container'
 import { TypeVariable } from '../core/variable'
 import { assertInstanceOf } from '../core/assert'
 
@@ -9,21 +10,17 @@ export class Type {
       throw new Error('abstract class Type cannot be instantiated')
   }
 
-  // freeTypeVariable :: () -> ISet TypeVariable
-  freeTypeVariables() {
-    throw new Error('Not implemented')
-  }
-
-  subTerms() {
-    throw new Error('Not implemented')
-  }
-
   subTypes() {
     throw new Error('Not implemented')
   }
 
   map(typeMapper) {
     throw new Error('Not implemented')
+  }
+
+  freeTypeVariables() {
+    return this.subTypes()::unionMap(
+      subTerm => subTerm.freeTypeVariables())
   }
 
   // typeCheck :: Type -> Maybe Error

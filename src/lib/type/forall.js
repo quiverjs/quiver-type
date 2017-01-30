@@ -93,7 +93,7 @@ export class ForAllType extends Type {
 
   map(typeMapper) {
     assertFunction(typeMapper)
-    
+
     const { argTVar, argKind, bodyType } = this
 
     const newBodyType = typeMapper(bodyType)

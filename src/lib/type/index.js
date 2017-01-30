@@ -19,3 +19,5 @@ export { SumType } from './sum'
 export { ProductType, RecordType } from './product'
 
 export { FixedPointType } from './fixed'
+
+export { ConstraintType } from './constraint'

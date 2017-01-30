@@ -3,12 +3,14 @@ import test from 'tape'
 import {
   varGen,
   lets, body, unit, unitTerm,
-  value, match, record, variant,
-  lambda, typeLambda, termLambda,
-  projectRecord, apply, applyType,
+  value, match, variant,
+  lambda, typeLambda,
+  apply, applyType,
   sumType, unitType, arrow, forall,
-  recordType, typeApp,
-  unitKind, arrowKind,
+  typeApp, unitKind, arrowKind,
+  typeclass, classInstance,
+  classMethod, deconstraint,
+  constraintLambda,
   compile
 } from '../lib/dsl'
 
@@ -48,7 +50,7 @@ test('type class test', assert => {
     // Functor = forall f. { fmap }
     const FunctorClass = forall(
       [[typeVar('f'), unitArrow]],
-      recordType({
+      typeclass('Functor', {
         fmap: fmapType
       }))
 
@@ -92,106 +94,111 @@ test('type class test', assert => {
     const MaybeFunctorClass = typeApp(
       FunctorClass, MaybeType)
 
-    const MaybeFunctorInstance = record({
-      fmap: maybeFmap
-    })
+    const MaybeFunctorInstance = classInstance(
+      MaybeFunctorClass,
+      {
+        fmap: maybeFmap
+      })
 
     assert::termTypeEquals(MaybeFunctorInstance, MaybeFunctorClass)
 
     const ShowClass = forall(
       [[typeVar('s'), unitKind]],
-      recordType({
+      typeclass('Show', {
         show: arrow(sType, StringType)
       }))
-
-    const showAType = typeApp(ShowClass, aType)
 
     const StringShowClass = typeApp(
       ShowClass, StringType)
 
-    const StringShowInstance = record({
-      show: lambda(
-        [[termVar('x'), StringType]],
-        body(
-          [varTerm('x', StringType)],
-          StringType,
-          str => `str(${str})`))
-    })
+    const StringShowInstance = classInstance(
+      StringShowClass,
+      {
+        show: lambda(
+          [[termVar('x'), StringType]],
+          body(
+            [varTerm('x', StringType)],
+            StringType,
+            str => `str(${str})`))
+      })
 
     assert::termTypeEquals(StringShowInstance, StringShowClass)
 
     const NumberShowClass = typeApp(
       ShowClass, NumberType)
 
-    const NumberShowInstance = record({
-      show: lambda(
-        [[termVar('x'), NumberType]],
-        body(
-          [varTerm('x', NumberType)],
-          StringType,
-          num => `num(${num})`))
-    })
+    const NumberShowInstance = classInstance(
+      NumberShowClass,
+      {
+        show: lambda(
+          [[termVar('x'), NumberType]],
+          body(
+            [varTerm('x', NumberType)],
+            StringType,
+            num => `num(${num})`))
+      })
 
     assert::termTypeEquals(NumberShowInstance, NumberShowClass)
 
-    const MaybeNum = typeApp(
-      MaybeType, NumberType)
+    const MaybeNum = typeApp(MaybeType, NumberType)
 
     const CompiledMaybeNum = MaybeNum.compileType()
+
+    const ShowAClass = typeApp(ShowClass, aType)
+    const ShowMaybeAClass = typeApp(ShowClass, MaybeAType)
 
     assert.test('maybe show 1', assert => {
       // MaybeShowInstance =
       //   Λ a :: * .
-      //     λ showA : Show a .
-      //       show : Maybe a -> String
-      //       show ma = match ma
-      //         Just x: `Just ${ showA.show x }`
-      //         Nothing: 'Nothing'
+      //     Show a =>
+      //       instance Show Maybe a where
+      //         show : Maybe a -> String
+      //         show ma = match ma
+      //           Just x: `Just ${ showA.show x }`
+      //           Nothing: 'Nothing'
       const MaybeShowInstance = typeLambda(
         [[typeVar('a'), unitKind]],
-        lambda(
-          [[termVar('showA'), showAType]],
-          record({
-            show: lambda(
-              [[termVar('ma'), MaybeAType]],
-              match(
-                varTerm('ma', MaybeAType),
-                StringType,
-                {
-                  Just: lambda(
-                    [[termVar('x'), aType]],
-                    lets(
-                      [[termVar('xStr'),
-                        apply(
-                          projectRecord(
-                            varTerm(
-                              'showA', showAType),
-                            'show'),
-                          varTerm('x', aType))
-                      ]],
+        constraintLambda(
+          [ShowAClass],
+          classInstance(
+            ShowMaybeAClass,
+            {
+              show: lambda(
+                [[termVar('ma'), MaybeAType]],
+                match(
+                  varTerm('ma', MaybeAType),
+                  StringType,
+                  {
+                    Just: lambda(
+                      [[termVar('x'), aType]],
+                      lets(
+                        [[termVar('xStr'),
+                          apply(
+                            classMethod(ShowAClass, 'show'),
+                            varTerm('x', aType))
+                        ]],
 
-                      body(
-                        [varTerm('xStr', StringType)],
-                        StringType,
-                        xStr =>
-                          `Just(${xStr})`
-                      ))),
+                        body(
+                          [varTerm('xStr', StringType)],
+                          StringType,
+                          xStr =>
+                            `Just(${xStr})`
+                        ))),
 
-                  Nothing: lambda(
-                    [[termVar('_'), unitType]],
-                    value('Nothing', StringType))
-                })),
-          })))
+                    Nothing: lambda(
+                      [[termVar('_'), unitType]],
+                      value('Nothing', StringType))
+                  })),
+            })))
 
       const MaybeStringShowInstance = apply(
-        applyType(
-          MaybeShowInstance, StringType),
+        applyType(MaybeShowInstance, StringType),
         StringShowInstance)
 
-      const showMaybeStr = compile(MaybeStringShowInstance).get('show')
+      const showMaybeStr = compile(deconstraint(MaybeStringShowInstance))
+        .get('show')
 
-      const MaybeString = typeApp(
-        MaybeType, StringType)
+      const MaybeString = typeApp(MaybeType, StringType)
 
       const CompiledMaybeStr = MaybeString.compileType()
 
@@ -202,11 +209,11 @@ test('type class test', assert => {
       assert.equals(showMaybeStr.call(nothingStr), 'Nothing')
 
       const MaybeNumShowInstance = apply(
-        applyType(
-          MaybeShowInstance, NumberType),
+        applyType(MaybeShowInstance, NumberType),
         NumberShowInstance)
 
-      const showMaybeNum = compile(MaybeNumShowInstance).get('show')
+      const showMaybeNum = compile(deconstraint(MaybeNumShowInstance))
+        .get('show')
 
       const justOne = CompiledMaybeNum.construct('Just', 1)
       assert.equals(showMaybeNum.call(justOne), 'Just(num(1))')
@@ -220,7 +227,7 @@ test('type class test', assert => {
     })
 
     assert.test('Maybe show 2', assert => {
-      const functorFType = typeApp(FunctorClass, fType)
+      const FunctorFClass = typeApp(FunctorClass, fType)
 
       // fmapShow =
       //   Λ f :: * -> * .
@@ -232,25 +239,16 @@ test('type class test', assert => {
       const fmapShow = typeLambda(
         [[typeVar('f'), unitArrow],
          [typeVar('a'), unitKind]],
-        termLambda(
-          [[termVar('showA'), showAType],
-           [termVar('functorF'), functorFType]],
+        constraintLambda(
+          [ShowAClass, FunctorFClass],
           apply(
             applyType(
-              projectRecord(
-                varTerm('functorF', functorFType),
-                'fmap'),
-              aType,
-              StringType),
-            projectRecord(
-              varTerm('showA', showAType),
-              'show'))))
+              classMethod(FunctorFClass, 'fmap'),
+              aType, StringType),
+            classMethod(ShowAClass, 'show'))))
 
       const fmapShowMaybeNumTerm = apply(
-        applyType(
-          fmapShow,
-          MaybeType,
-          NumberType),
+        applyType(fmapShow, MaybeType, NumberType),
         NumberShowInstance,
         MaybeFunctorInstance)
 

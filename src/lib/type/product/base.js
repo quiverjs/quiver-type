@@ -1,5 +1,4 @@
 import { mapUnique } from '../../core/util'
-import { unionMap } from '../../core/container'
 
 import { assertFunction } from '../../core/assert'
 
@@ -21,13 +20,6 @@ export class BaseProductType extends Type {
 
   get fieldTypes() {
     return this[$fieldTypes]
-  }
-
-  freeTypeVariables() {
-    const { fieldTypes } = this
-
-    return fieldTypes::unionMap(
-      fieldType => fieldType.freeTypeVariables())
   }
 
   typeCheck(targetType) {

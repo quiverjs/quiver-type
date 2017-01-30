@@ -98,7 +98,7 @@ export class BaseProjectTerm extends Term {
     const newProductTerm = productTerm.evaluate()
 
     if(newProductTerm instanceof ProductTerm) {
-      return productTerm.getFieldTerm(fieldKey).evaluate()
+      return newProductTerm.getFieldTerm(fieldKey).evaluate()
 
     } else if(newProductTerm !== productTerm) {
       return new this.constructor(newProductTerm, fieldKey)

@@ -13,6 +13,13 @@ export const assertInstanceOf = (object, type, message) => {
   }
 }
 
+export const assertKey = key => {
+  const keyType = typeof(key)
+  if(keyType !== 'string' && keyType !== 'symbol') {
+    throw new TypeError('key must be either string or symbol')
+  }
+}
+
 export const assertList = (list, message) => {
   if(!IList.isList(list)) {
     const errMessage = message || 'argument must be ImmutableList'

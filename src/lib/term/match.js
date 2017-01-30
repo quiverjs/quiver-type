@@ -1,4 +1,4 @@
-import { IMap, unionMap } from '../core/container'
+import { IMap } from '../core/container'
 import { TermVariable, TypeVariable } from '../core/variable'
 
 import { Type } from '../type/type'
@@ -65,14 +65,6 @@ export class MatchTerm extends Term {
 
   get returnType() {
     return this[$returnType]
-  }
-
-  freeTermVariables() {
-    const { variantTerm, caseTerms } = this
-
-    return caseTerms::unionMap(
-      term => term.freeTermVariables())
-      .union(variantTerm.freeTermVariables())
   }
 
   termType() {

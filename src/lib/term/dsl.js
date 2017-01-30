@@ -8,6 +8,11 @@ export {
   updateProduct, updateRecord
 } from './product'
 
+export {
+  abstract, constraintLambda,
+  proof, deconstraint
+} from './constraint/dsl'
+
 export { fixed } from './fixed'
 
 export { fold } from './fold'

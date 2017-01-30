@@ -1,5 +1,5 @@
 import { mapUnique } from '../../core/util'
-import { unionMap, IMap, IList } from '../../core/container'
+import { IMap, IList } from '../../core/container'
 
 import {
   assertMap,
@@ -59,13 +59,6 @@ export class BaseProductTerm extends Term {
       throw new Error(`invalid field key ${fieldKey}`)
 
     return fieldTerm
-  }
-
-  freeTermVariables() {
-    const { fieldTerms } = this
-
-    return fieldTerms::unionMap(
-      fieldTerm => fieldTerm.freeTermVariables())
   }
 
   termType() {

@@ -10,8 +10,6 @@ import { IMap } from '../core/container'
 
 import { mapUnique } from '../core/util'
 
-import { unionMap } from '../core/container'
-
 import { unitKind } from '../kind/unit'
 
 import { CompiledSumType } from '../compiled/sum'
@@ -40,11 +38,6 @@ export class SumType extends Type {
 
   get typeMap() {
     return this[$typeMap]
-  }
-
-  freeTypeVariables() {
-    return this.typeMap::unionMap(
-      type => type.freeTypeVariables())
   }
 
   typeCheck(targetType) {

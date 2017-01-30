@@ -1,5 +1,4 @@
 import { mapUnique } from '../../core/util'
-import { unionMap } from '../../core/container'
 
 import {
   assertFunction,
@@ -34,11 +33,6 @@ export class CommonBodyTerm extends Term {
 
   get returnType() {
     return this[$returnType]
-  }
-
-  freeTermVariables() {
-    return this.argTerms::unionMap(
-      argTerm => argTerm.freeTermVariables())
   }
 
   termType() {

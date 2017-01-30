@@ -5,9 +5,11 @@ export const IList = immutable.List
 export const IMap = immutable.Map
 
 export const unionMap = function(mapper) {
-  return this.reduce(
-    (result, value) => {
-      const set = mapper(value)
-      return result.union(set)
-    }, ISet())
+  let result = ISet()
+
+  for(const value of this) {
+    result = result.union(mapper(value))
+  }
+
+  return result
 }

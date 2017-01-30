@@ -9,6 +9,8 @@ export {
   applyType, typeLambda,
   unfold, unit, unitTerm,
   value, varTerm, variant,
+  abstract, constraintLambda,
+  proof, deconstraint,
   compile
 } from '../term/dsl'
 
@@ -18,7 +20,8 @@ export {
   typeConstructor,
   fixedType, forall,
   literalType, sumType,
-  unitType, varType
+  unitType, varType,
+  constraint
 } from '../type/dsl'
 
 export {
@@ -28,3 +31,7 @@ export {
 export { varGen, termVar, typeVar } from './variable'
 
 export { functionTerm, typedFunction } from './function'
+
+export {
+  typeclass, classInstance, classMethod 
+} from './typeclass'
