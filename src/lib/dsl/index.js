@@ -5,7 +5,7 @@ export {
   projectProduct, projectRecord,
   updateProduct, updateRecord,
   fixed, fold, lets,
-  match, apply,
+  match, when, apply,
   applyType, typeLambda,
   unfold, unit, unitTerm,
   value, varTerm, variant,
@@ -18,7 +18,8 @@ export {
   productType, recordType,
   typeApp, arrow,
   typeConstructor,
-  fixedType, forall,
+  fixedType, unfoldType,
+  forall,
   literalType, sumType,
   unitType, varType,
   constraint
@@ -33,5 +34,5 @@ export { varGen, termVar, typeVar } from './variable'
 export { functionTerm, typedFunction } from './function'
 
 export {
-  typeclass, classInstance, classMethod 
+  typeclass, classInstance, classMethod
 } from './typeclass'

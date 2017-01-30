@@ -6,7 +6,7 @@ export { arrow } from './arrow'
 
 export { typeConstructor } from './constructor'
 
-export { fixedType } from './fixed'
+export { fixedType, unfoldType } from './fixed'
 
 export { forall } from './forall'
 

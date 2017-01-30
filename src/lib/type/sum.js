@@ -40,6 +40,20 @@ export class SumType extends Type {
     return this[$typeMap]
   }
 
+  getTagType(tag) {
+    assertString(tag)
+
+    const { typeMap } = this
+
+    const tagType = typeMap.get(tag)
+
+    if(!tagType) {
+      throw new Error('invalid tag provided')
+    }
+
+    return tagType
+  }
+
   typeCheck(targetType) {
     assertInstanceOf(targetType, Type)
 

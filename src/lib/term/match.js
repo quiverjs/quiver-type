@@ -194,5 +194,13 @@ export class MatchTerm extends Term {
   }
 }
 
-export const match = (variantTerm, returnType, caseTerms) =>
+export const match = (variantTerm, returnType, ...caseTerms) =>
   new MatchTerm(variantTerm, returnType, IMap(caseTerms))
+
+export const when = (sumType, tag, argVar, bodyTerm) => {
+  assertInstanceOf(sumType, SumType)
+
+  const tagType = sumType.getTagType(tag)
+
+  return [tag, new ValueLambdaTerm(argVar, tagType, bodyTerm)]
+}

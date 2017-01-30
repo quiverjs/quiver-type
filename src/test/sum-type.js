@@ -1,26 +1,25 @@
 import test from 'tape'
 
 import {
-  varGen, body, match,
-  value, variant, lambda,
+  body, varTerm, varType,
+  match, when, variant,
+  value, lambda,
   forall, sumType, typeApp,
   unitKind, arrowKind,
-  functionTerm, compile
+  compile
 } from '../lib/dsl'
 
 import { NumberType, StringType } from '../lib/prelude'
 
 test('sum type test', assert => {
   assert.test('basic sum type', assert => {
-    const { termVar, typeVar, varTerm, varType } = varGen()
-
     const aType = varType('a', unitKind)
     const bType = varType('b', unitKind)
 
     // Either = forall a b. a | b
     const EitherType = forall(
-      [[typeVar('a'), unitKind],
-       [typeVar('b'), unitKind]],
+      [['a', unitKind],
+       ['b', unitKind]],
       sumType({
         Left: aType,
         Right: bType
@@ -35,20 +34,22 @@ test('sum type test', assert => {
       value(3, NumberType))
 
     const matchLambda = lambda(
-      [[termVar('x'), EitherNumStr]],
+      [['x', EitherNumStr]],
       match(
         varTerm('x', EitherNumStr),
         StringType,
-        {
-          Left: functionTerm(
-            [NumberType],
+
+        when(EitherNumStr, 'Left', 'num',
+          body(
+            [varTerm('num', NumberType)],
             StringType,
-            x => `num(${x})`),
-          Right: functionTerm(
-            [StringType],
+            num => `num(${num})`)),
+
+        when(EitherNumStr, 'Right', 'str',
+          body(
+            [varTerm('str', StringType)],
             StringType,
-            x => `str(${x})`)
-        }))
+            str => `str(${str})`))))
 
     const matchNumTerm = matchLambda.applyTerm(numVariantTerm)
     assert.equals(compile(matchNumTerm), 'num(3)')
@@ -69,8 +70,6 @@ test('sum type test', assert => {
   })
 
   assert.test('error sum types', assert => {
-    const { varTerm, varType } = varGen()
-
     assert.throws(() => {
       sumType({
         Left: NumberType,
@@ -87,77 +86,52 @@ test('sum type test', assert => {
       match(
         varTerm('x', EitherNumStr),
         StringType,
-        {
-          Left: functionTerm(
-            [NumberType],
+
+        when(EitherNumStr, 'Left', 'num',
+          body(
+            [varTerm('num', NumberType)],
             StringType,
-            x => `num(${x})`)
-        })
+            num => `num(${num})`)))
+
     }, 'should not allow match term that doesn\'t match all cases')
 
     assert.throws(() => {
       match(
         varTerm('x', EitherNumStr),
         StringType,
-        {
-          foo: functionTerm(
-            [NumberType],
+
+        when(EitherNumStr, 'foo', 'num',
+          body(
+            [varTerm('num', NumberType)],
             StringType,
-            x => `num(${x})`),
-          bar: functionTerm(
-            [StringType],
+            num => `num(${num})`)),
+
+        when(EitherNumStr, 'bar', 'str',
+          body(
+            [varTerm('str', StringType)],
             StringType,
-            x => `str(${x})`)
-        })
+            str => `str(${str})`)))
+
     }, 'should not allow match term that have wrong variant tags')
 
     assert.throws(() => {
       match(
         varTerm('x', EitherNumStr),
         StringType,
-        {
-          Left: functionTerm(
-            [StringType],
-            StringType,
-            x => `num(${x})`),
-          Right: functionTerm(
-            [NumberType],
-            StringType,
-            x => `str(${x})`)
-        })
-    }, 'should not allow match term with wrong lambda type in tag')
 
-    assert.throws(() => {
-      match(
-        varTerm('x', EitherNumStr),
-        StringType,
-        {
-          Left: functionTerm(
-            [NumberType],
-            StringType,
-            x => `num(${x})`),
-          Right: functionTerm(
-            [StringType],
+        when(EitherNumStr, 'Left', 'num',
+          body(
+            [varTerm('num', NumberType)],
             NumberType,
-            x => `str(${x})`)
-        })
-    }, 'should not allow match term with mismatched return type')
+            num => num)),
 
-    assert.throws(() => {
-      match(
-        varTerm('x', EitherNumStr),
-        StringType,
-        {
-          Left: functionTerm(
-            [NumberType],
+        when(EitherNumStr, 'Right', 'str',
+          body(
+            [varTerm('str', StringType)],
             StringType,
-            x => `num(${x})`),
-          Right: body(
-            [varTerm('x', NumberType)],
-            StringType,
-            x => `str(${x})`)
-        })
-    }, 'should not allow match term with non lambda term case handler')
+            str => `str(${str})`)))
+
+    }, 'should not allow match term with mismatched return type')
 
     assert.end()
   })

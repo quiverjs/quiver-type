@@ -19,7 +19,7 @@ export { fold } from './fold'
 
 export { lets } from './let'
 
-export { match } from './match'
+export { match, when } from './match'
 
 export { apply } from './term-application'
 

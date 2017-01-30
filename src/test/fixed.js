@@ -3,12 +3,14 @@ import test from 'tape'
 import { IList } from '../lib/core'
 
 import {
-  lets, unitTerm, body, fold, match,
-  value, record, unfold, variant, product,
+  lets, unitTerm, body, fold,
+  match, when,
+  value, record, unfold,
+  variant, product,
   varTerm, fixed, lambda, projectRecord,
   sumType, unitType, arrow, forall,
   recordType, productType, varType,
-  fixedType, typeApp,
+  fixedType, unfoldType, typeApp,
   unitKind, unit, compile
 } from '../lib/dsl'
 
@@ -121,8 +123,7 @@ test('fixed point test', assert => {
     const NumListType = typeApp(
       ListType, NumberType)
 
-    const UnfoldNumList = NumListType.unfoldType()
-    const NumConsType = productType(NumberType, NumListType)
+    const UnfoldNumList = unfoldType(NumListType)
 
     const nilList = fold(
       NumListType,
@@ -153,17 +154,14 @@ test('fixed point test', assert => {
     const isNilLambda = lambda(
       [['x', NumListType]],
       match(
-        unfold(
-          varTerm('x', NumListType)),
+        unfold(varTerm('x', NumListType)),
         BooleanType,
-        {
-          Nil: lambda(
-            [['y', unitType]],
-            value(true, BooleanType)),
-          Cons: lambda(
-            [['y', NumConsType]],
-            value(false, BooleanType))
-        }))
+
+        when(UnfoldNumList, 'Nil', '_',
+          value(true, BooleanType)),
+
+        when(UnfoldNumList, 'Cons', '_',
+          value(false, BooleanType))))
 
     const compiledList = NumListType.compileType()
 

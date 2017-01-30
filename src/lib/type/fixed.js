@@ -169,3 +169,9 @@ export class FixedPointType extends Type {
 export const fixedType = (fixedVar, selfKind, bodyType) => {
   return new FixedPointType(fixedVar, selfKind, bodyType)
 }
+
+export const unfoldType = fixedType => {
+  assertInstanceOf(fixedType, FixedPointType)
+
+  return fixedType.unfoldType()
+}

@@ -31,7 +31,7 @@ const findArgIndex = (argSpecs, termVar) => {
   }
 
   if(index === -1)
-    throw new Error(`term variable ${termVar} not found in argSpecs.`)
+    throw new Error(`term variable ${termVar.toString()} not found in argSpecs.`)
 
   return [index, foundArgSpec]
 }

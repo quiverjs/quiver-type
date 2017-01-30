@@ -4,7 +4,7 @@ import {
   lets, body, value,
   unit, unitTerm,
   varTerm, varType,
-  match, variant,
+  match, when, variant,
   lambda, typeLambda,
   apply, applyType,
   sumType, unitType,
@@ -73,23 +73,20 @@ test('type class test', assert => {
         match(
           varTerm('maybeA', MaybeAType),
           MaybeBType,
-          {
-            Just: lambda(
-              [['x', aType]],
-              variant(
-                MaybeBType,
-                'Just',
-                apply(
-                  varTerm('map', ABArrowType),
-                  varTerm('x', aType)))),
 
-            Nothing: lambda(
-              [['_', unitType]],
-              variant(
-                MaybeBType,
-                'Nothing',
-                unitTerm))
-          })))
+          when(MaybeAType, 'Just', 'x',
+            variant(
+              MaybeBType,
+              'Just',
+              apply(
+                varTerm('map', ABArrowType),
+                varTerm('x', aType)))),
+
+          when(MaybeAType, 'Nothing', '_',
+            variant(
+              MaybeBType,
+              'Nothing',
+              unitTerm)))))
 
     const MaybeFunctorClass = typeApp(
       FunctorClass, MaybeType)
@@ -148,6 +145,8 @@ test('type class test', assert => {
     const ShowMaybeAClass = typeApp(ShowClass, MaybeAType)
 
     assert.test('maybe show 1', assert => {
+      const maTerm = varTerm('ma', MaybeAType)
+
       // MaybeShowInstance =
       //   Λ a :: * .
       //     Show a =>
@@ -166,29 +165,26 @@ test('type class test', assert => {
               show: lambda(
                 [['ma', MaybeAType]],
                 match(
-                  varTerm('ma', MaybeAType),
+                  maTerm,
                   StringType,
-                  {
-                    Just: lambda(
-                      [['x', aType]],
-                      lets(
-                        [['x-str',
-                          apply(
-                            classMethod(ShowAClass, 'show'),
-                            varTerm('x', aType))
-                        ]],
 
-                        body(
-                          [varTerm('x-str', StringType)],
-                          StringType,
-                          xStr =>
-                            `Just(${xStr})`
-                        ))),
+                  when(MaybeAType, 'Just', 'x',
+                    lets(
+                      [['x-str',
+                        apply(
+                          classMethod(ShowAClass, 'show'),
+                          varTerm('x', aType))
+                      ]],
 
-                    Nothing: lambda(
-                      [['_', unitType]],
-                      value('Nothing', StringType))
-                  })),
+                      body(
+                        [varTerm('x-str', StringType)],
+                        StringType,
+                        xStr =>
+                          `Just(${xStr})`
+                      ))),
+
+                  when(MaybeAType, 'Nothing', '_',
+                    value('Nothing', StringType)))),
             })))
 
       const MaybeStringShowInstance = apply(
