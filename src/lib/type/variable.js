@@ -1,115 +1,60 @@
-import { ISet } from '../core/container'
-import {
-  assertNoError,
-  assertKeyword,
-  assertFunction,
-  assertInstanceOf
-} from '../core/assert'
+import { Term } from './term'
+import { termImpl } from './impl'
+import { assertVariable } from './assert'
+import { setWithValue } from '../container'
 
-import { Kind } from '../kind/kind'
-import { ArrowKind } from '../kind/arrow'
+const $termVar = Symbol('@termVar')
 
-import { Type } from './type'
-import { ApplicationType } from './application'
-
-const $typeVar = Symbol('@typeVar')
-const $kind = Symbol('@kind')
-
-export class VariableType extends Type {
-  constructor(typeVar, kind) {
-    assertKeyword(typeVar)
-    assertInstanceOf(kind, Kind)
-
-    super()
-
-    this[$typeVar] = typeVar
-    this[$kind] = kind
+const findArgIndex = (argVars, termVar) => {
+  for(let i=argVars.size-1; i>=0; i++) {
+    const argVar = argVars.get(i)
+    if(argVar === termVar) {
+      return i
+    }
   }
 
-  get typeVar() {
-    return this[$typeVar]
-  }
+  throw new Error(`term variable ${termVar.toString()} not found in argVars`)
+}
 
-  get kind() {
-    return this[$kind]
-  }
+export const VariableTerm = termImpl(
+  class extends Term {
+    constructor(termVar) {
+      assertVariable(termVar)
 
-  freeTypeVariables() {
-    return ISet([this.typeVar])
-  }
+      super()
 
-  *subTypes() {
-    // empty
-  }
+      this[$termVar] = termVar
+    }
 
-  map(typeMapper) {
-    assertFunction(typeMapper)
+    get termVar() {
+      return this[$termVar]
+    }
 
-    return this
-  }
+    freeTermVariables() {
+      return setWithValue(this.termVar)
+    }
 
-  bindType(typeVar, type) {
-    assertKeyword(typeVar)
-    assertInstanceOf(type, Type)
+    bindTerm(termVar, term) {
+      if(this.termVar === termVar) {
+        return term
+      } else {
+        return this
+      }
+    }
 
-    if(typeVar !== this.typeVar)
+    weakHeadNormalForm() {
       return this
+    }
 
-    assertNoError(this[$kind].kindCheck(type.typeKind()))
+    normalForm() {
+      return this
+    }
 
-    return type
-  }
+    compileClosure(argVars) {
+      const { termVar } = this
+      const argIndex = findArgIndex(argVars, termVar)
 
-  typeCheck(targetType) {
-    assertInstanceOf(targetType, Type)
-
-    if(targetType === this) return null
-
-    if(!(targetType instanceof VariableType))
-      return new TypeError('target type must be VariableType')
-
-    // Without unification, only same type variable matches
-    if(targetType.typeVar !== this.typeVar)
-      return new TypeError('target type variable does not match')
-  }
-
-  validateTVarKind(typeVar, kind) {
-    assertKeyword(typeVar)
-    assertInstanceOf(kind, Kind)
-
-    if(this.typeVar !== typeVar)
-      return null
-
-    return this.kind.kindCheck(kind)
-  }
-
-  typeKind() {
-    return this[$kind]
-  }
-
-  compileType() {
-    throw new Error('Variable Type cannot be compiled')
-  }
-
-  applyType(targetType) {
-    const selfKind = this.kind
-
-    if(!(selfKind instanceof ArrowKind))
-      throw new TypeError('type of non-arrow kind cannot be applied to other type')
-
-    assertNoError(selfKind.leftKind.kindCheck(targetType.typeKind()))
-
-    return new ApplicationType(this, targetType)
-  }
-
-  formatType() {
-    const { typeVar } = this
-    const typeVarRep = typeVar.name
-
-    return ['tvar', typeVarRep]
-  }
-}
-
-export const varType = (typeVar, kind) => {
-  return new VariableType(typeVar, kind)
-}
+      return closureArgs =>
+        closureArgs[argIndex]
+    }
+  })
