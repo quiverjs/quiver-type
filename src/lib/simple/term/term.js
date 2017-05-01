@@ -5,8 +5,18 @@ export class Term {
       throw new Error('Abstract class Term cannot be instantiated')
   }
 
+  // termType :: This -> Type
+  termType() {
+    throw new Error('not implemented')
+  }
+
   // freeTermVariables :: This -> Set Variable
   freeTermVariables() {
+    throw new Error('not implemented')
+  }
+
+  // validateVarType :: This -> VariableTerm -> Maybe Error
+  validateVarType(typeVar, type) {
     throw new Error('not implemented')
   }
 
