@@ -1,15 +1,21 @@
 import { assertRecord } from '../record/assert'
 import { getItem, equalItems } from '../list/algo'
 
+const $typeTag = Symbol('@typeTag')
 const $keyNode = Symbol('@keyNode')
 const $caseIndex = Symbol('@caseIndex')
 const $value = Symbol('value')
 
 export class Union {
-  constructor(keyNode, caseIndex, value) {
+  constructor(typeTag, keyNode, caseIndex, value) {
+    this[$typeTag] = typeTag
     this[$keyNode] = keyNode
     this[$caseIndex] = caseIndex
     this[$value] = value
+  }
+
+  get typeTag() {
+    return this[$typeTag]
   }
 
   get keyNode() {
