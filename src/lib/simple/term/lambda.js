@@ -2,24 +2,38 @@ import { Term } from './term'
 import { gensym } from './util'
 import { LetTerm } from './let'
 import { termImpl } from './impl'
+import { assertType } from '../type/type'
 import { VariableTerm } from './variable'
+import { LambdaClosure } from '../closure/lambda'
 import { assertTerm, assertVariable } from './assert'
 
 const $argVar = Symbol('@argVar')
+const $argType = Symbol('@argType')
 const $bodyTerm = Symbol('@bodyTerm')
 
 export const LambdaTerm = termImpl(
   class extends Term {
-    constructor(argVar, bodyTerm) {
+    constructor(argVar, argType, bodyTerm) {
       assertVariable(argVar)
+      assertType(argType)
       assertTerm(bodyTerm)
 
+      const err = bodyTerm.validateVarType(argVar, argType)
+      if(err) throw err
+
+      super()
+
       this[$argVar] = argVar
+      this[$argType] = argType
       this[$bodyTerm] = bodyTerm
     }
 
     get argVar() {
       return this[$argVar]
+    }
+
+    get argType() {
+      return this[$argType]
     }
 
     get bodyTerm() {
@@ -31,6 +45,15 @@ export const LambdaTerm = termImpl(
 
       return bodyTerm.freeTermVariables()
         .delete(argVar)
+    }
+
+    validateVarType(termVar, termType) {
+      const { argVar, bodyTerm } = this
+
+      if(argVar === termVar)
+        return null
+
+      return bodyTerm.validateVarType(termVar, termType)
     }
 
     alphaConvert() {
@@ -78,11 +101,10 @@ export const LambdaTerm = termImpl(
     compileClosure(closureVars) {
       const { argVar, bodyTerm } = this
 
-      const inClosureVars = closureVars.concat(argVar)
+      const inClosureVars = closureVars.prepend(argVar)
       const bodyClosure = bodyTerm.compileClosure(inClosureVars)
 
-      return closureArgs => inArgs =>
-        bodyClosure(closureArgs.push(inArgs))
+      return new LambdaClosure(bodyClosure)
     }
 
     applyTerm(argTerm) {

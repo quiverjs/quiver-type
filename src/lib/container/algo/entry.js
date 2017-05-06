@@ -1,21 +1,6 @@
-import { Node } from '../node/node'
-import { Entry } from '../node/entry'
+import { cons, Entry } from '../node'
 
-export const nodeFromEntriesIter = it => {
-  const { value: entry, done } = it.next()
-
-  if(done)
-    return null
-
-  const [key, value] = entry
-
-  const next = nodeFromEntriesIter(it)
-  const node = new Node(new Entry(key, value), next)
-
-  return node
-}
-
-
+// getEntry :: Node Entry -> Key -> (Bool, Any)
 export const getEntry = (node, targetKey) => {
   if(node === null)
     return [false, undefined]
@@ -29,6 +14,7 @@ export const getEntry = (node, targetKey) => {
   return getEntry(next, targetKey)
 }
 
+// mapEntry :: Node Entry -> (Any -> Any) -> Node Entry
 export const mapEntry = (node, mapper) => {
   const { item, next } = node
   const { key, value } = item
@@ -37,7 +23,7 @@ export const mapEntry = (node, mapper) => {
   const mappedNext = mapEntry(next, mapper)
 
   const mappedEntry = new Entry(key, mappedValue)
-  return new Node(mappedEntry, mappedNext)
+  return cons(mappedEntry, mappedNext)
 }
 
 const doSetEntry = (node, targetKey, targetValue) => {
@@ -46,24 +32,26 @@ const doSetEntry = (node, targetKey, targetValue) => {
 
   if(key === targetKey) {
     if(value === targetValue)
-      return node
+      return [true, node]
 
     const newEntry = new Entry(key, targetValue)
-    const newNode = new Node(newEntry, next)
+    const newNode = cons(newEntry, next)
 
     return [true, newNode]
 
   } else {
     const [found, newNext] = doSetEntry(next, targetKey, targetValue)
+
     if(newNext === next) {
       return [found, node]
     } else {
-      const newNode = new Node(item, newNext)
+      const newNode = cons(item, newNext)
       return [found, newNode]
     }
   }
 }
 
+// setEntry :: Node Entry -> Key -> Value -> Node Entry
 export const setEntry = (node, key, value) => {
   const [found, newNode] = doSetEntry(node, key, value)
 
@@ -71,5 +59,5 @@ export const setEntry = (node, key, value) => {
     return newNode
 
   const entry = new Entry(key, value)
-  return new Node(entry, node)
+  return cons(entry, node)
 }

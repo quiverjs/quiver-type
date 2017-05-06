@@ -1,9 +1,12 @@
 import { Term } from './term'
 import { termImpl } from './impl'
+import { assertType } from '../type/type'
 import { assertVariable } from './assert'
 import { setWithValue } from '../container'
+import { VariableClosure } from '../closure/variable'
 
 const $termVar = Symbol('@termVar')
+const $varType = Symbol('@varType')
 
 const findArgIndex = (argVars, termVar) => {
   for(let i=argVars.size-1; i>=0; i++) {
@@ -18,16 +21,26 @@ const findArgIndex = (argVars, termVar) => {
 
 export const VariableTerm = termImpl(
   class extends Term {
-    constructor(termVar) {
+    constructor(termVar, varType) {
       assertVariable(termVar)
+      assertType(varType)
 
       super()
 
       this[$termVar] = termVar
+      this[$varType] = varType
     }
 
     get termVar() {
       return this[$termVar]
+    }
+
+    get varType() {
+      return this[$varType]
+    }
+
+    termType() {
+      return this.varType
     }
 
     freeTermVariables() {
@@ -54,7 +67,6 @@ export const VariableTerm = termImpl(
       const { termVar } = this
       const argIndex = findArgIndex(argVars, termVar)
 
-      return closureArgs =>
-        closureArgs[argIndex]
+      return new VariableClosure(argIndex)
     }
   })

@@ -1,5 +1,6 @@
 import { isInstanceOf, assertInstanceOf } from '../common/assert'
 
+import { nil } from './nil'
 import { Node } from './node'
 
 export const isNode = node => {
@@ -7,7 +8,7 @@ export const isNode = node => {
 }
 
 export const isMaybeNode = node => {
-  return isInstanceOf(node, Node) || node === null
+  return isInstanceOf(node, Node) || node === nil
 }
 
 export const assertMaybeNode = node => {

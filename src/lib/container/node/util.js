@@ -1,5 +1,7 @@
+import { nil } from './nil'
+
 const doGetPred = (node, pred) => {
-  if(node === null)
+  if(node === nil)
     return true
 
   const { item, next } = node

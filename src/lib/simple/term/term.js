@@ -35,7 +35,7 @@ export class Term {
     throw new Error('not implemented')
   }
 
-  // compileClosure :: This -> IList Variable -> (List Any ->  Any)
+  // compileClosure :: This -> Node Variable -> Closure
   compileClosure(argVars) {
     throw new Error('not implemented')
   }

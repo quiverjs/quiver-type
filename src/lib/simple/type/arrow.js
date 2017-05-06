@@ -1,6 +1,6 @@
 import { typeImpl } from './impl'
 import { Type, assertType } from './type'
-import { ArrowFunction } from './arrow-func'
+import { LambdaValue } from '../value/lambda'
 import { listFromValue } from '../common/container'
 import { assertInstanceOf, isInstanceOf } from '../common/assert'
 
@@ -39,6 +39,7 @@ export const ArrowType = typeImpl(
       return this[$rightType]
     }
 
+    // argTypes :: () -> List Type
     get argTypes() {
       return this[$argTypes]
     }
@@ -60,8 +61,8 @@ export const ArrowType = typeImpl(
     }
 
     checkValue(func) {
-      if(!isInstanceOf(func, ArrowFunction))
-        return new TypeError('argument must be instance of ArrowFunction')
+      if(!isInstanceOf(func, LambdaValue))
+        return new TypeError('argument must be instance of LambdaValue')
 
       const err = this.checkType(func.type)
       if(err) return err
@@ -69,13 +70,31 @@ export const ArrowType = typeImpl(
       return null
     }
 
-    checkArgs(arg, ...restArgs) {
+    // checkArgs :: This -> Node -> Error
+    checkArgs(args) {
+      const { argTypes } = this
+      if(argTypes.size !== args.size)
+        return new Error('argument count mismatch')
+
+      return this.checkPartialArgs(args)
+    }
+
+    // checkPartialArgs :: This -> Node -> Error
+    checkPartialArgs(args) {
+      if(args.isNil())
+        return null
+
+      const { item, next } = args
       const { leftType, rightType } = this
-      const err = leftType.checkValue(arg)
+
+      const err = leftType.checkValue(item)
       if(err) return err
 
       if(isInstanceOf(rightType, ArrowType))
-        return rightType.checkArgs(...restArgs)
+        return rightType.checkArgs(next)
+
+      if(!next.isNil())
+        return new TypeError('too many arguments provided')
 
       return null
     }
