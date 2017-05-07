@@ -11,15 +11,15 @@ export const getItem = (node, i) => {
 }
 
 // setItem :: Node -> Nat -> Any -> Node
-export const setItem = (node, i, item) => {
+export const setItem = (node, i, newItem) => {
   if(node.isNil())
     throw new Error('index out of bound')
 
   if(i === 0)
-    return cons(item, node.next)
+    return cons(newItem, node.next)
 
   const { item, next } = node
-  const newNext = setItem(next, i-1, item)
+  const newNext = setItem(next, i-1, newItem)
 
   return cons(item, newNext)
 }

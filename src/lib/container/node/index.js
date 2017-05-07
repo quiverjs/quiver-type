@@ -1,4 +1,5 @@
 export { nil } from './nil'
+export { cons } from './cons'
 export { Node } from './node'
 export { Entry } from './entry'
 export { isNode, assertNode, assertNonEmptyNode } from './assert'

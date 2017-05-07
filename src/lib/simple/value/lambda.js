@@ -1,10 +1,11 @@
 import { iterToNode } from '../container'
+import { ArrowValue } from './arrow'
 
 const $lambdaClosure = Symbol('@lambdaClosure')
 const $closureValues = Symbol('@closureValues')
 const $arrowType = Symbol('@arrowType')
 
-export class LambdaValue {
+export class LambdaValue extends ArrowValue {
   // constructor :: This -> LambdaClosure -> Node -> ()
   constructor(lambdaClosure, closureValues) {
     const { arrowType } = lambdaClosure

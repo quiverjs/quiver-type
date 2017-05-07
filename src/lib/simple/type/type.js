@@ -16,6 +16,11 @@ export class Type {
     throw new Error('Not implemented')
   }
 
+  // isArrowType :: This -> Bool
+  isArrowType() {
+    throw new Error('Not implemented')
+  }
+
   formatType() {
     throw new Error('Not implemented')
   }

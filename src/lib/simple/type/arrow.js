@@ -1,13 +1,24 @@
 import { typeImpl } from './impl'
 import { Type, assertType } from './type'
-import { LambdaValue } from '../value/lambda'
-import { listFromValue } from '../common/container'
+import { ArrowValue } from '../value/arrow'
+import { cons, nodeFromValue } from '../container'
 import { assertInstanceOf, isInstanceOf } from '../common/assert'
 
 const $leftType = Symbol('@leftType')
 const $rightType = Symbol('@rightType')
 const $argTypes = Symbol('@argTypes')
 const $returnType = Symbol('@returnType')
+const $arity = Symbol('@arity')
+
+const getArgTypes = (leftType, rightType) => {
+  if(rightType.isArrowType()) {
+    const { argTypes, returnType } = rightType
+    return [cons(leftType, argTypes), returnType]
+
+  } else {
+    return [nodeFromValue(leftType), rightType]
+  }
+}
 
 export const ArrowType = typeImpl(
   class extends Type {
@@ -15,20 +26,14 @@ export const ArrowType = typeImpl(
       assertType(leftType)
       assertType(rightType)
 
+      const [argTypes, returnType] = getArgTypes(leftType, rightType)
       super()
 
       this[$leftType] = leftType
       this[$rightType] = rightType
-
-      if(isInstanceOf(rightType, ArrowType)) {
-        const { argTypes, returnType } = rightType
-        this[$argTypes] = argTypes.prepend(leftType)
-        this[$returnType] = returnType
-
-      } else {
-        this[$argTypes] = listFromValue(leftType)
-        this[$returnType] = rightType
-      }
+      this[$argTypes] = argTypes
+      this[$returnType] = returnType
+      this[$arity] = argTypes.size
     }
 
     get leftType() {
@@ -39,13 +44,17 @@ export const ArrowType = typeImpl(
       return this[$rightType]
     }
 
-    // argTypes :: () -> List Type
+    // argTypes :: () -> Node Type
     get argTypes() {
       return this[$argTypes]
     }
 
     get returnType() {
       return this[$returnType]
+    }
+
+    get arity() {
+      return this[$arity]
     }
 
     checkType(targetType) {
@@ -60,17 +69,26 @@ export const ArrowType = typeImpl(
       return rightType.typeCheck(targetType.rightType)
     }
 
-    checkValue(func) {
-      if(!isInstanceOf(func, LambdaValue))
-        return new TypeError('argument must be instance of LambdaValue')
+    checkValue(arrowValue) {
+      if(!isInstanceOf(arrowValue, ArrowValue))
+        return new TypeError('argument must be instance of ArrowValue')
 
-      const err = this.checkType(func.type)
+      const err = this.checkType(arrowValue.type)
       if(err) return err
 
       return null
     }
 
-    // checkArgs :: This -> Node -> Error
+    isArrowType() {
+      return true
+    }
+
+    checkArg(arg) {
+      const { leftType } = this
+      return leftType.checkValue(arg)
+    }
+
+    // checkArgs :: This -> Node -> Maybe Error
     checkArgs(args) {
       const { argTypes } = this
       if(argTypes.size !== args.size)
@@ -79,7 +97,7 @@ export const ArrowType = typeImpl(
       return this.checkPartialArgs(args)
     }
 
-    // checkPartialArgs :: This -> Node -> Error
+    // checkPartialArgs :: This -> Node -> Maybe Error
     checkPartialArgs(args) {
       if(args.isNil())
         return null

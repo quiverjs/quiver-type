@@ -14,6 +14,14 @@ export const appendItem = (node, newItem) => {
   return cons(item, newNext)
 }
 
+export const prependWithIter = (node, it) => {
+  const { value, done } = it.next()
+  if(done) return node
+
+  const next = prependWithIter(node, it)
+  return cons(value, next)
+}
+
 // concatNodes :: Node -> Node -> Node
 export const concatNodes = (node1, node2) => {
   if(node1.isNil())
@@ -27,3 +35,16 @@ export const concatNodes = (node1, node2) => {
 
   return cons(item, newNext)
 }
+
+const doReverseNode = (node, acc) => {
+  if(node.isNil())
+    return acc
+
+  const { item, next } = node
+  const newAcc = cons(item, acc)
+
+  return doReverseNode(next, newAcc)
+}
+
+export const reverseNode = node =>
+  doReverseNode(node, nil)
