@@ -1,21 +1,15 @@
+import { assertNode } from './node'
 import { assertInstanceOf } from '../common/assert'
-import { hasItem, nodeToIter } from '../list/algo'
-
 import {
-  insertUnique, deleteItem, unionSet
-} from './algo'
+  hasItem, deleteItem,
+  insertUnique, unionSet,
+} from '../algo'
 
 const $node = Symbol('@node')
 
-const newSet = (currentSet, currentNode, newNode) => {
-  if(newNode === currentNode)
-    return currentSet
-
-  return new Set(newNode)
-}
-
 export class Set {
   constructor(node) {
+    assertNode(node)
     this[$node] = node
   }
 
@@ -23,10 +17,18 @@ export class Set {
     return this[$node]
   }
 
+  get size() {
+    return this.node.size
+  }
+
   add(item) {
     const { node } = this
     const newNode = insertUnique(node, item)
-    return newSet(this, node, newNode)
+
+    if(newNode === node)
+      return this
+
+    return new Set(newNode)
   }
 
   has(item) {
@@ -38,18 +40,28 @@ export class Set {
     const { node } = this
     const newNode = deleteItem(node, item)
 
-    return newSet(this, node, newNode)
+    if(newNode === node)
+      return this
+
+    return new Set(newNode)
   }
 
   values() {
     const { node } = this
-    return nodeToIter(node)
+    return node.values()
   }
 
   union(target) {
     assertInstanceOf(target, Set)
     const { node } = this
     const newNode = unionSet(node, target.node)
-    return newSet(this, node, newNode)
+
+    if(newNode === node)
+      return this
+
+    return new Set(newNode)
   }
 }
+
+export const assertSet = set =>
+  assertInstanceOf(set, Set)

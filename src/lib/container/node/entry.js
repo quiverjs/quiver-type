@@ -2,7 +2,7 @@ import {
   isInstanceOf,
   assertKeyword,
   assertInstanceOf
-} from '../common/assert'
+} from '../assert'
 
 const $key = Symbol('@key')
 const $value = Symbol('@value')
@@ -29,6 +29,11 @@ export class Entry {
     yield value
   }
 }
+
+export const entry = (key, value) =>
+  new Entry(key, value)
+
+export const makeEntry = entry
 
 export const isEntry = entry =>
   isInstanceOf(entry, Entry)

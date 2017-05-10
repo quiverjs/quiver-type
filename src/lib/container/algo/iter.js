@@ -1,7 +1,6 @@
-import { cons, nil, Entry } from '../node'
+import { cons, nil, makeEntry } from '../node'
 
-// iterToNode :: Iterator Any -> Node
-export const iterToNode = it => {
+const doIterToNode = it => {
   const { value, done } = it.next()
   if(done) return nil
 
@@ -9,15 +8,22 @@ export const iterToNode = it => {
   return cons(value, next)
 }
 
-// entryIterToNode :: Iterator Entry -> Node
-export const entryIterToNode = it => {
+// iterToNode :: Iterator Any -> Node
+export const iterToNode = it =>
+  doIterToNode(it[Symbol.iterator]())
+
+const doEntryIterToNode = it => {
   const { value: entry, done } = it.next()
   if(done) return nil
 
   const [key, value] = entry
-  const next = entryIterToNode(it)
-  return cons(new Entry(key, value), next)
+  const next = doEntryIterToNode(it)
+  return cons(makeEntry(key, value), next)
 }
+
+// entryIterToNode :: Iterator Entry -> Node
+export const entryIterToNode = it =>
+  doEntryIterToNode(it[Symbol.iterator]())
 
 // entryIterToNodes :: Iterator Entry -> (Node, Node)
 export const entryIterToNodes = it => {
@@ -35,31 +41,27 @@ export const entryIterToNodes = it => {
   return [keyNode, valueNode]
 }
 
-// nodeToIter :: Node -> Iterator Any
-export const nodeToIter = function*(node) {
-  while(node !== nil) {
-    yield node.item
-    node = node.next
-  }
-}
-
-// nodesToIter :: Node a -> Node b -> Iterator (a, b)
-export const nodesToIter = function*(node1, node2) {
+const doNodesToIter = function*(node1, node2) {
   while(!node1.isNil()) {
     yield [node1.item, node2.item]
     node1 = node1.next
     node2 = node2.next
   }
+}
 
-  if(!node2.isNil())
+// nodesToIter :: Node a -> Node b -> Iterator (a, b)
+export const nodesToIter = (node1, node2) => {
+  if(!node1.size !== node2.size)
     throw new Error('node1 and node2 are of different size')
+
+  return doNodesToIter(node1, node2)
 }
 
 // nodeToEntryIter :: Node -> Iterator (Nat, Any)
 export const nodeToEntryIter = function*(node) {
   let i = 0
 
-  while(node !== nil) {
+  while(!node.isNil()) {
     yield [i, node.item]
     i += 1
     node = node.next

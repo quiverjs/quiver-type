@@ -1,10 +1,16 @@
-import { nodeToIter, findItem } from '../list/algo'
-import { getEntry, setEntry, mapEntry } from './algo'
+import { assertEntryNode } from '../node'
+
+import {
+  hasEntry, getEntry,
+  setEntry, mapEntry,
+  getOptionalEntry,
+} from '../algo'
 
 const $node = Symbol('@node')
 
 export class Map {
   constructor(node) {
+    assertEntryNode(node)
     this[$node] = node
   }
 
@@ -14,7 +20,7 @@ export class Map {
 
   entries() {
     const { node } = this
-    return nodeToIter(node)
+    return node.values()
   }
 
   *keys() {
@@ -31,46 +37,41 @@ export class Map {
 
   get size() {
     const { node } = this
-
     return node.size
   }
 
   has(key) {
     const { node } = this
-    const i = findItem(node, entry => (entry.key === key))
-    return i >= 0
+    return hasEntry(node, key)
   }
 
   get(key) {
     const { node } = this
-    const [found, value] = getEntry(node, key)
-
-    if(!found)
-      throw new Error(`key not found: ${key}`)
-
-    return value
+    return getEntry(node, key)
   }
 
   set(key, value) {
     const { node } = this
     const newNode = setEntry(node, key, value)
+
+    if(newNode === node)
+      return this
+
     return new Map(newNode)
   }
 
-  getOptional(key, defaultValue=undefined) {
+  getOptional(key, defaultValue) {
     const { node } = this
-    const [found, value] = getEntry(node, key)
-
-    if(found) {
-      return value
-    } else {
-      return defaultValue
-    }
+    return getOptionalEntry(node, key, defaultValue)
   }
 
   map(mapper) {
     const { node } = this
     const newNode = mapEntry(node, mapper)
+
+    if(newNode === node)
+      return this
+
     return new Map(newNode)
   }
 }

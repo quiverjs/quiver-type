@@ -1,21 +1,29 @@
-import { assertRecord } from '../record/assert'
-import { getItem, equalItems } from '../list/algo'
+import { assertKeyNode } from '../node'
+import { assertRecord } from '../record'
+import { getItem, equalItems } from '../algo'
+import {
+  assertNat,
+  assertInstanceOf
+} from '../assert'
 
-const $typeTag = Symbol('@typeTag')
 const $keyNode = Symbol('@keyNode')
 const $caseIndex = Symbol('@caseIndex')
 const $value = Symbol('value')
 
 export class Union {
-  constructor(typeTag, keyNode, caseIndex, value) {
-    this[$typeTag] = typeTag
+  // constructor :: This -> Node Key -> Nat -> Any -> ()
+  constructor(keyNode, caseIndex, value) {
+    assertKeyNode(keyNode)
+    assertNat(caseIndex)
+
+    const keySize = keyNode.size
+    if(caseIndex > keySize)
+      throw new Error(`case index ${caseIndex} is larger than key node size ${keySize}`)
+
+
     this[$keyNode] = keyNode
     this[$caseIndex] = caseIndex
     this[$value] = value
-  }
-
-  get typeTag() {
-    return this[$typeTag]
   }
 
   get keyNode() {
@@ -35,6 +43,7 @@ export class Union {
     return getItem(keyNode, caseIndex)
   }
 
+  // match :: Record (Any -> Any) -> Any
   match(cases) {
     assertRecord(cases)
     if(!equalItems(this.keyNode, cases.keyNode))
@@ -49,3 +58,9 @@ export class Union {
     return caseFunc(value)
   }
 }
+
+export const assertUnion = union =>
+  assertInstanceOf(union, Union)
+
+export const union = (keyNode, caseIndex, value) =>
+  new Union(keyNode, caseIndex, value)

@@ -1,15 +1,15 @@
 import { List } from './list'
-import { nodeFromIter } from './algo'
-import { assertMaybeNode } from '../node/assert'
+import { iterToNode } from '../algo'
+import { nil, assertNode } from '../node'
 
-export const emptyList = new List(null)
+export const emptyList = new List(nil)
 
 export const listFromNode = node => {
-  assertMaybeNode(node)
+  assertNode(node)
   return new List(node)
 }
 
 export const listFromIter = it => {
-  const node = nodeFromIter(it)
+  const node = iterToNode(it)
   return new List(node)
 }

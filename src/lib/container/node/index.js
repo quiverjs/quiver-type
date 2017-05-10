@@ -1,5 +1,13 @@
-export { nil } from './nil'
-export { cons } from './cons'
-export { Node } from './node'
-export { Entry } from './entry'
-export { isNode, assertNode, assertNonEmptyNode } from './assert'
+export { nil, Nil } from './nil'
+export { cons, Cons } from './cons'
+
+export {
+  Node, assertNode,
+  assertKeyNode,
+  assertEntryNode,
+} from './node'
+
+export {
+  entry, makeEntry,
+  Entry, isEntry, assertEntry,
+} from './entry'

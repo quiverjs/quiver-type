@@ -24,6 +24,18 @@ export class Nil extends Node {
   isEntryNode() {
     return true
   }
+
+  checkPred(pred) {
+    return true
+  }
+
+  *values() {
+    // noop
+  }
+
+  *[Symbol.iterator]() {
+    // noop
+  }
 }
 
 export const nil = new Nil()

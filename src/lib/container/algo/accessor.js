@@ -1,31 +1,41 @@
-import { cons, nil } from '../node'
+import { cons } from '../node'
 
-// getItem :: Node -> Nat -> Error Any
-export const getItem = (node, i) => {
-  if(node.isNil())
-    throw new Error('index out of bound')
-
-  if(i === 0) return node.item
-
-  return getItem(node.next, i-1)
+const doGetItem = (node, i) => {
+  if(i === 0) {
+    return node.item
+  } else {
+    return doGetItem(node.next, i-1)
+  }
 }
 
-// setItem :: Node -> Nat -> Any -> Node
-export const setItem = (node, i, newItem) => {
-  if(node.isNil())
+// getItem :: Node -> Nat -> Any
+export const getItem = (node, i) => {
+  if(i >= node.size)
     throw new Error('index out of bound')
 
+  return doGetItem(node, i)
+}
+
+const doSetItem = (node, i, newItem) => {
   if(i === 0)
     return cons(newItem, node.next)
 
   const { item, next } = node
-  const newNext = setItem(next, i-1, newItem)
+  const newNext = doSetItem(next, i-1, newItem)
 
   return cons(item, newNext)
 }
 
+// setItem :: Node -> Nat -> Any -> Node
+export const setItem = (node, i, newItem) => {
+  if(i >= node.size)
+    throw new Error('index out of bound')
+
+  return doSetItem(node, i, newItem)
+}
+
 export const hasItem = (node, target) => {
-  if(node === nil)
+  if(node.isNil())
     return false
 
   const { item, next } = node
@@ -36,19 +46,19 @@ export const hasItem = (node, target) => {
   return hasItem(next, target)
 }
 
-export const deleteItem = (node, target) => {
+const doFindItem = (node, pred, i) => {
   if(node.isNil())
-    return node
+    return -1
 
   const { item, next } = node
 
-  if(item === target)
-    return next
+  if(pred(item))
+    return i
 
-  const newNext = deleteItem(next, target)
+  return doFindItem(next, pred, i+1)
+}
 
-  if(newNext === next)
-    return node
-
-  return cons(item, newNext)
+// findItem :: Node -> Any -> Int
+export const findItem = (node, pred) => {
+  return doFindItem(node, pred, 0)
 }

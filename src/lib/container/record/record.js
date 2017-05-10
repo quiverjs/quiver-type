@@ -1,5 +1,12 @@
-import { getItem, setItem, nodeToIter } from '../list/algo'
-import { getValue, setValue, nodesToIter } from './algo'
+import { assertNode, assertKeyNode } from '../node'
+
+import {
+  getItem,
+  setItem,
+  nodesToIter,
+  getRecordValue,
+  setRecordValue,
+} from '../algo'
 
 const $keyNode = Symbol('@keyNode')
 const $valueNode = Symbol('@valueNode')
@@ -7,6 +14,12 @@ const $valueNode = Symbol('@valueNode')
 export class Record {
   // Constructor :: KeyNode -> Node -> This
   constructor(keyNode, valueNode) {
+    assertKeyNode(keyNode)
+    assertNode(valueNode)
+
+    if(keyNode.size !== valueNode.size)
+      throw new Error('size of key node and value node must match')
+
     this[$keyNode] = keyNode
     this[$valueNode] = valueNode
   }
@@ -26,12 +39,16 @@ export class Record {
 
   get(key) {
     const { keyNode, valueNode } = this
-    return getValue(key, keyNode, valueNode)
+    return getRecordValue(key, keyNode, valueNode)
   }
 
   set(key, value) {
     const { keyNode, valueNode } = this
-    const newValueNode = setValue(keyNode, valueNode, key, value)
+    const newValueNode = setRecordValue(keyNode, valueNode, key, value)
+
+    if(newValueNode === valueNode)
+      return this
+
     return new Record(keyNode, newValueNode)
   }
 
@@ -43,17 +60,21 @@ export class Record {
   rawSet(i, value) {
     const { keyNode, valueNode } = this
     const newValueNode = setItem(valueNode, i, value)
+
+    if(newValueNode === valueNode)
+      return this
+
     return new Record(keyNode, newValueNode)
   }
 
   keys() {
     const { keyNode } = this
-    return nodeToIter(keyNode)
+    return keyNode.values()
   }
 
   values() {
     const { valueNode } = this
-    return nodeToIter(valueNode)
+    return valueNode.values()
   }
 
   entries() {

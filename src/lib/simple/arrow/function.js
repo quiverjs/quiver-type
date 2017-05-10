@@ -1,6 +1,6 @@
 import { ArrowValue } from './arrow'
-import { checkArgs, checkPartialArgs, getArgsReturn } from '../util/args'
-import { curriedApply, assertFunctionReturned } from '../util/curry'
+import { curriedApply, assertFunctionReturned } from './curry'
+import { checkArgs, checkPartialArgs, getArgsReturn } from './args'
 
 const $arrowType = Symbol('@arrowType')
 const $curriedFunc = Symbol('@curriedFunc')

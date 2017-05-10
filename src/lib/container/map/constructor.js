@@ -1,13 +1,7 @@
 import { Map } from './map'
-import { nodeFromEntriesIter } from './algo'
-import { assertEntryNode } from '../node/assert'
-
-export const mapFromNode = node => {
-  assertEntryNode(node)
-  return new Map(node)
-}
+import { entryIterToMap } from '../algo'
 
 export const mapFromEntries = it => {
-  const node = nodeFromEntriesIter(it)
+  const node = entryIterToMap(it)
   return new Map(node)
 }

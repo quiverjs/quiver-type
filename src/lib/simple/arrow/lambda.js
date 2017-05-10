@@ -1,6 +1,6 @@
 import { ArrowValue } from './arrow'
-import { iterToNode } from '../container'
-import { checkArgs, checkPartialArgs } from '../util/args'
+import { iterToNode } from '../../container'
+import { checkArgs, checkPartialArgs } from './args'
 
 const $lambdaClosure = Symbol('@lambdaClosure')
 const $closureValues = Symbol('@closureValues')

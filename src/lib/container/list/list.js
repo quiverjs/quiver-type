@@ -1,12 +1,12 @@
 import { Node } from '../node'
-import { assertInstanceOf } from '../common/assert'
+import { assertInstanceOf } from '../assert'
 
 import {
   getItem, setItem,
   appendItem, mapNode,
   findItem, concatNodes,
-  nodeToIter, nodeToEntriesIter,
-} from './algo'
+  nodeToEntryIter,
+} from '../algo'
 
 const $node = Symbol('@node')
 
@@ -20,12 +20,7 @@ export class List {
   }
 
   get size() {
-    const { node } = this
-
-    if(node === null)
-      return 0
-
-    return node.size
+    return this.node.size
   }
 
   get length() {
@@ -37,6 +32,7 @@ export class List {
     return getItem(node, i)
   }
 
+  // set :: Nat -> Any -> List
   set(i, value) {
     const { node } = this
     const newNode = setItem(node, i, value)
@@ -65,30 +61,35 @@ export class List {
     return this.prepend(item)
   }
 
+  // values :: This -> Iterator Any
   values() {
     const { node } = this
-    return nodeToIter(node)
+    return node.values()
   }
 
+  // entries :: This -> Iterator (Nat, Any)
   entries() {
     const { node } = this
-    return nodeToEntriesIter(node)
+    return nodeToEntryIter(node)
   }
 
   [Symbol.iterator]() {
     return this.values()
   }
 
+  // map :: This -> (Any -> Nat -> Any) -> List
   map(mapper) {
     const { node } = this
     return new List(mapNode(node, mapper))
   }
 
+  // find :: This -> (Any -> Bool) -> Nat
   find(pred) {
     const { node } = this
     return findItem(node, pred)
   }
 
+  // concat :: This -> List -> List
   concat(target) {
     assertInstanceOf(target, List)
 
@@ -101,3 +102,6 @@ export class List {
     return new List(newNode)
   }
 }
+
+export const assertList = list =>
+  assertInstanceOf(list, List)

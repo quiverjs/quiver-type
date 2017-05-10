@@ -1,4 +1,4 @@
-import { cons } from '../node'
+import { cons, nil } from '../node'
 import { hasItem } from './accessor'
 
 export const insertUnique = (node, item) => {
@@ -27,4 +27,12 @@ export const unionSet = (node1, node2) => {
   }
 
   return node1
+}
+
+export const iterToSet = it => {
+  let node = nil
+  for(const item of it) {
+    node = insertUnique(node, item)
+  }
+  return node
 }
