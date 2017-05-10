@@ -11,14 +11,10 @@
   "repository": {
     "url": "git@github.com:quiverjs/quiver-signal.type"
   },
-  "dependencies": {
-    "immutable": "^3.8.1",
-    "quiver-util": "^1.2.5"
-  },
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "quiver-babel": "^1.0.3",
-    "tape": "^4.6.0"
+    "babel-cli": "^6.24.1",
+    "quiver-babel": "^1.0.4",
+    "tape": "^4.6.3"
   },
   "bugs": {
     "url": "https://github.com/quiverjs/quiver-signal/issues",
@@ -31,6 +27,6 @@
     "prepublish": "make build"
   },
   "engines": {
-    "node": ">=7.2.0"
+    "node": ">=7.0.0"
   }
 }

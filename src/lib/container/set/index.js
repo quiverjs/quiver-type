@@ -1,2 +1,10 @@
-export { Set, assertSet } from './set'
-export { setFromIter } from './constructor'
+export {
+  Set,
+  isSet,
+  assertSet,
+} from './set'
+
+export {
+  emptySet,
+  setFromIter,
+} from './constructor'

@@ -1,5 +1,5 @@
 import { Node } from '../node'
-import { assertInstanceOf } from '../assert'
+import { isInstanceOf, assertInstanceOf } from '../assert'
 
 import {
   getItem, setItem,
@@ -102,6 +102,9 @@ export class List {
     return new List(newNode)
   }
 }
+
+export const isList = list =>
+  isInstanceOf(list, List)
 
 export const assertList = list =>
   assertInstanceOf(list, List)

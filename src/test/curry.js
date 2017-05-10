@@ -1,6 +1,6 @@
 import test from 'tape'
 import { iterToNode } from '../lib/container/algo/iter'
-import { currifyFunction, nestedCurrifyFunction } from '../lib/simple/util/curry'
+import { currifyFunction, nestedCurrifyFunction } from '../lib/simple/arrow/curry'
 
 test('curry function test', assert => {
   const func1 = (a, b, c) =>

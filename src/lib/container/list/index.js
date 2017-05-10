@@ -1,4 +1,10 @@
-export { List, assertList } from './list'
 export {
-  emptyList, listFromNode, listFromIter
+  List,
+  isList,
+  assertList,
+} from './list'
+export {
+  emptyList,
+  listFromNode,
+  listFromIter,
 } from './constructor'

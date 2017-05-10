@@ -23,7 +23,7 @@ export {
   prependItem,
   appendItem,
   concatNodes,
-  reverseNode
+  reverseNode,
 } from './append'
 
 export {

@@ -1,4 +1,4 @@
-import { assertInstanceOf } from '../assert'
+import { isInstanceOf, assertInstanceOf } from '../assert'
 
 export class Node {
   constructor() {
@@ -50,6 +50,9 @@ export class Node {
     throw new Error('not implemented')
   }
 }
+
+export const isNode = node =>
+  isInstanceOf(node, Node)
 
 export const assertNode = node =>
   assertInstanceOf(node, Node)

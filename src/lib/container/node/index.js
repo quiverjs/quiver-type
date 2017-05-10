@@ -2,7 +2,9 @@ export { nil, Nil } from './nil'
 export { cons, Cons } from './cons'
 
 export {
-  Node, assertNode,
+  Node,
+  isNode,
+  assertNode,
   assertKeyNode,
   assertEntryNode,
 } from './node'

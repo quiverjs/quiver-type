@@ -1,5 +1,5 @@
 import { Record } from './record'
-import { isInstanceOf, assertInstanceOf } from '../common/assert'
+import { isInstanceOf, assertInstanceOf } from '../assert'
 
 export const isRecord = record =>
   isInstanceOf(record, Record)
