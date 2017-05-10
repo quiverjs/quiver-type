@@ -11,6 +11,8 @@ const $valueChecker = Symbol('@valueChecker')
 
 export const CompositeType = typeImpl(
   class extends Type {
+    // type ValueChecker = List Type -> Any -> Bool
+    // constructor :: This -> String -> List Type -> ValueChecker -> ()
     constructor(name, subTypes, valueChecker) {
       assertString(name)
       assertList(subTypes)

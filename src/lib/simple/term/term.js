@@ -2,7 +2,7 @@
 export class Term {
   constructor() {
     if(this.constructor === Term)
-      throw new Error('Abstract class Term cannot be instantiated')
+      throw new Error('abstract class Term cannot be instantiated')
   }
 
   // termType :: This -> Type
@@ -16,7 +16,7 @@ export class Term {
   }
 
   // validateVarType :: This -> VariableTerm -> Maybe Error
-  validateVarType(typeVar, type) {
+  validateVarType(termVar, type) {
     throw new Error('not implemented')
   }
 

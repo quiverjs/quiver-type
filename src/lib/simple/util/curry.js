@@ -1,3 +1,18 @@
+
+export const assertFunctionReturned = func => {
+  if(typeof(func) !== 'function')
+    throw new TypeError('expected value returned from curried function to be a function')
+}
+
+// curriedApply ::
+export const curriedApply = (curriedFunc, args) => {
+  for(const arg of args) {
+    assertFunctionReturned(curriedFunc)
+    curriedFunc = curriedFunc(arg)
+  }
+  return curriedFunc
+}
+
 const curriedFunction = func =>
   (...appliedArgs) => arg =>
     func(...appliedArgs, arg)

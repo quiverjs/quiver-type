@@ -16,11 +16,14 @@ export class ValueClosure extends Closure {
     return this.value
   }
 
-  bindApplyArg(closureValues, arg) {
-    throw new Error('cannot apply argument to variable closure')
-  }
-
   bindApplyArgs(closureValues, args) {
     throw new Error('cannot apply arguments to variable closure')
+  }
+}
+
+export class ArrowValueClosure extends ValueClosure {
+  bindApplyArgs(closureValues, args) {
+    const { value } = this
+    return value.applyRaw(...args)
   }
 }

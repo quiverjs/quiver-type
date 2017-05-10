@@ -17,8 +17,8 @@ export class Type {
   }
 
   // isArrowType :: This -> Bool
-  isArrowType() {
-    throw new Error('Not implemented')
+  get isArrowType() {
+    return false
   }
 
   formatType() {

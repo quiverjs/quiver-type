@@ -1,5 +1,6 @@
-import { iterToNode } from '../container'
 import { ArrowValue } from './arrow'
+import { iterToNode } from '../container'
+import { checkArgs, checkPartialArgs } from '../util/args'
 
 const $lambdaClosure = Symbol('@lambdaClosure')
 const $closureValues = Symbol('@closureValues')
@@ -9,6 +10,8 @@ export class LambdaValue extends ArrowValue {
   // constructor :: This -> LambdaClosure -> Node -> ()
   constructor(lambdaClosure, closureValues) {
     const { arrowType } = lambdaClosure
+
+    super()
 
     this[$lambdaClosure] = lambdaClosure
     this[$closureValues] = closureValues
@@ -31,23 +34,21 @@ export class LambdaValue extends ArrowValue {
     const args = iterToNode(argsArray)
     const { lambdaClosure, closureValues, arrowType } = this
 
-    const err = arrowType.checkArgs(args)
-    if(err) throw err
+    checkArgs(arrowType, args)
 
     return lambdaClosure.bindApplyArgs(closureValues, args)
   }
 
-  partialApply(...argsArray) {
+  applyPartial(...argsArray) {
     const args = iterToNode(argsArray)
     const { lambdaClosure, closureValues, arrowType } = this
 
-    const err = arrowType.checkPartialArgs(args)
-    if(err) throw err
+    checkPartialArgs(arrowType, args)
 
     return lambdaClosure.bindApplyArgs(closureValues, args)
   }
 
-  rawApply(...argsArray) {
+  applyRaw(...argsArray) {
     const args = iterToNode(argsArray)
     const { lambdaClosure, closureValues } = this
     return lambdaClosure.bindApplyArgs(closureValues, args)
