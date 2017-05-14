@@ -1,15 +1,14 @@
-import {
-  assertTerm,
-  assertVariable,
-  assertArgVars,
-} from './assert'
+import { assertVariable } from './assert'
+
+import { assertTerm } from './term'
+import { assertKeywordNode } from '../../container'
 
 const $freeTermVars = Symbol('@freeTermVars')
 const $weakHeadNF = Symbol('@weakHeadNF')
 const $normalForm = Symbol('@normalForm')
 
 export const termImpl = ParentTerm =>
-  class TermImpl extends ParentTerm {
+  class extends ParentTerm {
     freeTermVariables() {
       if(!this[$freeTermVars]) {
         this[$freeTermVars] = super.freeTermVariables()
@@ -42,8 +41,7 @@ export const termImpl = ParentTerm =>
     }
 
     compileClosure(closureVars) {
-      assertArgVars(closureVars)
-
+      assertKeywordNode(closureVars)
       return super.compileClosure(closureVars)
     }
   }

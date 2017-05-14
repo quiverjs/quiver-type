@@ -1,71 +1,103 @@
-import { typeImpl } from './impl'
 import { Type, assertType } from './type'
-import { assertList, zipIter } from '../common/container'
+import { assertTypeNode } from './assert'
+import { nodesToIter, valueNode } from '../../container'
 import {
   assertString, assertFunction, isInstanceOf
-} from '../common/assert'
+} from '../../assert'
 
 const $name = Symbol('@name')
 const $subTypes = Symbol('@subType')
 const $valueChecker = Symbol('@valueChecker')
+const $valueCheckerBuilder = Symbol('@valueCheckerBuilder')
 
-export const CompositeType = typeImpl(
-  class extends Type {
-    // type ValueChecker = List Type -> Any -> Bool
-    // constructor :: This -> String -> List Type -> ValueChecker -> ()
-    constructor(name, subTypes, valueChecker) {
-      assertString(name)
-      assertList(subTypes)
-      assertFunction(valueChecker)
+export class CompositeType extends Type {
+  // constructor :: This -> String -> Node Type ->
+  //                (Node Type -> (Any -> Bool)) -> ()
+  constructor(name, subTypes, valueCheckerBuilder) {
+    assertString(name)
+    assertTypeNode(subTypes)
+    assertFunction(valueCheckerBuilder)
 
-      for(const subType of subTypes.values()) {
-        assertType(subType)
-      }
+    const valueChecker = valueCheckerBuilder(subTypes)
+    assertFunction(valueChecker)
 
-      this[$name] = name
-      this[$subTypes] = subTypes
-      this[$valueChecker] = valueChecker
+    this[$name] = name
+    this[$subTypes] = subTypes
+    this[$valueChecker] = valueChecker
+    this[$valueCheckerBuilder] = valueCheckerBuilder
+  }
+
+  get typeName() {
+    return this[$name]
+  }
+
+  get subTypes() {
+    return this[$subTypes]
+  }
+
+  get valueChecker() {
+    return this[$valueChecker]
+  }
+
+  get valueCheckerBuilder() {
+    return this[$valueCheckerBuilder]
+  }
+
+  checkType(targetType) {
+    assertType(targetType)
+
+    if(!isInstanceOf(targetType, CompositeType))
+      return new TypeError('target type must be a composite type')
+
+    const { typeName, subTypes } = this
+
+    if(typeName !== targetType.typeName)
+      return new TypeError('target composite type have different name')
+
+    const subTypes2 = targetType.subTypes
+    if(subTypes.size !== subTypes2.size)
+      return new TypeError('target composite type have different sub types')
+
+    for(const [type1, type2] of nodesToIter(
+        subTypes, subTypes2))
+    {
+      const err = type1.checkType(type2)
+      if(err) return err
     }
 
-    get typeName() {
-      return this[$name]
-    }
+    return null
+  }
 
-    get subTypes() {
-      return this[$subTypes]
-    }
+  checkValue(value) {
+    const { subTypes, valueChecker } = this
+    return valueChecker(subTypes, value)
+  }
 
-    get valueChecker() {
-      return this[$valueChecker]
-    }
+  formatType() {
+    const { typeName, subTypes } = this
+    const subTypesRep = [...subTypes].map(
+      subType => subType.formatType())
 
-    checkType(targetType) {
-      assertType(targetType)
+    return ['composite-type', typeName, subTypesRep]
+  }
+}
 
-      if(!isInstanceOf(targetType, CompositeType))
-        return new TypeError('target type must be a composite type')
+export const compositeType = (name, subTypes, valueCheckerBuilder) =>
+  new CompositeType(name, subTypes, valueCheckerBuilder)
 
-      const { typeName, subTypes } = this
+export const compositeTypeBuilder = (name, valueCheckerBuilder) => {
+  assertString(name)
+  assertFunction(valueCheckerBuilder)
 
-      if(typeName !== targetType.typeName)
-        return new TypeError('target composite type have different name')
+  return subTypes =>{
+    assertTypeNode(subTypes)
+    return new CompositeType(name, subTypes, valueCheckerBuilder)
+  }
+}
 
-      const subTypes2 = targetType.subTypes
-      if(subTypes.size !== subTypes2.size)
-        return new TypeError('target composite type have different sub types')
-
-      for(const [type1, type2] of zipIter(
-        subTypes.values(), subTypes2.values()))
-      {
-        const err = type1.checkType(type2)
-        if(err) return err
-      }
-
-      return null
-    }
-
-    checkValue(value) {
-      const { subTypes, valueChecker } = this
-      return valueChecker(subTypes, value)
-    }
-  })
+export const simpleCompositeTypeBuilder = (name, valueCheckerBuilder) =>
+  subType => {
+    assertType(subType)
+    const subTypes = valueNode(subType)
+    return new CompositeType(name, subTypes, valueCheckerBuilder)
+  }

@@ -1,13 +1,18 @@
+export { Node } from './node'
 export { nil, Nil } from './nil'
 export { cons, Cons } from './cons'
+export { valueNode } from './constructor'
 
 export {
-  Node,
   isNode,
   assertNode,
+  isKeyNode,
+  isKeywordNode,
+  isEntryNode,
   assertKeyNode,
+  assertKeywordNode,
   assertEntryNode,
-} from './node'
+} from './assert'
 
 export {
   entry, makeEntry,

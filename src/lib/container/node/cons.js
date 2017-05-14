@@ -1,7 +1,5 @@
-import { Node, assertNode } from './node'
-
-import { isEntry } from './entry'
-import { isString } from '../assert'
+import { Node } from './node'
+import { assertNode } from './assert'
 
 const $item = Symbol('@item')
 const $next = Symbol('@next')
@@ -63,14 +61,6 @@ export class Cons extends Node {
 
   isNil() {
     return false
-  }
-
-  isKeyNode() {
-    return this.checkPred(isString)
-  }
-
-  isEntryNode() {
-    return this.checkPred(isEntry)
   }
 
   checkPred(pred) {

@@ -1,15 +1,39 @@
+
+export const isNumber = num => {
+  return typeof(num) === 'number'
+}
+
+export const isInteger = int => {
+  return isNumber(int) && ((int|0) === int)
+}
+
+export const isNat = nat => {
+  return isInteger(nat) && (nat > 0)
+}
+
 export const isString = str => {
   return typeof(str) === 'string'
 }
 
-export const isNat = nat => {
-  return (typeof(nat) === 'number') &&
-    (nat > 0) && ((nat|0) === nat)
+export const isSymbol = symbol => {
+  return typeof(symbol) === 'symbol'
 }
 
 export const isKeyword = keyword => {
   const type = typeof(keyword)
   return (type === 'string' || type === 'symbol')
+}
+
+export const isBoolean = bool => {
+  return typeof(bool) === 'boolean'
+}
+
+export const isObject = object => {
+  return typeof(object) === 'object'
+}
+
+export const isArray = array => {
+  return Array.isArray(array)
 }
 
 export const isInstanceOf = (object, Class) => {

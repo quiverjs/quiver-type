@@ -1,3 +1,4 @@
+import { isInstanceOf, assertInstanceOf } from '../assert'
 
 export class Term {
   constructor() {
@@ -39,4 +40,25 @@ export class Term {
   compileClosure(argVars) {
     throw new Error('not implemented')
   }
+
+  // checkTerm :: This -> Term -> Maybe Error
+  checkTerm(term) {
+    throw new Error('not implemented')
+  }
+
+  // subTerms :: This -> Iterator Term
+  subTerms() {
+    throw new Error('not implemented')
+  }
+
+  // mapSubTerms :: This -> (Term -> Term) -> Term
+  mapSubTerms(mapper) {
+    throw new Error('not implemented')
+  }
 }
+
+export const isTerm = term =>
+  isInstanceOf(term, Term)
+
+export const assertTerm = term =>
+  assertInstanceOf(term, Term)

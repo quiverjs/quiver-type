@@ -1,9 +1,18 @@
-import { formatLisp } from '../common/format'
+import { formatLisp } from '../../format'
+import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 export class Type {
   constructor() {
     if(this.constructor === Type)
       throw new Error('abstract class Type cannot be instantiated')
+  }
+
+  // Other than arrow type, all other types
+  // have arity of 1
+  //
+  // arity :: This -> Nat
+  get arity() {
+    return 1
   }
 
   // checkType :: This -> Type -> Maybe Error
@@ -16,11 +25,7 @@ export class Type {
     throw new Error('Not implemented')
   }
 
-  // isArrowType :: This -> Bool
-  get isArrowType() {
-    return false
-  }
-
+  // formatType :: This -> Array
   formatType() {
     throw new Error('Not implemented')
   }
@@ -29,3 +34,9 @@ export class Type {
     return formatLisp(this.formatType())
   }
 }
+
+export const isType = type =>
+  isInstanceOf(type, Type)
+
+export const assertType = type =>
+  assertInstanceOf(type, Type)

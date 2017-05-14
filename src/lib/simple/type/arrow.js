@@ -1,8 +1,9 @@
 import { typeImpl } from './impl'
 import { Type, assertType } from './type'
 import { ArrowValue } from '../value/arrow'
-import { assertInstanceOf, isInstanceOf } from '../common/assert'
+import { assertInstanceOf, isInstanceOf } from '../../assert'
 
+const $arity = Symbol('@arity')
 const $leftType = Symbol('@leftType')
 const $rightType = Symbol('@rightType')
 
@@ -14,8 +15,13 @@ export const ArrowType = typeImpl(
 
       super()
 
+      this[$arity] = rightType.arity + 1
       this[$leftType] = leftType
       this[$rightType] = rightType
+    }
+
+    get arity() {
+      return this[$arity]
     }
 
     get leftType() {
@@ -48,13 +54,31 @@ export const ArrowType = typeImpl(
       return null
     }
 
-    get isArrowType() {
-      return true
+    formatType() {
+      const { leftType, rightType } = this
+      const leftFormat = leftType.formatType()
+      const rightFormat = rightType.formatType()
+
+      return ['arrow-type', leftFormat, rightFormat]
     }
   })
 
-  export const assertArrowType = arrowType =>
-    assertInstanceOf(arrowType, ArrowType)
+export const assertArrowType = arrowType =>
+  assertInstanceOf(arrowType, ArrowType)
 
-  export const isArrowType = arrowType =>
-    isInstanceOf(arrowType, ArrowType)
+export const isArrowType = arrowType =>
+  isInstanceOf(arrowType, ArrowType)
+
+export const arrow = (...argTypes) => {
+  if(argTypes.length < 2) {
+    throw new TypeError('arrow type must have at least 2 arg types')
+  }
+
+  const rightType = argTypes[argTypes.length-1]
+  const restTypes = argTypes.slice(0, -1)
+
+  return restTypes.reduceRight(
+    (rightType, leftType) => {
+      return new ArrowType(leftType, rightType)
+    }, rightType)
+}

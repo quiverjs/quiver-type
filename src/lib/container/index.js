@@ -1,10 +1,19 @@
 export {
   nil,
   cons,
+  valueNode,
   entry,
+  makeEntry,
+
   isNode,
   assertNode,
-  assertKeNode,
+  isKeyNode,
+  isKeywordNode,
+  isEntryNode,
+  assertKeyNode,
+  assertKeywordNode,
+  assertEntryNode,
+
   isEntry,
   assertEntry
 } from './node'

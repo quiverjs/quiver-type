@@ -1,6 +1,7 @@
-import { Closure } from './closure'
 import { LambdaValue } from '../value/lambda'
-import { cons } from '../container'
+import { cons, assertNode } from '../container'
+import { assertArrowType } from '../type/arrow'
+import { Closure, assertClosure } from './closure'
 
 const $arrowType = Symbol('@arrowType')
 const $bodyClosure = Symbol('@bodyClosure')
@@ -8,6 +9,9 @@ const $bodyClosure = Symbol('@bodyClosure')
 export class LambdaClosure extends Closure {
   // constructor :: This -> ArrowType -> Closure -> ()
   constructor(arrowType, bodyClosure) {
+    assertArrowType(arrowType)
+    assertClosure(bodyClosure)
+
     this[$arrowType] = arrowType
     this[$bodyClosure] = bodyClosure
   }
@@ -21,10 +25,14 @@ export class LambdaClosure extends Closure {
   }
 
   bindValues(closureValues) {
+    assertNode(closureValues)
     return new LambdaValue(this, closureValues)
   }
 
   bindApplyArgs(closureValues, args) {
+    assertNode(closureValues)
+    assertNode(args)
+
     if(args.isNil())
       return this.bindValues(closureValues)
 

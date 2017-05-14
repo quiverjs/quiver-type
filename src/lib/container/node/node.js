@@ -1,5 +1,3 @@
-import { isInstanceOf, assertInstanceOf } from '../assert'
-
 export class Node {
   constructor() {
     if(this.constructor === Node)
@@ -31,16 +29,6 @@ export class Node {
     throw new Error('not implemented')
   }
 
-  // isKeyNode :: This -> Bool
-  isKeyNode() {
-    throw new Error('not implemented')
-  }
-
-  // isEntryNode :: This -> Bool
-  isEntryNode() {
-    throw new Error('not implemented')
-  }
-
   // checkPred :: This -> (Any -> Bool) -> Bool
   checkPred(pred) {
     throw new Error('not implemented')
@@ -49,22 +37,4 @@ export class Node {
   [Symbol.iterator]() {
     throw new Error('not implemented')
   }
-}
-
-export const isNode = node =>
-  isInstanceOf(node, Node)
-
-export const assertNode = node =>
-  assertInstanceOf(node, Node)
-
-export const assertKeyNode = node => {
-  assertNode(node)
-  if(!node.isKeyNode())
-    throw new TypeError('type of node must be key node')
-}
-
-export const assertEntryNode = node => {
-  assertNode(node)
-  if(!node.isEntryNode())
-    throw new TypeError('type of node must be entry node')
 }

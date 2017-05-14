@@ -17,14 +17,6 @@ export class Nil extends Node {
     return true
   }
 
-  isKeyNode() {
-    return true
-  }
-
-  isEntryNode() {
-    return true
-  }
-
   checkPred(pred) {
     return true
   }

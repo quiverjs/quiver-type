@@ -1,5 +1,5 @@
 import { assertNode } from '../node'
-import { assertInstanceOf } from '../assert'
+import { isInstanceOf, assertInstanceOf } from '../assert'
 import {
   hasItem, deleteItem,
   insertUnique, unionSet,
@@ -64,7 +64,7 @@ export class Set {
 }
 
 export const isSet = set =>
-  isIntanceOf(set, Set)
+  isInstanceOf(set, Set)
 
 export const assertSet = set =>
   assertInstanceOf(set, Set)
