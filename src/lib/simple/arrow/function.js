@@ -1,4 +1,6 @@
 import { ArrowValue } from './arrow'
+import { assertFunction } from '../../assert'
+import { assertArrowType, isArrowType } from '../type/arrow'
 import { curriedApply, assertFunctionReturned } from './curry'
 import { checkArgs, checkPartialArgs, getArgsReturn } from './args'
 
@@ -8,7 +10,7 @@ const $curriedFunc = Symbol('@curriedFunc')
 const applyArgs = (curriedFunc, returnType, args) => {
   const returnValue = curriedApply(curriedFunc, args)
 
-  if(!returnType.isArrowType)
+  if(!isArrowType(returnType))
     return returnValue
 
   assertFunctionReturned(returnValue)
@@ -18,10 +20,21 @@ const applyArgs = (curriedFunc, returnType, args) => {
 export class FunctionValue extends ArrowValue {
   // constructor :: This -> ArrowType -> CurriedFunction -> ()
   constructor(arrowType, curriedFunc) {
+    assertArrowType(arrowType)
+    assertFunction(curriedFunc)
+
     super()
 
     this[$arrowType] = arrowType
     this[$curriedFunc] = curriedFunc
+  }
+
+  get arrowType() {
+    return this[$arrowType]
+  }
+
+  get curriedFunc() {
+    return this[$curriedFunc]
   }
 
   apply(...args) {
@@ -31,6 +44,9 @@ export class FunctionValue extends ArrowValue {
   }
 
   applyPartial(...args) {
+    if(args.length === 0)
+      return this
+
     const { curriedFunc, arrowType } = this
     const returnType = checkPartialArgs(arrowType, args)
     return applyArgs(curriedFunc, returnType, args)

@@ -1,14 +1,15 @@
+import { isArrowType } from '../type/arrow'
 
 // checkArgsReturn :: ArrowType -> Iterable Any -> Bool -> Exception Type
 const checkArgsReturn = (arrowType, args, checkType) => {
   for(const arg of args) {
-    if(!arrowType.isArrowType)
+    if(!isArrowType(arrowType))
       throw new Error('too many arguments provided')
 
     const { leftType, rightType } = arrowType
 
     if(checkType) {
-      const err = leftType.checkType(arg)
+      const err = leftType.checkValue(arg)
       if(err) throw err
     }
 
@@ -27,7 +28,7 @@ export const checkPartialArgs = (arrowType, args) =>
 export const checkArgs = (arrowType, args) => {
   const returnType = checkPartialArgs(arrowType, args)
 
-  if(returnType.isArrowType)
+  if(isArrowType(returnType))
     throw new Error('not enough arguments provided')
 
   return returnType

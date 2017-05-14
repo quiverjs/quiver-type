@@ -15,3 +15,10 @@ export {
   primitiveType,
   PrimitiveType,
 } from './primitive'
+
+export {
+  compositeType,
+  compositeTypeBuilder,
+  simpleCompositeTypeBuilder,
+  CompositeType,
+} from './composite'

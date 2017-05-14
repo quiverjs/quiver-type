@@ -28,6 +28,8 @@ export const IntegerType = primitiveType(
     return null
   })
 
+export const IntType = IntegerType
+
 export const NatType = primitiveType(
   'Nat',
   nat => {

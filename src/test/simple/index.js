@@ -1,1 +1,2 @@
 import './type'
+import './arrow'

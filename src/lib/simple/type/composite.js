@@ -21,6 +21,8 @@ export class CompositeType extends Type {
     const valueChecker = valueCheckerBuilder(subTypes)
     assertFunction(valueChecker)
 
+    super()
+
     this[$name] = name
     this[$subTypes] = subTypes
     this[$valueChecker] = valueChecker
@@ -70,7 +72,7 @@ export class CompositeType extends Type {
 
   checkValue(value) {
     const { subTypes, valueChecker } = this
-    return valueChecker(subTypes, value)
+    return valueChecker(value)
   }
 
   formatType() {
@@ -95,9 +97,16 @@ export const compositeTypeBuilder = (name, valueCheckerBuilder) => {
   }
 }
 
-export const simpleCompositeTypeBuilder = (name, valueCheckerBuilder) =>
-  subType => {
+export const simpleCompositeTypeBuilder = (name, valueCheckerBuilder) => {
+  const wrappedBuilder = subTypes => {
+    const [subType] = subTypes
+    return valueCheckerBuilder(subType)
+  }
+
+  return subType => {
     assertType(subType)
     const subTypes = valueNode(subType)
-    return new CompositeType(name, subTypes, valueCheckerBuilder)
+
+    return new CompositeType(name, subTypes, wrappedBuilder)
   }
+}

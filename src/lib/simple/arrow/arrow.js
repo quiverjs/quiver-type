@@ -1,3 +1,4 @@
+import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 export class ArrowValue {
   constructor() {
@@ -17,3 +18,9 @@ export class ArrowValue {
     throw new Error('not implemented')
   }
 }
+
+export const isArrowValue = arrowValue =>
+  isInstanceOf(arrowValue, ArrowValue)
+
+export const assertArrowValue = arrowValue =>
+  assertInstanceOf(arrowValue, ArrowValue)

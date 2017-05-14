@@ -8,7 +8,7 @@ export const isInteger = int => {
 }
 
 export const isNat = nat => {
-  return isInteger(nat) && (nat > 0)
+  return isInteger(nat) && (nat >= 0)
 }
 
 export const isString = str => {
@@ -30,6 +30,10 @@ export const isBoolean = bool => {
 
 export const isObject = object => {
   return typeof(object) === 'object'
+}
+
+export const isFunction = func => {
+  return typeof(func) === 'function'
 }
 
 export const isArray = array => {
@@ -55,6 +59,11 @@ export const assertKeyword = keyword => {
 export const assertNat = nat => {
   if(!isNat(nat))
     throw new TypeError('argument must be natural number')
+}
+
+export const assertFunction = func => {
+  if(!isFunction(func))
+    throw new TypeError('argument must be function')
 }
 
 export const assertInstanceOf = (object, Class) => {

@@ -81,6 +81,11 @@ export class Cons extends Node {
   [Symbol.iterator]() {
     return nodeToIter(this)
   }
+
+  toString() {
+    const { item, next } = this
+    return `(cons ${item} ${next})`
+  }
 }
 
 export const cons = (item, next) =>

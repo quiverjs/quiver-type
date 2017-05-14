@@ -28,6 +28,10 @@ export class Nil extends Node {
   *[Symbol.iterator]() {
     // noop
   }
+
+  toString() {
+    return 'nil'
+  }
 }
 
 export const nil = new Nil()

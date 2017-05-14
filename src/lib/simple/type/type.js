@@ -8,11 +8,11 @@ export class Type {
   }
 
   // Other than arrow type, all other types
-  // have arity of 1
+  // have arity of 0
   //
   // arity :: This -> Nat
   get arity() {
-    return 1
+    return 0
   }
 
   // checkType :: This -> Type -> Maybe Error

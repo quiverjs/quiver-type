@@ -37,4 +37,8 @@ export class Node {
   [Symbol.iterator]() {
     throw new Error('not implemented')
   }
+
+  inspect() {
+    return this.toString()
+  }
 }
