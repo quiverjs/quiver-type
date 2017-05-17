@@ -1,9 +1,7 @@
+import { arrow } from '../type/arrow'
+import { currifyFunction } from './curry'
 import { FunctionValue } from './function'
-import { arrow, isArrowType } from '../type/arrow'
 import { assertFunction } from '../../assert'
-import {
-  currifyFunction, nestedCurrifyFunction
-} from './curry'
 
 const wrapSafeReturn = (returnType, func) =>
   (...args) => {
@@ -19,14 +17,11 @@ const wrapSafeReturn = (returnType, func) =>
 export const simpleArrowFunction = (argTypes, returnType, func) => {
   assertFunction(func)
 
-  if(isArrowType(returnType))
-    throw new TypeError('return type must not be arrow type')
-
+  const arity = argTypes.length
   const arrowType = arrow(...argTypes, returnType)
-  const { arity } = arrowType
 
   const wrappedFunc = wrapSafeReturn(returnType, func)
   const curriedFunc = currifyFunction(wrappedFunc, arity)
 
-  return new FunctionValue(arrowType, curriedFunc)
+  return new FunctionValue(arrowType, arity, curriedFunc)
 }

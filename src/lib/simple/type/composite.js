@@ -71,7 +71,7 @@ export class CompositeType extends Type {
   }
 
   checkValue(value) {
-    const { subTypes, valueChecker } = this
+    const { valueChecker } = this
     return valueChecker(value)
   }
 

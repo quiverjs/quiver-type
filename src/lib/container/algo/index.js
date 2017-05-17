@@ -56,3 +56,7 @@ export {
   unionSet,
   iterToSet,
 } from './set'
+
+export {
+  sliceNode
+} from './slice'

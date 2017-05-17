@@ -28,8 +28,14 @@ export const isBoolean = bool => {
   return typeof(bool) === 'boolean'
 }
 
+export const isNull = arg => {
+  return arg === null
+}
+
+export const isUnit = isNull
+
 export const isObject = object => {
-  return typeof(object) === 'object'
+  return typeof(object) === 'object' && !isNull(object)
 }
 
 export const isFunction = func => {

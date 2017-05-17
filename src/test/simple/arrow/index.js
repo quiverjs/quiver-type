@@ -19,7 +19,7 @@ test('arrow value test', assert => {
 
     const plusFunc = a => b => (a+b)
 
-    const plusValue = new FunctionValue(PlusType, plusFunc)
+    const plusValue = new FunctionValue(PlusType, 2, plusFunc)
 
     assert.notOk(PlusType.checkValue(plusValue))
 
@@ -100,12 +100,41 @@ test('arrow value test', assert => {
     const MultType = arrow(IntType, IntType, IntType)
 
     // forgot currify
-    const mult = new FunctionValue(MultType,
+    const mult = new FunctionValue(MultType, 2,
       (a, b) => (a*b))
 
     assert.throws(() => mult.partialApply(1))
     assert.throws(() => mult.partialApply(1, 2))
     assert.throws(() => mult.apply(1, 2))
+
+    assert.end()
+  })
+
+  assert.test('nested wrap', assert => {
+    const AdderType = arrow(IntType, IntType)
+
+    const add = simpleArrowFunction(
+      [IntType, IntType],
+      IntType,
+      (a, b) => (a+b))
+
+    const addATwice = simpleArrowFunction(
+      [IntType],
+      AdderType,
+      a => add.applyPartial(a*2))
+
+    assert.equals(addATwice.apply(2, 3), 7)
+    assert.equals(addATwice.apply(3, 4), 10)
+
+    const fourAdder = addATwice.applyPartial(2)
+
+    assert.equals(fourAdder.apply(3), 7)
+    assert.equals(fourAdder.apply(5), 9)
+
+    assert.throws(() => addATwice.apply(2))
+    assert.throws(() => addATwice.apply('foo', 2))
+    assert.throws(() => addATwice.apply(2, 'foo'))
+    assert.throws(() => fourAdder.apply('foo'))
 
     assert.end()
   })
