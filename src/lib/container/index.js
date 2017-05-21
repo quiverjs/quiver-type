@@ -94,4 +94,6 @@ export {
   unionSet,
   iterToSet,
 
+  sliceNode,
+
 } from './algo'

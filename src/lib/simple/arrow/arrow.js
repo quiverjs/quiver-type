@@ -1,3 +1,5 @@
+import { iterToNode } from '../../container'
+import { checkArgs, checkPartialArgs } from './args'
 import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 export class ArrowValue {
@@ -6,16 +8,33 @@ export class ArrowValue {
       throw new Error('abstract class Value cannot be instantiated')
   }
 
+  // arrowType :: This -> ArrowType
+  get arrowType() {
+    throw new Error('not implemented')
+  }
+
+  // $apply :: Node Any -> Any
+  $apply(args) {
+    throw new Error('not implemented')
+  }
+
+  // apply :: Array Any -> Any
   apply(...args) {
-    throw new Error('not implemented')
+    const { arrowType } = this
+    const inArgs = iterToNode(args)
+    checkArgs(arrowType, inArgs)
+    return this.$apply(inArgs)
   }
 
+  // applyPartial :: Array Any -> Any
   applyPartial(...args) {
-    throw new Error('not implemented')
-  }
+    if(args.length === 0)
+      return this
 
-  applyRaw(...args) {
-    throw new Error('not implemented')
+    const { arrowType } = this
+    const inArgs = iterToNode(args)
+    checkPartialArgs(arrowType, inArgs)
+    return this.$apply(inArgs)
   }
 }
 

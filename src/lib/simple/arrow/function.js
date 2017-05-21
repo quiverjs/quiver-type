@@ -1,29 +1,13 @@
 import { ArrowValue } from './arrow'
+import { getReturnType } from './args'
 import { assertArrowType } from '../type/arrow'
+import { sliceNode, assertNode } from '../../container'
 import { assertFunction, assertNat } from '../../assert'
 import { curriedApply, assertFunctionReturned } from './curry'
 
 const $arity = Symbol('@arity')
 const $arrowType = Symbol('@arrowType')
 const $curriedFunc = Symbol('@curriedFunc')
-
-const getReturnType = (arrowType, argsSize) => {
-  if(argsSize === 0)
-    return arrowType
-
-  return getReturnType(arrowType.rightType, argsSize-1)
-}
-
-const checkArgs = (arrowType, args) => {
-  for(const arg of args) {
-    const { leftType, rightType } = arrowType
-
-    const err = leftType.checkValue(arg)
-    if(err) throw err
-
-    arrowType = rightType
-  }
-}
 
 export class FunctionValue extends ArrowValue {
   // constructor :: This -> ArrowType -> Nat -> CurriedFunction -> ()
@@ -54,33 +38,10 @@ export class FunctionValue extends ArrowValue {
     return this[$curriedFunc]
   }
 
-  apply(...args) {
-    const { arrowType } = this
+  $apply(args) {
+    assertNode(args)
 
-    if(args.length !== arrowType.arity)
-      throw new Error('not enough arguments provided')
-
-    checkArgs(arrowType, args)
-
-    return this.applyRaw(...args)
-  }
-
-  applyPartial(...args) {
-    if(args.length === 0)
-      return this
-
-    const { arrowType } = this
-
-    if(args.length > arrowType.arity)
-      throw new Error('too many arguments provided')
-
-    checkArgs(arrowType, args)
-
-    return this.applyRaw(...args)
-  }
-
-  applyRaw(...args) {
-    const argsSize = args.length
+    const argsSize = args.size
 
     if(argsSize === 0)
       return this
@@ -103,10 +64,9 @@ export class FunctionValue extends ArrowValue {
       return new FunctionValue(restType, restArity, restFunc)
     }
 
-    const currentArgs = args.slice(0, arity)
-    const restArgs = args.slice(arity)
+    const [currentArgs, restArgs] = sliceNode(args, arity)
 
     const resultArrow = curriedApply(curriedFunc, currentArgs)
-    return resultArrow.applyRaw(...restArgs)
+    return resultArrow.$apply(restArgs)
   }
 }

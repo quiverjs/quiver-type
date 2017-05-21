@@ -3,6 +3,7 @@ import { assertNode, assertKeyNode } from '../node'
 import {
   getItem,
   setItem,
+  mapNode,
   nodesToIter,
   getRecordValue,
   setRecordValue,
@@ -52,12 +53,14 @@ export class Record {
     return new Record(keyNode, newValueNode)
   }
 
-  rawGet(i) {
+  // $get :: This -> Nat -> Any
+  $get(i) {
     const { valueNode } = this
     return getItem(valueNode, i)
   }
 
-  rawSet(i, value) {
+  // $set :: This -> Nat -> Any -> Record
+  $set(i, value) {
     const { keyNode, valueNode } = this
     const newValueNode = setItem(valueNode, i, value)
 
@@ -80,5 +83,16 @@ export class Record {
   entries() {
     const { keyNode, valueNode } = this
     return nodesToIter(keyNode, valueNode)
+  }
+
+  mapValues(mapper) {
+    const { keyNode, valueNode } = this
+
+    const newValueNode = mapNode(valueNode, mapper)
+
+    if(newValueNode === valueNode)
+      return this
+
+    return new Record(keyNode, newValueNode)
   }
 }

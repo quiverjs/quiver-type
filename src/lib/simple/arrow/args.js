@@ -1,35 +1,35 @@
-import { isArrowType } from '../type/arrow'
+// getReturnType :: arrowType -> Nat -> Type
+export const getReturnType = (arrowType, argsSize) => {
+  if(argsSize === 0)
+    return arrowType
 
-// checkArgsReturn :: ArrowType -> Iterable Any -> Bool -> Exception Type
-const checkArgsReturn = (arrowType, args, checkType) => {
+  return getReturnType(arrowType.rightType, argsSize-1)
+}
+
+// $checkArgs :: ArrowType -> Iterable Any -> Exception
+const $checkArgs = (arrowType, args) => {
   for(const arg of args) {
-    if(!isArrowType(arrowType))
-      throw new Error('too many arguments provided')
-
     const { leftType, rightType } = arrowType
 
-    if(checkType) {
-      const err = leftType.checkValue(arg)
-      if(err) throw err
-    }
+    const err = leftType.checkValue(arg)
+    if(err) throw err
 
     arrowType = rightType
   }
-
-  return arrowType
 }
 
-export const getArgsReturn = (arrowType, args) =>
-  checkArgsReturn(arrowType, args, false)
-
-export const checkPartialArgs = (arrowType, args) =>
-  checkArgsReturn(arrowType, args, true)
-
+// checkArgs :: ArrowType -> Node Any -> Exception
 export const checkArgs = (arrowType, args) => {
-  const returnType = checkPartialArgs(arrowType, args)
-
-  if(isArrowType(returnType))
+  if(args.size !== arrowType.arity)
     throw new Error('not enough arguments provided')
 
-  return returnType
+  $checkArgs(arrowType, args)
+}
+
+// checkArgs :: ArrowType -> Node Any -> Exception
+export const checkPartialArgs = (arrowType, args) => {
+  if(args.size > arrowType.arity)
+    throw new Error('too many arguments provided')
+
+  $checkArgs(arrowType, args)
 }

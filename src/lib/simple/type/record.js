@@ -1,7 +1,7 @@
 import { typeImpl } from './impl'
-import { Type, assertType } from './type'
-import { isInstanceOf } from '../common/assert'
+import { Type, isType } from './type'
 import { assertRecord, isRecord, zipIter } from '../container'
+import { isInstanceOf, assertInstanceOf } from '../common/assert'
 
 const $typeRecord = Symbol('@typeRecord')
 
@@ -11,9 +11,8 @@ export const assertTypeRecord = typeRecord => {
   if(typeRecord.size === 0)
     throw new Error('type record must have non zero size')
 
-  for(const subType of typeRecord.values()) {
-    assertType(subType)
-  }
+  if(!typeRecord.valueNode.checkPred(isType))
+    throw new TypeError('values in type record must be type')
 }
 
 export const checkTypeRecord = (typeRecord1, typeRecord2) => {
@@ -66,7 +65,6 @@ export const RecordType = typeImpl(
       if(typeRecord.size !== valueRecord.size)
         return new TypeError('value record have different size')
 
-
       for(const [entry1, entry2] of zipIter(
         typeRecord.entries(), valueRecord.entries()))
       {
@@ -83,3 +81,9 @@ export const RecordType = typeImpl(
       return null
     }
   })
+
+export const isRecordType = recordType =>
+  isInstanceOf(recordType, RecordType)
+
+export const assertRecordType = recordType =>
+  assertInstanceOf(recordType, RecordType)

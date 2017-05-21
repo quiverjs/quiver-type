@@ -10,6 +10,10 @@ import {
 } from '../../../lib/simple/arrow'
 
 import {
+  iterToNode, valueNode
+} from '../../../lib/container'
+
+import {
   IntType
 } from '../../../lib/simple/prelude/primitive'
 
@@ -51,11 +55,11 @@ test('arrow value test', assert => {
     assert.equals(plusValue.applyPartial(1, 2), 3)
     assert.equals(plusValue.applyPartial(1, -5), -4)
 
-    assert.equals(plusValue.applyRaw(1.2, 3.6), 4.8)
-    assert.equals(plusValue.applyRaw('foo', 'bar'), 'foobar')
-    assert.equals(plusValue.applyRaw('foo').applyRaw('bar'), 'foobar')
+    assert.equals(plusValue.$apply(iterToNode([1.2, 3.6])), 4.8)
+    assert.equals(plusValue.$apply(iterToNode(['foo', 'bar'])), 'foobar')
+    assert.equals(plusValue.$apply(valueNode('foo')).$apply(valueNode('bar')), 'foobar')
 
-    assert.throws(() => plusValue.applyRaw(1, 2, 3))
+    assert.throws(() => plusValue.$apply(iterToNode([1, 2, 3])))
 
     assert.end()
   })
@@ -88,10 +92,10 @@ test('arrow value test', assert => {
     assert.throws(() => twice.apply(0.2))
     assert.throws(() => twice.apply('foo'))
 
-    assert.equals(mult.applyRaw(5, 0.2), 1)
+    assert.equals(mult.$apply(iterToNode([5, 0.2])), 1)
 
     // throw because return value 0.8 is invalid
-    assert.throws(() => mult.applyRaw(4, 0.2))
+    assert.throws(() => mult.$apply(iterToNode([4, 0.2])))
 
     assert.end()
   })

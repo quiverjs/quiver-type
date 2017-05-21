@@ -1,8 +1,8 @@
 import { typeImpl } from './impl'
 import { Type } from './type'
-import { isInstanceOf } from '../common/assert'
-import { isUnion, equalItems } from '../container'
+import { isVariantValue } from '../value/variant'
 import { assertTypeRecord, checkTypeRecord } from './record'
+import { isInstanceOf, assertInstanceOf } from '../common/assert'
 
 const $typeRecord = Symbol('@typeRecord')
 
@@ -20,6 +20,16 @@ export const SumType = typeImpl(
       return this[$typeRecord]
     }
 
+    getCaseType(caseTag) {
+      const { typeRecord } = this
+      return typeRecord.get(caseTag)
+    }
+
+    getCaseIndex(caseIndex) {
+      const { typeRecord } = this
+      return typeRecord.getRaw(caseIndex)
+    }
+
     checkType(targetType) {
       if(!isInstanceOf(targetType, SumType))
         return new TypeError('target type must be sum type')
@@ -27,23 +37,18 @@ export const SumType = typeImpl(
       return checkTypeRecord(this.typeRecord, targetType.typeRecord)
     }
 
-    checkValue(union) {
-      if(!isUnion(union))
-        return new TypeError('value must be a union')
+    checkValue(variant) {
+      if(!isVariantValue(variant))
+        return new TypeError('value must instance of VariantValue')
 
-      const valueType = union.typeTag
+      const { sumType } = variant
 
-      const err = this.checkType(valueType)
-      if(err) return err
-
-      const { typeRecord } = this
-
-      if(!equalItems(typeRecord.keyNode, union.keyNode))
-        return new TypeError('union value have different case tags')
-
-      const { caseIndex, value } = union.caseIndex
-      const caseType = typeRecord.rawGet(caseIndex)
-
-      return caseType.checkValue(value)
+      return this.checkType(sumType)
     }
   })
+
+export const isSumType = sumType =>
+  isInstanceOf(sumType, SumType)
+
+export const assertSumType = sumType =>
+  assertInstanceOf(sumType, SumType)

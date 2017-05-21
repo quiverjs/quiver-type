@@ -19,6 +19,10 @@ export class Node {
     throw new Error('not implemented')
   }
 
+  get length() {
+    return this.size
+  }
+
   // isNode :: This -> Bool
   get isNode() {
     return true
