@@ -12,9 +12,9 @@ export class VariantValue {
     assertSumType(sumType)
     assertNat(caseIndex)
 
-    const caseType = sumType.getCaseIndex(caseIndex)
+    const caseType = sumType.$getCaseType(caseIndex)
 
-    const err = caseType.checkType(value)
+    const err = caseType.checkValue(value)
     if(err) throw err
 
     this[$sumType] = sumType
@@ -49,3 +49,10 @@ export const isVariantValue = variant =>
 
 export const assertVariantValue = variant =>
   assertInstanceOf(variant, VariantValue)
+
+export const variantValue = (sumType, caseTag, value) => {
+  assertSumType(sumType)
+
+  const caseIndex = sumType.getCaseIndex(caseTag)
+  return new VariantValue(sumType, caseIndex, value)
+}

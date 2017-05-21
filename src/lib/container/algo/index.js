@@ -50,6 +50,7 @@ export {
 export {
   getRecordValue,
   setRecordValue,
+  mapRecordValues,
 } from './record'
 
 export {

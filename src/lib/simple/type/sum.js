@@ -1,8 +1,9 @@
-import { typeImpl } from './impl'
 import { Type } from './type'
+import { typeImpl } from './impl'
 import { isVariantValue } from '../value/variant'
+import { recordFromObject } from '../../container'
 import { assertTypeRecord, checkTypeRecord } from './record'
-import { isInstanceOf, assertInstanceOf } from '../common/assert'
+import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 const $typeRecord = Symbol('@typeRecord')
 
@@ -20,14 +21,22 @@ export const SumType = typeImpl(
       return this[$typeRecord]
     }
 
+    // getCaseType :: This -> Key -> Type
     getCaseType(caseTag) {
       const { typeRecord } = this
       return typeRecord.get(caseTag)
     }
 
-    getCaseIndex(caseIndex) {
+    // $getCaseType :: This -> Nat -> Type
+    $getCaseType(caseIndex) {
       const { typeRecord } = this
-      return typeRecord.getRaw(caseIndex)
+      return typeRecord.$get(caseIndex)
+    }
+
+    // getCaseIndex :: This -> Key -> Nat
+    getCaseIndex(caseTag) {
+      const { typeRecord } = this
+      return typeRecord.getKeyIndex(caseTag)
     }
 
     checkType(targetType) {
@@ -52,3 +61,6 @@ export const isSumType = sumType =>
 
 export const assertSumType = sumType =>
   assertInstanceOf(sumType, SumType)
+
+export const sumType = typeObject =>
+  new SumType(recordFromObject(typeObject))

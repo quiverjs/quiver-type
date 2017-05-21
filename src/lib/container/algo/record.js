@@ -1,4 +1,4 @@
-import { cons } from '../node'
+import { cons, nil } from '../node'
 
 // getRecordValue :: Node Key -> Node -> Key -> Any
 export const getRecordValue = (keyNode, valueNode, key) => {
@@ -33,3 +33,17 @@ export const setRecordValue = (keyNode, valueNode, key, value) => {
 
   return cons(currentValue, newNext)
 }
+
+const $mapRecordValues = (keyNode, valueNode, mapper, i) => {
+  if(valueNode.isNil())
+    return nil
+
+  const newValue = mapper(valueNode.item, keyNode.item, i)
+  const newNext = $mapRecordValues(keyNode.next, valueNode.next, mapper, i+1)
+
+  return cons(newValue, newNext)
+}
+
+// mapRecordValues :: Node Key -> Node Any -> (Any -> Any) -> Node Any
+export const mapRecordValues = (keyNode, valueNode, mapper) =>
+  $mapRecordValues(keyNode, valueNode, mapper, 0)

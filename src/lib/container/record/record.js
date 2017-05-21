@@ -3,10 +3,11 @@ import { assertNode, assertKeyNode } from '../node'
 import {
   getItem,
   setItem,
-  mapNode,
+  findItem,
   nodesToIter,
   getRecordValue,
   setRecordValue,
+  mapRecordValues,
 } from '../algo'
 
 const $keyNode = Symbol('@keyNode')
@@ -85,10 +86,21 @@ export class Record {
     return nodesToIter(keyNode, valueNode)
   }
 
+  getKeyIndex(key) {
+    const { keyNode } = this
+    const keyIndex = findItem(keyNode,
+      k => (k === key))
+
+    if(keyIndex === -1)
+      throw new Error(`key not found: ${key}`)
+
+    return keyIndex
+  }
+
   mapValues(mapper) {
     const { keyNode, valueNode } = this
 
-    const newValueNode = mapNode(valueNode, mapper)
+    const newValueNode = mapRecordValues(keyNode, valueNode, mapper)
 
     if(newValueNode === valueNode)
       return this

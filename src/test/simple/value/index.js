@@ -1,1 +1,2 @@
 import './record'
+import './variant'

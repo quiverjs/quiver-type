@@ -1,9 +1,9 @@
 // getReturnType :: arrowType -> Nat -> Type
-export const getReturnType = (arrowType, argsSize) => {
-  if(argsSize === 0)
+export const getReturnType = (arrowType, arity) => {
+  if(arity === 0)
     return arrowType
 
-  return getReturnType(arrowType.rightType, argsSize-1)
+  return getReturnType(arrowType.rightType, arity-1)
 }
 
 // $checkArgs :: ArrowType -> Iterable Any -> Exception
