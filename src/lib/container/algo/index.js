@@ -27,6 +27,7 @@ export {
 } from './append'
 
 export {
+  objectEntries,
   findEntry,
   getEntry,
   getOptionalEntry,

@@ -1,7 +1,10 @@
 import { typeImpl } from './impl'
 import { Type, isType } from './type'
-import { assertRecord, isRecord, zipIter } from '../container'
-import { isInstanceOf, assertInstanceOf } from '../common/assert'
+import { isTypedRecord } from '../value/record'
+import { isInstanceOf, assertInstanceOf } from '../../assert'
+import {
+  assertRecord, isRecord, zipIter, recordFromObject
+} from '../../container'
 
 const $typeRecord = Symbol('@typeRecord')
 
@@ -35,6 +38,12 @@ export const checkTypeRecord = (typeRecord1, typeRecord2) => {
   return null
 }
 
+const formatTypeEntries = function*(entries) {
+  for(const [key, type] of entries) {
+    yield [key, type.formatType()]
+  }
+}
+
 export const RecordType = typeImpl(
   class extends Type {
     constructor(typeRecord) {
@@ -56,7 +65,27 @@ export const RecordType = typeImpl(
       return checkTypeRecord(this.typeRecord, targetType.typeRecord)
     }
 
-    checkValue(valueRecord) {
+    // checkValue :: Any -> Maybe Error
+    checkValue(record) {
+      if(!isTypedRecord(record))
+        return new TypeError('value must be instance of TypedRecord')
+
+      const { recordType } = record
+      return this.checkType(recordType)
+    }
+
+    getFieldType(key) {
+      const { typeRecord } = this
+      return typeRecord.get(key)
+    }
+
+    $getFieldType(i) {
+      const { typeRecord } = this
+      return typeRecord.$get(i)
+    }
+
+    // checkRecord :: Record Any -> Maybe Error
+    checkRecord(valueRecord) {
       if(!isRecord(valueRecord))
         return new TypeError('value must be a record')
 
@@ -80,7 +109,16 @@ export const RecordType = typeImpl(
 
       return null
     }
+
+    formatType() {
+      const { typeRecord } = this
+      const fieldRep = [...formatTypeEntries(typeRecord.entries())]
+      return ['record-type', fieldRep]
+    }
   })
+
+export const recordType = typeObject =>
+  new RecordType(recordFromObject(typeObject))
 
 export const isRecordType = recordType =>
   isInstanceOf(recordType, RecordType)

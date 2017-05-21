@@ -37,6 +37,7 @@ export {
   assertRecord,
   recordFromNode,
   recordFromEntries,
+  recordFromObject,
 } from './record'
 
 export {

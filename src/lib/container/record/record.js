@@ -40,7 +40,7 @@ export class Record {
 
   get(key) {
     const { keyNode, valueNode } = this
-    return getRecordValue(key, keyNode, valueNode)
+    return getRecordValue(keyNode, valueNode, key)
   }
 
   set(key, value) {

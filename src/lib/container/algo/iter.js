@@ -21,12 +21,11 @@ const doEntryIterToNode = it => {
   return cons(makeEntry(key, value), next)
 }
 
-// entryIterToNode :: Iterator Entry -> Node
+// entryIterToNode :: Iterable Entry -> Node
 export const entryIterToNode = it =>
   doEntryIterToNode(it[Symbol.iterator]())
 
-// entryIterToNodes :: Iterator Entry -> (Node, Node)
-export const entryIterToNodes = it => {
+const doEntryIterToNodes = it => {
   const { value: entry, done } = it.next()
 
   if(done)
@@ -41,6 +40,10 @@ export const entryIterToNodes = it => {
   return [keyNode, valueNode]
 }
 
+// entryIterToNodes :: Iterable Entry -> (Node, Node)
+export const entryIterToNodes = it =>
+  doEntryIterToNodes(it[Symbol.iterator]())
+
 const doNodesToIter = function*(node1, node2) {
   while(!node1.isNil()) {
     yield [node1.item, node2.item]
@@ -51,7 +54,7 @@ const doNodesToIter = function*(node1, node2) {
 
 // nodesToIter :: Node a -> Node b -> Iterator (a, b)
 export const nodesToIter = (node1, node2) => {
-  if(!node1.size !== node2.size)
+  if(node1.size !== node2.size)
     throw new Error('node1 and node2 are of different size')
 
   return doNodesToIter(node1, node2)
