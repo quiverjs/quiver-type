@@ -8,7 +8,7 @@ export class TypedRecord {
   constructor(recordType, valueRecord) {
     assertRecordType(recordType)
 
-    const err = recordType.checkRecord(valueRecord)
+    const err = recordType.checkValueRecord(valueRecord)
     if(err) throw err
 
     this[$recordType] = recordType
@@ -87,8 +87,8 @@ export class TypedRecord {
   }
 }
 
-export const typedRecord = (valueType, valueRecord) =>
-  new TypedRecord(valueType, valueRecord)
+export const typedRecord = (recordType, valueRecord) =>
+  new TypedRecord(recordType.realType, valueRecord)
 
 export const isTypedRecord = record =>
   isInstanceOf(record, TypedRecord)

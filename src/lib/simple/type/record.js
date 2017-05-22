@@ -84,10 +84,14 @@ export const RecordType = typeImpl(
       return typeRecord.$get(i)
     }
 
-    // checkRecord :: Record Any -> Maybe Error
-    checkRecord(valueRecord) {
+    checkTermRecord(termRecord) {
+
+    }
+
+    // checkValueRecord :: Record Any -> Maybe Error
+    checkValueRecord(valueRecord) {
       if(!isRecord(valueRecord))
-        return new TypeError('value must be a record')
+        return new TypeError('valueRecord must be a record')
 
       const { typeRecord } = this
 

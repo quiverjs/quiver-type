@@ -20,21 +20,21 @@ test('record value test', assert => {
       second: 'foo'
     })
 
-    assert.notOk(IntStrPair.checkRecord(record1))
+    assert.notOk(IntStrPair.checkValueRecord(record1))
 
     const record2 = recordFromObject({
       first: 'foo',
       second: 1
     })
 
-    assert.ok(IntStrPair.checkRecord(record2))
+    assert.ok(IntStrPair.checkValueRecord(record2))
 
     const record3 = recordFromObject({
       second: 'foo',
       first: 1
     })
 
-    assert.ok(IntStrPair.checkRecord(record3),
+    assert.ok(IntStrPair.checkValueRecord(record3),
       'should not type check when field order is different')
 
     const record4 = recordFromEntries([
@@ -42,7 +42,7 @@ test('record value test', assert => {
       ['first', 1]
     ])
 
-    assert.ok(IntStrPair.checkRecord(record4),
+    assert.ok(IntStrPair.checkValueRecord(record4),
       'should not type check when field order is different')
 
     const typedRecord1 = typedRecord(IntStrPair, record1)

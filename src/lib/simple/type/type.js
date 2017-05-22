@@ -1,4 +1,5 @@
 import { formatLisp } from '../../format'
+import { assertTerm } from '../term/term'
 import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 export class Type {
@@ -9,10 +10,20 @@ export class Type {
 
   // Other than arrow type, all other types
   // have arity of 0
-  //
   // arity :: This -> Nat
   get arity() {
     return 0
+  }
+
+  // The real type used for type comparison
+  // This is usually same as this
+  get realType() {
+    return this
+  }
+
+  checkTerm(term) {
+    assertTerm(term)
+    return this.checkType(term.termType())
   }
 
   // checkType :: This -> Type -> Maybe Error

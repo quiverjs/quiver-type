@@ -1,4 +1,5 @@
-import { isInstanceOf, assertInstanceOf } from '../assert'
+import { formatLisp } from '../../format'
+import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 export class Term {
   constructor() {
@@ -11,7 +12,7 @@ export class Term {
     throw new Error('not implemented')
   }
 
-  // freeTermVariables :: This -> Set Variable
+  // freeTermVariables :: This -> Map Variable Nat
   freeTermVariables() {
     throw new Error('not implemented')
   }
@@ -46,6 +47,17 @@ export class Term {
     throw new Error('not implemented')
   }
 
+  // applyTerm :: This -> Term -> Term
+  applyTerm(term) {
+    throw new Error('not implemented')
+  }
+
+  // Indicates whether a term has implemented .applyTerm()
+  // isApplicable :: This -> Bool
+  get isApplicable() {
+    return false
+  }
+
   // subTerms :: This -> Iterator Term
   subTerms() {
     throw new Error('not implemented')
@@ -54,6 +66,15 @@ export class Term {
   // mapSubTerms :: This -> (Term -> Term) -> Term
   mapSubTerms(mapper) {
     throw new Error('not implemented')
+  }
+
+  // formatTerm :: This -> Array
+  formatTerm() {
+    throw new Error('Not implemented')
+  }
+
+  inspect() {
+    return formatLisp(this.formatTerm())
   }
 }
 

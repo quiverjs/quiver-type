@@ -57,15 +57,15 @@ export const LambdaTerm = termImpl(
     }
 
     alphaConvert() {
-      const { argVar, bodyTerm } = this
+      const { argVar, argType, bodyTerm } = this
       const newArgVar = gensym()
-      const varTerm = new VariableTerm(newArgVar)
+      const varTerm = new VariableTerm(newArgVar, argType)
       const newBodyTerm = bodyTerm.bindTerm(argVar, varTerm)
-      return new LambdaTerm(newArgVar, newBodyTerm)
+      return new LambdaTerm(newArgVar, argType, newBodyTerm)
     }
 
     bindTerm(termVar, targetTerm) {
-      const { argVar, bodyTerm } = this
+      const { argVar, argType, bodyTerm } = this
 
       if(termVar === argVar)
         return this
@@ -76,23 +76,19 @@ export const LambdaTerm = termImpl(
       const newBodyTerm = bodyTerm.bindTerm(termVar, targetTerm)
 
       if(newBodyTerm !== bodyTerm) {
-        return new LambdaTerm(argVar, bodyTerm)
+        return new LambdaTerm(argVar, argType, bodyTerm)
       } else {
         return this
       }
     }
 
-    weakHeadNormalForm() {
-      return this
-    }
-
     normalForm() {
-      const { argVar, bodyTerm } = this
+      const { argVar, argType, bodyTerm } = this
 
       const newBodyTerm = bodyTerm.normalForm()
 
       if(newBodyTerm !== bodyTerm) {
-        return new LambdaTerm(argVar, newBodyTerm)
+        return new LambdaTerm(argVar, argType, newBodyTerm)
       } else {
         return this
       }
@@ -110,8 +106,19 @@ export const LambdaTerm = termImpl(
     applyTerm(argTerm) {
       assertTerm(argTerm)
 
-      const { argVar, bodyTerm } = this
+      const { argVar, argType, bodyTerm } = this
+
+      const err = argType.checkTerm(argTerm)
+      if(err) throw err
 
       return new LetTerm(argVar, argTerm, bodyTerm)
+    }
+
+    get isApplicable() {
+      return true
+    }
+
+    formatTerm() {
+
     }
   })
