@@ -1,39 +1,35 @@
 import { assertType } from './type'
 import { ArrowType } from './arrow'
-import { WrapperType } from './wrapper'
 import { assertSumType } from './sum'
 import { RecordType } from './record'
+import { isInstanceOf, assertInstanceOf } from '../../assert'
 
 const $sumType = Symbol('@sumType')
-const $recordType = Symbol('@recordType')
+const $arrowType = Symbol('@arrowType')
 
-export class CaseType extends WrapperType {
+export class CaseType extends RecordType {
   constructor(sumType, returnType) {
     assertSumType(sumType)
     assertType(returnType)
 
+    const arrowType = new ArrowType(sumType, returnType)
+
     const { typeRecord } = sumType
-    const resultType = typeRecord.mapValues(
+    const caseRecord = typeRecord.mapValues(
       fieldType => new ArrowType(fieldType, returnType))
 
-    const recordType = new RecordType(resultType)
-
-    super()
+    super(caseRecord)
 
     this[$sumType] = sumType
-    this[$recordType] = recordType
+    this[$arrowType] = arrowType
   }
 
   get sumType() {
     return this[$sumType]
   }
 
-  get recordType() {
-    return this[$recordType]
-  }
-
-  get realType() {
-    return this.recordType
+  get arrowType() {
+    return this[$arrowType]
   }
 
   formatType() {
@@ -49,3 +45,9 @@ export class CaseType extends WrapperType {
 // caseType :: SumType -> Type -> RecordType
 export const caseType = (sumType, returnType) =>
   new CaseType(sumType, returnType)
+
+export const isCaseType = caseType =>
+  isInstanceOf(caseType, CaseType)
+
+export const assertCaseType = caseType =>
+  assertInstanceOf(caseType, CaseType)

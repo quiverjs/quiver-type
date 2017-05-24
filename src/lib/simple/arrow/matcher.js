@@ -1,45 +1,32 @@
 import { ArrowValue } from './arrow'
 import { arrow } from '../type/arrow'
-import { caseType } from '../type/case'
-import { assertType } from '../type/type'
 import { isFunction } from '../../assert'
-import { assertSumType } from '../type/sum'
 import { typedRecord } from '../value/record'
 import { assertNode, cons } from '../../container'
 import { arrowFunction } from './constructor'
+import {
+  caseType as makeCaseType,
+  assertCaseType
+} from '../type/case'
 
-const $sumType = Symbol('@sumType')
-const $returnType = Symbol('@returnType')
+const $caseType = Symbol('@caseType')
 const $recordValue = Symbol('@recordValue')
-const $arrowType = Symbol('@arrowType')
-const $recordType = Symbol('@recordType')
 
 export class MatcherValue extends ArrowValue {
-  constructor(sumType, returnType, recordValue) {
-    assertSumType(sumType)
-    assertType(returnType)
+  constructor(caseType, recordValue) {
+    assertCaseType(caseType)
 
-    const arrowType = arrow(sumType, returnType)
-    const recordType = caseType(sumType, returnType)
-
-    const err = recordType.checkValue(recordValue)
+    const err = caseType.checkValue(recordValue)
     if(err) throw err
 
     super()
 
-    this[$sumType] = sumType
-    this[$returnType] = returnType
+    this[$caseType] = caseType
     this[$recordValue] = recordValue
-    this[$arrowType] = arrowType
-    this[$recordType] = recordType
   }
 
-  get sumType() {
-    return this[$sumType]
-  }
-
-  get returnType() {
-    return this[$returnType]
+  get caseType() {
+    return this[$caseType]
   }
 
   get recordValue() {
@@ -47,11 +34,8 @@ export class MatcherValue extends ArrowValue {
   }
 
   get arrowType() {
-    return this[$arrowType]
-  }
-
-  get recordType() {
-    return this[$recordType]
+    const { caseType } = this
+    return caseType.arrowType
   }
 
   $apply(args) {
@@ -85,8 +69,8 @@ export const matcherValue = (sumType, returnType, caseFunctions) => {
       return arrowFunction(arrowType, caseFunction)
     })
 
-  const recordType = caseType(sumType, returnType)
-  const recordValue = typedRecord(recordType, arrowRecord)
+  const caseType = makeCaseType(sumType, returnType)
+  const recordValue = typedRecord(caseType, arrowRecord)
 
-  return new MatcherValue(sumType, returnType, recordValue)
+  return new MatcherValue(caseType, recordValue)
 }

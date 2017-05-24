@@ -88,7 +88,7 @@ export class TypedRecord {
 }
 
 export const typedRecord = (recordType, valueRecord) =>
-  new TypedRecord(recordType.realType, valueRecord)
+  new TypedRecord(recordType, valueRecord)
 
 export const isTypedRecord = record =>
   isInstanceOf(record, TypedRecord)
