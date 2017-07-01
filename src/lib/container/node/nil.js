@@ -25,7 +25,7 @@ export class Nil extends Node {
     // noop
   }
 
-  *[Symbol.iterator]() {
+  *entries() {
     // noop
   }
 

@@ -15,7 +15,10 @@ export {
   assertEntryNode,
 
   isEntry,
-  assertEntry
+  assertEntry,
+
+  nodeToIter,
+  nodeToEntryIter,
 } from './node'
 
 export {
@@ -63,7 +66,6 @@ export {
   entryIterToNode,
   entryIterToNodes,
   nodesToIter,
-  nodeToEntryIter,
   zipIter,
 
   deleteItem,
@@ -96,5 +98,4 @@ export {
   iterToSet,
 
   sliceNode,
-
 } from './algo'

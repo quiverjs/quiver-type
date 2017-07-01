@@ -10,7 +10,6 @@ export {
   entryIterToNode,
   entryIterToNodes,
   nodesToIter,
-  nodeToEntryIter,
   zipIter,
 } from './iter'
 

@@ -23,15 +23,15 @@ export class TypedRecord {
     return this[$valueRecord]
   }
 
-  size() {
+  get size() {
     return this.valueRecord.size
   }
 
-  keyNode() {
+  get keyNode() {
     return this.valueRecord.keyNode
   }
 
-  valueNode() {
+  get valueNode() {
     return this.valueRecord.valueNode
   }
 
@@ -78,12 +78,6 @@ export class TypedRecord {
 
   entries() {
     return this.valueRecord.entries()
-  }
-
-  // Returns normal record
-  // mapValues :: This -> (Any -> Any) -> Record
-  mapValues(mapper) {
-    return this.valueRecord.mapValues(mapper)
   }
 }
 

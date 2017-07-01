@@ -1,28 +1,11 @@
 import { Node } from './node'
 import { assertNode } from './assert'
+import { nodeToIter, nodeToEntryIter, doGetPred } from './algo'
 
 const $item = Symbol('@item')
 const $next = Symbol('@next')
 const $size = Symbol('@size')
 const $predCache = Symbol('@predCache')
-
-// nodeToIter :: Node -> Iterator Any
-const nodeToIter = function*(node) {
-  while(!node.isNil()) {
-    const { item, next } = node
-    yield item
-    node = next
-  }
-}
-
-const doGetPred = (node, pred) => {
-  const { item, next } = node
-  const currentResult = pred(item)
-
-  if(!currentResult) return false
-
-  return next.checkPred(pred)
-}
 
 export class Cons extends Node {
   // constructor :: This -> Any -> Node -> ()
@@ -78,8 +61,8 @@ export class Cons extends Node {
     return nodeToIter(this)
   }
 
-  [Symbol.iterator]() {
-    return nodeToIter(this)
+  entries() {
+    return nodeToEntryIter(this)
   }
 
   toString() {

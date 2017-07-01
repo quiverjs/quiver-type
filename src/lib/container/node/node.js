@@ -38,8 +38,16 @@ export class Node {
     throw new Error('not implemented')
   }
 
-  [Symbol.iterator]() {
+  values() {
     throw new Error('not implemented')
+  }
+
+  entries() {
+    throw new Error('not implemented')
+  }
+
+  [Symbol.iterator]() {
+    return this.values()
   }
 
   inspect() {

@@ -18,3 +18,8 @@ export {
   entry, makeEntry,
   Entry, isEntry, assertEntry,
 } from './entry'
+
+export {
+  nodeToIter,
+  nodeToEntryIter,
+} from './algo'

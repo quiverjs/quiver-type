@@ -60,17 +60,6 @@ export const nodesToIter = (node1, node2) => {
   return doNodesToIter(node1, node2)
 }
 
-// nodeToEntryIter :: Node -> Iterator (Nat, Any)
-export const nodeToEntryIter = function*(node) {
-  let i = 0
-
-  while(!node.isNil()) {
-    yield [i, node.item]
-    i += 1
-    node = node.next
-  }
-}
-
 // zipITer :: Iterator a -> Iterator b -> Iterator (a, b)
 export const zipIter = function*(iter1, iter2) {
   try {
