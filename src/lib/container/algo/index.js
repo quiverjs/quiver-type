@@ -26,7 +26,6 @@ export {
 } from './append'
 
 export {
-  objectEntries,
   findEntry,
   getEntry,
   getOptionalEntry,
@@ -61,3 +60,8 @@ export {
 export {
   sliceNode
 } from './slice'
+
+export {
+  objectKeys,
+  objectEntries,
+} from './object'

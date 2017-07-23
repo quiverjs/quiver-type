@@ -1,9 +1,9 @@
 import { Type } from './type'
 import { typeImpl } from './impl'
 import { isVariantValue } from '../value/variant'
-import { recordFromObject } from '../../container'
 import { assertTypeRecord, checkTypeRecord } from './record'
 import { isInstanceOf, assertInstanceOf } from '../../assert'
+import { recordFromObject, recordFromEntries } from '../../container'
 
 const $typeRecord = Symbol('@typeRecord')
 
@@ -54,6 +54,14 @@ export const SumType = typeImpl(
 
       return this.checkType(sumType)
     }
+
+    formatType() {
+      const { typeRecord } = this
+      const entriesRep = [...typeRecord.entries()]
+        .map(([key, type]) => [key, type.formatType()])
+
+      return ['sum-type', entriesRep]
+    }
   })
 
 export const isSumType = sumType =>
@@ -64,3 +72,6 @@ export const assertSumType = sumType =>
 
 export const sumType = typeObject =>
   new SumType(recordFromObject(typeObject))
+
+export const sumTypeFromEntries = typeEntries =>
+  new SumType(recordFromEntries(typeEntries))

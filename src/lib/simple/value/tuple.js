@@ -1,5 +1,6 @@
 import { assertProductType } from '../type/product'
 import { isInstanceOf, assertInstanceOf } from '../../assert'
+import { iterToNode } from '../../container'
 
 const $productType = Symbol('@productType')
 const $valueNode = Symbol('@valueNode')
@@ -64,8 +65,10 @@ export class TypedTuple {
   }
 }
 
-export const typedTuple = (productType, valueNode) =>
-  new TypedTuple(productType, valueNode)
+export const typedTuple = (productType, ...values) => {
+  const valueNode = iterToNode(values)
+  return new TypedTuple(productType, valueNode)
+}
 
 export const isTypedTuple = typedTuple =>
   isInstanceOf(typedTuple, TypedTuple)

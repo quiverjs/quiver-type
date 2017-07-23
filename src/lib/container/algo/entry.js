@@ -1,16 +1,5 @@
 import { nil, cons, entry } from '../node'
 
-const ownKeys = function*(object) {
-  yield* Object.getOwnPropertyNames(object)
-  yield* Object.getOwnPropertySymbols(object)
-}
-
-export const objectEntries = function*(object) {
-  for(const key of ownKeys(object)) {
-    yield [key, object[key]]
-  }
-}
-
 export const findEntry = (node, targetKey) => {
   if(node.isNil())
     return [false]

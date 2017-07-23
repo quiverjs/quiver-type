@@ -98,4 +98,7 @@ export {
   iterToSet,
 
   sliceNode,
+
+  objectKeys,
+  objectEntries,
 } from './algo'

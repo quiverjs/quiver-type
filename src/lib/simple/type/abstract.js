@@ -1,3 +1,4 @@
+import { isInstanceOf } from '../../assert'
 import { Type, assertType } from './type'
 
 const $implType = Symbol('@implType')
@@ -40,6 +41,13 @@ export class AbstractType extends Type {
   }
 
   checkType(type) {
+    assertType(type)
+
+    if(type === this) return null
+
+    if(isInstanceOf(type, AbstractType))
+      return this.realType.checkType(type.realType)
+
     return this.realType.checkType(type)
   }
 
@@ -55,6 +63,6 @@ export class AbstractType extends Type {
 export const recursiveType = constructor => {
   const abstractType = new AbstractType()
   const realType = constructor(abstractType)
-  abstract.implement(realType)
+  abstractType.implement(realType)
   return realType
 }
