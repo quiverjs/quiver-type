@@ -18,6 +18,8 @@ export class ProductClosure extends Closure {
     assertProductType(productType)
     assertClosureNode(closureNode)
 
+    super()
+
     this[$productType] = productType
     this[$closureNode] = closureNode
   }

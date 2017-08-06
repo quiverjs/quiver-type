@@ -22,4 +22,4 @@ export const findDeleteItem = (node, pred) =>
 
 // deleteItem :: Node -> (Any -> Nat -> Bool) -> Node
 export const deleteItem = (node, target) =>
-  findDeleteItem(item => (item === target))
+  findDeleteItem(node, item => (item === target))

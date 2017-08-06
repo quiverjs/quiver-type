@@ -1,4 +1,4 @@
-import { nodeFromValue, cons } from '../container'
+import { valueNode, cons } from '../../container'
 import { Closure, assertClosure } from './closure'
 
 const $lambdaClosure = Symbol('@lambdaClosure')
@@ -26,7 +26,7 @@ export class ApplyClosure extends Closure {
   bindValues(closureValues) {
     const { lambdaClosure, argClosure } = this
     const arg = argClosure.bindValues(closureValues)
-    const args = nodeFromValue(arg)
+    const args = valueNode(arg)
     return lambdaClosure.bindApplyArgs(closureValues, args)
   }
 

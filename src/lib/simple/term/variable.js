@@ -10,14 +10,15 @@ const $termVar = Symbol('@termVar')
 const $varType = Symbol('@varType')
 
 const findArgIndex = (argVars, termVar, i) => {
+  if(argVars.isNil())
+    throw new Error(`term variable ${termVar} is not found in argVars ${[...argVars]}`)
+
   const { item, next } = argVars
   if(item === termVar) {
     return i
   } else {
     return findArgIndex(next, termVar, i+1)
   }
-
-  throw new Error(`term variable ${termVar} is not found in argVars`)
 }
 
 export const VariableTerm = termImpl(
@@ -50,9 +51,20 @@ export const VariableTerm = termImpl(
 
     bindTerm(termVar, term) {
       if(this.termVar === termVar) {
+        const err = this.varType.checkTerm(term)
+        if(err) throw err
+
         return term
       } else {
         return this
+      }
+    }
+
+    validateVarType(termVar, type) {
+      if(termVar === this.termVar) {
+        return this.varType.checkType(type)
+      } else {
+        return null
       }
     }
 
@@ -76,8 +88,8 @@ export const VariableTerm = termImpl(
     }
 
     formatTerm() {
-      const { termVar, termType } = this
-      const typeRep = termType.formatType()
+      const { termVar, varType } = this
+      const typeRep = varType.formatType()
 
       return ['var-term', termVar, typeRep]
     }

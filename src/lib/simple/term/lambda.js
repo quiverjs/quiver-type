@@ -1,5 +1,4 @@
 import { Term, assertTerm } from './term'
-import { gensym } from './util'
 import { LetTerm } from './let'
 import { termImpl } from './impl'
 import { assertType } from '../type/type'
@@ -7,6 +6,8 @@ import { ArrowType } from '../type/arrow'
 import { VariableTerm } from './variable'
 import { LambdaClosure } from '../closure/lambda'
 import { assertVariable } from './assert'
+import { cons } from '../../container'
+import { gensym } from './gensym'
 
 const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
@@ -45,14 +46,19 @@ export const LambdaTerm = termImpl(
       return this[$bodyTerm]
     }
 
-    termType() {
+    get selfType() {
       return this[$selfType]
+    }
+
+    termType() {
+      return this.selfType
     }
 
     freeTermVariables() {
       const { argVar, bodyTerm } = this
 
-      return bodyTerm.freeTermVariables()
+      return bodyTerm
+        .freeTermVariables()
         .delete(argVar)
     }
 
@@ -85,7 +91,7 @@ export const LambdaTerm = termImpl(
       const newBodyTerm = bodyTerm.bindTerm(termVar, targetTerm)
 
       if(newBodyTerm !== bodyTerm) {
-        return new LambdaTerm(argVar, argType, bodyTerm)
+        return new LambdaTerm(argVar, argType, newBodyTerm)
       } else {
         return this
       }
@@ -104,12 +110,12 @@ export const LambdaTerm = termImpl(
     }
 
     compileClosure(closureVars) {
-      const { argVar, bodyTerm } = this
+      const { argVar, bodyTerm, selfType } = this
 
-      const inClosureVars = closureVars.prepend(argVar)
+      const inClosureVars = cons(argVar, closureVars)
       const bodyClosure = bodyTerm.compileClosure(inClosureVars)
 
-      return new LambdaClosure(bodyClosure)
+      return new LambdaClosure(selfType, bodyClosure)
     }
 
     applyTerm(argTerm) {
@@ -123,7 +129,7 @@ export const LambdaTerm = termImpl(
       return new LetTerm(argVar, argTerm, bodyTerm)
     }
 
-    get isApplicable() {
+    isApplicable() {
       return true
     }
 
@@ -136,3 +142,14 @@ export const LambdaTerm = termImpl(
       return ['lambda', [argVar, argTypeRep], bodyRep]
     }
   })
+
+export const lambda = (args, bodyTerm) => {
+  const [[argVar, argType], ...restArgs] = args
+
+  if(restArgs.length > 0) {
+    const restBodyTerm = lambda(restArgs, bodyTerm)
+    return new LambdaTerm(argVar, argType, restBodyTerm)
+  } else {
+    return new LambdaTerm(argVar, argType, bodyTerm)
+  }
+}

@@ -8,7 +8,6 @@ import {
   isKeyword,
   isBoolean,
   isObject,
-  isUnit,
 } from '../../assert'
 
 export const NumberType = primitiveType(
@@ -88,12 +87,3 @@ export const ObjectType = primitiveType(
 export const AnyType = primitiveType(
   'Any',
   object => null)
-
-export const UnitType = primitiveType(
-  'Unit',
-  unit => {
-    if(!isUnit(unit))
-      return new TypeError('argument must be unit')
-
-    return null
-  })

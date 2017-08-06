@@ -1,10 +1,10 @@
 import { termImpl } from './impl'
-import { Term } from './term'
+import { Term, assertTerm } from './term'
 import {
-  mapNode, reduceNode, emptySet
+  mapNode, reduceNode, emptySet, iterToNode
 } from '../../container'
 
-import { assertProductType } from '../type/product'
+import { assertProductType, ProductType } from '../type/product'
 import { ProductClosure } from '../closure/product'
 
 const $termNode = Symbol('@termNode')
@@ -94,3 +94,17 @@ export const ProductTerm = termImpl(
       return ['product-term', [...subTermsRep]]
     }
   })
+
+export const productTerm = (...subTerms) => {
+  for(const subTerm of subTerms) {
+    assertTerm(subTerm)
+  }
+
+  const termNode = iterToNode(subTerms)
+  const typeNode = mapNode(termNode,
+    term => term.termType())
+
+  const productType = new ProductType(typeNode)
+
+  return new ProductTerm(productType, termNode)
+}

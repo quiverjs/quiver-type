@@ -1,2 +1,6 @@
 import './value'
 import './variable'
+import './apply'
+import './let'
+import './lambda'
+import './product'

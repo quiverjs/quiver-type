@@ -1,12 +1,15 @@
 import { Term, assertTerm } from './term'
 import { termImpl } from './impl'
-import { assertVariable } from './assert'
+import { assertVariable, isInstanceOf } from './assert'
+import { VariableTerm } from './variable'
 import { LetClosure } from '../closure/let'
 import { cons } from '../../container'
+import { gensym } from './gensym'
 
 const $boundVar = Symbol('@boundVar')
 const $boundTerm = Symbol('@boundTerm')
 const $bodyTerm = Symbol('@bodyTerm')
+const $applyTerm = Symbol('@applyTerm')
 
 export const LetTerm = termImpl(
   class extends Term {
@@ -81,6 +84,47 @@ export const LetTerm = termImpl(
       }
     }
 
+    isApplicable() {
+      return this.bodyTerm.isApplicable()
+    }
+
+    [$applyTerm](argTerm) {
+      const { boundVar, boundTerm, bodyTerm } = this
+
+      let newBodyTerm
+      if(isInstanceOf(bodyTerm, LetTerm)) {
+        newBodyTerm = bodyTerm[$applyTerm](argTerm)
+      } else {
+        newBodyTerm = bodyTerm.applyTerm(argTerm)
+      }
+
+      if(newBodyTerm === bodyTerm) {
+        return this
+      } else {
+        return new LetTerm(boundVar, boundTerm, newBodyTerm)
+      }
+    }
+
+    applyTerm(argTerm) {
+      assertTerm(argTerm)
+
+      if(!this.isApplicable())
+        throw new Error('given let term cannot be applied term')
+
+      const selfType = this.termType()
+      const argType = argTerm.termType()
+
+      const err = selfType.leftType.checkType(argType)
+      if(err) throw err
+
+      const boundVar = gensym()
+      const varTerm = new VariableTerm(boundVar, argType)
+
+      const bodyTerm = this[$applyTerm](varTerm)
+
+      return new LetTerm(boundVar, argTerm, bodyTerm)
+    }
+
     normalForm() {
       const { boundVar, boundTerm, bodyTerm } = this
       const newBoundTerm = boundTerm.normalForm()
@@ -88,11 +132,12 @@ export const LetTerm = termImpl(
 
       if(newBoundTerm.isTerminal()) {
         return newBodyTerm
-          .bindTerm(boundVar, boundTerm)
+          .bindTerm(boundVar, newBoundTerm)
           .normalForm()
 
-      } if(newBodyTerm === bodyTerm && newBoundTerm === boundTerm) {
+      } else if(newBodyTerm === bodyTerm && newBoundTerm === boundTerm) {
         return this
+
       } else {
         return new LetTerm(boundVar, newBoundTerm, newBodyTerm)
       }
@@ -103,9 +148,28 @@ export const LetTerm = termImpl(
 
       const boundClosure = boundTerm.compileClosure(closureVars)
 
-      const inClosureVars = cons(closureVars, boundVar)
+      const inClosureVars = cons(boundVar, closureVars)
       const bodyClosure = bodyTerm.compileClosure(inClosureVars)
 
       return new LetClosure(boundClosure, bodyClosure)
     }
+
+    formatTerm() {
+      const { boundVar, boundTerm, bodyTerm } = this
+
+      const boundRep = boundTerm.formatTerm()
+      const bodyRep = bodyTerm.formatTerm()
+
+      return ['let-term', [boundVar, boundRep], bodyRep]
+    }
   })
+
+export const letTerm = (boundArgs, bodyTerm) => {
+  const [[boundVar, boundTerm], ...restArgs] = boundArgs
+  if(restArgs.length > 0) {
+    const inBodyTerm = letTerm(restArgs, bodyTerm)
+    return new LetTerm(boundVar, boundTerm, inBodyTerm)
+  } else {
+    return new LetTerm(boundVar, boundTerm, bodyTerm)
+  }
+}

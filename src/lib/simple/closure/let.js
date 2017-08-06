@@ -1,11 +1,13 @@
 import { Closure } from './closure'
-import { cons } from '../container'
+import { cons } from '../../container'
 
 const $boundClosure = Symbol('@boundClosure')
 const $bodyClosure = Symbol('@bodyClosure')
 
 export class LetClosure extends Closure {
   constructor(boundClosure, bodyClosure) {
+    super()
+
     this[$boundClosure] = boundClosure
     this[$bodyClosure] = bodyClosure
   }

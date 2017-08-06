@@ -2,13 +2,14 @@ import test from 'tape'
 
 import { recursiveType } from '../../../lib/simple/type/abstract'
 import { abstractDataType, adtValue } from '../../../lib/simple/dsl/adt'
-import { UnitType, NumberType } from '../../../lib/simple/prelude/primitive'
+import { NumberType } from '../../../lib/simple/prelude/primitive'
+import { unitType } from '../../../lib/simple/type/unit'
 
 test('recursive type test', assert => {
   assert.test('basic list', assert => {
     const NumberList = recursiveType(t =>
       abstractDataType({
-        Nil: UnitType,
+        Nil: unitType,
         Cons: [NumberType, t]
       }))
 

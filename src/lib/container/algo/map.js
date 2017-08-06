@@ -1,6 +1,8 @@
 import { cons, makeEntry } from '../node'
 
 const doMap = (node, mapper, i) => {
+  if(node.isNil()) return node
+
   const { item, next } = node
 
   const mapped = mapper(item, i)

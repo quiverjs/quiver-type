@@ -19,8 +19,10 @@ export const ApplyTerm = termImpl(
       assertArrowType(leftType)
       const selfType = leftType.rightType
 
-      const err = selfType.checkType(rightType)
+      const err = leftType.leftType.checkType(rightType)
       if(err) throw err
+
+      super()
 
       this[$leftTerm] = leftTerm
       this[$rightTerm] = rightTerm
@@ -45,7 +47,16 @@ export const ApplyTerm = termImpl(
       const leftVars = leftTerm.freeTermVariables()
       const rightVars = rightTerm.freeTermVariables()
 
-      return leftVars.concat(rightVars)
+      return leftVars.union(rightVars)
+    }
+
+    validateVarType(termVar, type) {
+      const { leftTerm, rightTerm } = this
+
+      const err = rightTerm.validateVarType(termVar, type)
+      if(err) return err
+
+      return leftTerm.validateVarType(termVar, type)
     }
 
     bindTerm(termVar, term) {
@@ -87,4 +98,23 @@ export const ApplyTerm = termImpl(
 
       return new ApplyClosure(leftClosure, rightClosure)
     }
+
+    formatTerm() {
+      const { leftTerm, rightTerm } = this
+
+      const leftRep = leftTerm.formatTerm()
+      const rightRep = rightTerm.formatTerm()
+
+      return ['apply-term', leftRep, rightRep]
+    }
   })
+
+export const applyTerm = (leftTerm, rightTerm, ...restTerms) => {
+  const term = new ApplyTerm(leftTerm, rightTerm)
+
+  if(restTerms.length > 0) {
+    return applyTerm(term, ...restTerms)
+  } else {
+    return term
+  }
+}

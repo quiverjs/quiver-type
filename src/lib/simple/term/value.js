@@ -3,6 +3,7 @@ import { termImpl } from './impl'
 import { emptySet } from '../../container'
 import { assertType } from '../type/type'
 import { isArrowType } from '../type/arrow'
+import { assertArrowValue } from '../arrow/arrow'
 import { ValueClosure, ArrowValueClosure } from '../closure/value'
 
 const $value = Symbol('@value')
@@ -69,7 +70,23 @@ export const ValueTerm = termImpl(
     isTerminal() {
       return true
     }
+
+    formatTerm() {
+      const { value, valueType } = this
+      const typeRep = valueType.formatType()
+      if(value.toString) {
+        return ['value-term', typeRep, value.toString()]
+      } else {
+        return ['value-term', typeRep]
+      }
+    }
   })
 
 export const valueTerm = (valueType, value) =>
   new ValueTerm(valueType, value)
+
+export const arrowValueTerm = (arrowValue) => {
+  assertArrowValue(arrowValue)
+
+  return new ValueTerm(arrowValue.arrowType, arrowValue)
+}

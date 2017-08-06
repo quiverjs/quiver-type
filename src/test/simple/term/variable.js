@@ -7,12 +7,16 @@ import {
 } from '../../../lib/container'
 
 import {
-  IntType
+  IntType, StringType
 } from '../../../lib/simple/prelude/primitive'
 
 import {
   arrowType
 } from '../../../lib/simple/type/arrow'
+
+import {
+  valueTerm
+} from '../../../lib/simple/term/value'
 
 import {
   simpleArrowFunction,
@@ -25,6 +29,17 @@ test('VariableTerm test', assert => {
     assert.equals(xTerm.termType(), IntType)
 
     assert.deepEquals([...xTerm.freeTermVariables()], ['x'])
+
+    const threeTerm = valueTerm(IntType, 3)
+    assert.equals(xTerm.bindTerm('x', threeTerm), threeTerm)
+    assert.equals(xTerm.bindTerm('y', threeTerm), xTerm)
+
+    const fooTerm = valueTerm(StringType, 'foo')
+    assert.throws(() => xTerm.bindTerm('x', fooTerm))
+
+    assert.notOk(xTerm.validateVarType('x', IntType))
+    assert.ok(xTerm.validateVarType('x', StringType))
+    assert.notOk(xTerm.validateVarType('y', StringType))
 
     const closure1 = xTerm.compileClosure(valueNode('x'))
     assert.equals(closure1.bindValues(valueNode(1)), 1)

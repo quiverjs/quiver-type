@@ -1,5 +1,5 @@
-import { LambdaValue } from '../value/lambda'
-import { cons, assertNode } from '../container'
+import { LambdaValue } from '../arrow/lambda'
+import { cons, assertNode } from '../../container'
 import { assertArrowType } from '../type/arrow'
 import { Closure, assertClosure } from './closure'
 
@@ -11,6 +11,8 @@ export class LambdaClosure extends Closure {
   constructor(arrowType, bodyClosure) {
     assertArrowType(arrowType)
     assertClosure(bodyClosure)
+
+    super()
 
     this[$arrowType] = arrowType
     this[$bodyClosure] = bodyClosure
@@ -33,13 +35,14 @@ export class LambdaClosure extends Closure {
     assertNode(closureValues)
     assertNode(args)
 
-    if(args.isNil())
-      return this.bindValues(closureValues)
-
     const { bodyClosure } = this
     const { item, next } = args
     const inClosureValues = cons(item, closureValues)
 
-    return bodyClosure.bindApplyArgs(inClosureValues, next)
+    if(next.isNil()) {
+      return bodyClosure.bindValues(inClosureValues)
+    } else {
+      return bodyClosure.bindApplyArgs(inClosureValues, next)
+    }
   }
 }
