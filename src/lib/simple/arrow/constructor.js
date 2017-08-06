@@ -1,4 +1,4 @@
-import { arrow, assertArrowType } from '../type/arrow'
+import { arrowType, assertArrowType } from '../type/arrow'
 import { getReturnType } from './args'
 import { currifyFunction } from './curry'
 import { FunctionValue } from './function'
@@ -15,28 +15,28 @@ const wrapSafeReturn = (returnType, func) =>
     return result
   }
 
-export const arrowFunction = (arrowType, func, arity=arrowType.arity) => {
+export const arrowFunction = (funcType, func, arity=funcType.arity) => {
   assertFunction(func)
-  assertArrowType(arrowType)
+  assertArrowType(funcType)
 
-  if(arity > arrowType.arity)
-    throw new TypeError('arity must be <= arrowType.arity')
+  if(arity > funcType.arity)
+    throw new TypeError('arity must be <= funcType.arity')
 
-  const returnType = getReturnType(arrowType, arity)
+  const returnType = getReturnType(funcType, arity)
   const wrappedFunc = wrapSafeReturn(returnType, func)
   const curriedFunc = currifyFunction(wrappedFunc, arity)
 
-  return new FunctionValue(arrowType, arity, curriedFunc)
+  return new FunctionValue(funcType, arity, curriedFunc)
 }
 
 export const simpleArrowFunction = (argTypes, returnType, func) => {
   assertFunction(func)
 
   const arity = argTypes.length
-  const arrowType = arrow(...argTypes, returnType)
+  const funcType = arrowType(...argTypes, returnType)
 
   const wrappedFunc = wrapSafeReturn(returnType, func)
   const curriedFunc = currifyFunction(wrappedFunc, arity)
 
-  return new FunctionValue(arrowType, arity, curriedFunc)
+  return new FunctionValue(funcType, arity, curriedFunc)
 }

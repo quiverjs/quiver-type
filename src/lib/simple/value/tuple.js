@@ -1,6 +1,6 @@
 import { assertProductType } from '../type/product'
 import { isInstanceOf, assertInstanceOf } from '../../assert'
-import { iterToNode } from '../../container'
+import { iterToNode, getItem, setItem } from '../../container'
 
 const $productType = Symbol('@productType')
 const $valueNode = Symbol('@valueNode')

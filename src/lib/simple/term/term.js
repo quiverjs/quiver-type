@@ -27,11 +27,6 @@ export class Term {
     throw new Error('not implemented')
   }
 
-  // weakHeadNormalForm :: This -> Term
-  weakHeadNormalForm() {
-    throw new Error('not implemented')
-  }
-
   // normalForm :: This -> Term
   normalForm() {
     throw new Error('not implemented')
@@ -54,7 +49,16 @@ export class Term {
 
   // Indicates whether a term has implemented .applyTerm()
   // isApplicable :: This -> Bool
-  get isApplicable() {
+  isApplicable() {
+    return false
+  }
+
+  // Indicates whether the term is terminal and
+  // not composed of other terms. This means
+  // we can substitute it with multiple variable
+  // occurences safely without incurring multiple
+  // side effects
+  isTerminal() {
     return false
   }
 

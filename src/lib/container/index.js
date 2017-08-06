@@ -54,6 +54,7 @@ export {
   assertSet,
   emptySet,
   setFromIter,
+  setWithValue,
 } from './set'
 
 export {
@@ -86,6 +87,8 @@ export {
   equalItems,
   strictEqual,
   strictEqualItems,
+
+  reduceNode,
 
   mapNode,
   mapEntry,

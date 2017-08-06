@@ -61,6 +61,10 @@ export class Set {
 
     return new Set(newNode)
   }
+
+  [Symbol.iterator]() {
+    return this.values()
+  }
 }
 
 export const isSet = set =>

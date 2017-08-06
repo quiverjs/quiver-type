@@ -1,7 +1,8 @@
 import { Term } from './term'
 import { termImpl } from './impl'
-import { emptySet } from '../container'
+import { emptySet } from '../../container'
 import { assertType } from '../type/type'
+import { isArrowType } from '../type/arrow'
 import { ValueClosure, ArrowValueClosure } from '../closure/value'
 
 const $value = Symbol('@value')
@@ -14,7 +15,7 @@ export const ValueTerm = termImpl(
     constructor(valueType, value) {
       assertType(valueType)
 
-      const err = valueType.checkType(value)
+      const err = valueType.checkValue(value)
       if(err) throw err
 
       super()
@@ -22,7 +23,7 @@ export const ValueTerm = termImpl(
       this[$valueType] = valueType
       this[$value] = value
 
-      if(valueType.isArrowType) {
+      if(isArrowType(valueType)) {
         this[$closure] = new ArrowValueClosure(value)
       } else {
         this[$closure] = new ValueClosure(value)
@@ -57,10 +58,6 @@ export const ValueTerm = termImpl(
       return this
     }
 
-    weakHeadNormalForm() {
-      return this
-    }
-
     normalForm() {
       return this
     }
@@ -68,4 +65,11 @@ export const ValueTerm = termImpl(
     compileClosure(argVars) {
       return this.closure
     }
+
+    isTerminal() {
+      return true
+    }
   })
+
+export const valueTerm = (valueType, value) =>
+  new ValueTerm(valueType, value)

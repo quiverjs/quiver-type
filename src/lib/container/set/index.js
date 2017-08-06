@@ -7,4 +7,5 @@ export {
 export {
   emptySet,
   setFromIter,
+  setWithValue,
 } from './constructor'

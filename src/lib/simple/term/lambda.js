@@ -1,15 +1,17 @@
-import { Term } from './term'
+import { Term, assertTerm } from './term'
 import { gensym } from './util'
 import { LetTerm } from './let'
 import { termImpl } from './impl'
 import { assertType } from '../type/type'
+import { ArrowType } from '../type/arrow'
 import { VariableTerm } from './variable'
 import { LambdaClosure } from '../closure/lambda'
-import { assertTerm, assertVariable } from './assert'
+import { assertVariable } from './assert'
 
 const $argVar = Symbol('@argVar')
 const $argType = Symbol('@argType')
 const $bodyTerm = Symbol('@bodyTerm')
+const $selfType = Symbol('@selfType')
 
 export const LambdaTerm = termImpl(
   class extends Term {
@@ -21,11 +23,14 @@ export const LambdaTerm = termImpl(
       const err = bodyTerm.validateVarType(argVar, argType)
       if(err) throw err
 
+      const selfType = new ArrowType(argType, bodyTerm.termType())
+
       super()
 
       this[$argVar] = argVar
       this[$argType] = argType
       this[$bodyTerm] = bodyTerm
+      this[$selfType] = selfType
     }
 
     get argVar() {
@@ -38,6 +43,10 @@ export const LambdaTerm = termImpl(
 
     get bodyTerm() {
       return this[$bodyTerm]
+    }
+
+    termType() {
+      return this[$selfType]
     }
 
     freeTermVariables() {
@@ -119,6 +128,11 @@ export const LambdaTerm = termImpl(
     }
 
     formatTerm() {
+      const { argVar, argType, bodyTerm } = this
 
+      const argTypeRep = argType.formatType()
+      const bodyRep = bodyTerm.formatTerm()
+
+      return ['lambda', [argVar, argTypeRep], bodyRep]
     }
   })

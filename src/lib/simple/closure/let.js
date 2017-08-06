@@ -1,17 +1,17 @@
 import { Closure } from './closure'
 import { cons } from '../container'
 
-const $bindClosure = Symbol('@bindClosure')
+const $boundClosure = Symbol('@boundClosure')
 const $bodyClosure = Symbol('@bodyClosure')
 
 export class LetClosure extends Closure {
-  constructor(bindClosure, bodyClosure) {
-    this[$bindClosure] = bindClosure
+  constructor(boundClosure, bodyClosure) {
+    this[$boundClosure] = boundClosure
     this[$bodyClosure] = bodyClosure
   }
 
-  get bindClosure() {
-    return this[$bindClosure]
+  get boundClosure() {
+    return this[$boundClosure]
   }
 
   get bodyClosure() {
@@ -19,15 +19,15 @@ export class LetClosure extends Closure {
   }
 
   bindValues(closureValues) {
-    const { bindClosure, bodyClosure } = this
-    const bindValue = bindClosure.bindValues(closureValues)
+    const { boundClosure, bodyClosure } = this
+    const bindValue = boundClosure.bindValues(closureValues)
     const inClosureValues = cons(bindValue, closureValues)
     return bodyClosure.bindValues(inClosureValues)
   }
 
   bindApplyArgs(closureValues, args) {
-    const { bindClosure, bodyClosure } = this
-    const bindValue = bindClosure.bindValues(closureValues)
+    const { boundClosure, bodyClosure } = this
+    const bindValue = boundClosure.bindValues(closureValues)
     const inClosureValues = cons(bindValue, closureValues)
     return bodyClosure.bindApplyArgs(inClosureValues, args)
   }

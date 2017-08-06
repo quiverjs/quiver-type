@@ -1,4 +1,6 @@
 import { Closure } from './closure'
+import { assertNode } from '../../container'
+import { assertArrowValue } from '../arrow/arrow'
 
 const $value = Symbol('@value')
 
@@ -12,18 +14,30 @@ export class ValueClosure extends Closure {
     return this[$value]
   }
 
-  bindValues(closureValues) {
+  bindValues(values) {
+    assertNode(values)
     return this.value
   }
 
-  bindApplyArgs(closureValues, args) {
+  bindApplyArgs(values, args) {
+    assertNode(values)
+    assertNode(args)
+
     throw new Error('cannot apply arguments to variable closure')
   }
 }
 
 export class ArrowValueClosure extends ValueClosure {
-  bindApplyArgs(closureValues, args) {
+  constructor(value) {
+    assertArrowValue(value)
+    super(value)
+  }
+
+  bindApplyArgs(values, args) {
+    assertNode(values)
+    assertNode(args)
+
     const { value } = this
-    return value.applyRaw(...args)
+    return value.$apply(args)
   }
 }

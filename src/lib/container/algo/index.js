@@ -41,6 +41,10 @@ export {
 } from './equal'
 
 export {
+  reduceNode,
+} from './reduce'
+
+export {
   mapNode,
   mapEntry,
 } from './map'

@@ -1,5 +1,5 @@
 import { ArrowValue } from './arrow'
-import { arrow } from '../type/arrow'
+import { arrowType } from '../type/arrow'
 import { isFunction } from '../../assert'
 import { typedRecord } from '../value/record'
 import { assertNode, cons } from '../../container'
@@ -65,8 +65,8 @@ export const matcherValue = (sumType, returnType, caseFunctions) => {
       if(!isFunction(caseFunction))
         throw new TypeError(`case function ${caseTag} not found in case map`)
 
-      const arrowType = arrow(caseType, returnType)
-      return arrowFunction(arrowType, caseFunction)
+      const funcType = arrowType(caseType, returnType)
+      return arrowFunction(funcType, caseFunction)
     })
 
   const caseType = makeCaseType(sumType, returnType)

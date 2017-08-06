@@ -4,7 +4,7 @@ import { Closure, assertClosure } from './closure'
 const $lambdaClosure = Symbol('@lambdaClosure')
 const $argClosure = Symbol('@argClosure')
 
-export class ApplicationClosure extends Closure {
+export class ApplyClosure extends Closure {
   constructor(lambdaClosure, argClosure) {
     assertClosure(lambdaClosure)
     assertClosure(argClosure)

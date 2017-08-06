@@ -1,12 +1,23 @@
 import { typeImpl } from './impl'
 import { Type, isType } from './type'
 import { isTypedTuple } from '../value/tuple'
+import { isTerm, assertTerm } from '../term/term'
 import { isInstanceOf, assertInstanceOf } from '../../assert'
 import {
-  isNode, assertNode, nodesToIter, iterToNode
+  assertNode, nodesToIter, iterToNode
 } from '../../container'
 
 const $typeNode = Symbol('@typeNode')
+
+export const assertTermNode = node => {
+  assertNode(node)
+
+  if(node.size === 0)
+    throw new Error('term node must have non-zero size')
+
+  if(!node.checkPred(isTerm))
+    throw new TypeError('term node values must be instance of Term')
+}
 
 // assertTypeNode :: Node Any -> Exception
 export const assertTypeNode = node => {
@@ -60,8 +71,7 @@ export const ProductType = typeImpl(
     }
 
     checkValueNode(valueNode) {
-      if(!isNode(valueNode))
-        return new TypeError('value node must be instance of Node')
+      assertNode(valueNode)
 
       const { typeNode } = this
       if(valueNode.size !== typeNode.size)
@@ -69,6 +79,23 @@ export const ProductType = typeImpl(
 
       for(const [type, value] of nodesToIter(typeNode, valueNode)) {
         const err = type.checkValue(value)
+        if(err) return err
+      }
+
+      return null
+    }
+
+    checkTermNode(termNode) {
+      assertNode(termNode)
+
+      const { typeNode } = this
+      if(termNode.size !== termNode.size)
+        return new TypeError('term node size mismatch')
+
+      for(const [type, term] of nodesToIter(typeNode, termNode)) {
+        assertTerm(term)
+
+        const err = type.checkType(term.termType())
         if(err) return err
       }
 

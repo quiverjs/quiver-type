@@ -1,4 +1,4 @@
-import { isKeyword, assertKeyword } from '../assert'
+import { isKeyword, assertKeyword } from '../../assert'
 
 export const isVariable = variable =>
   isKeyword(variable)

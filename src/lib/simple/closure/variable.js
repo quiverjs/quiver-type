@@ -1,5 +1,5 @@
 import { Closure } from './closure'
-import { getItem } from '../container'
+import { getItem } from '../../container'
 
 const $argIndex = Symbol('@argIndex')
 
@@ -10,16 +10,24 @@ export class VariableClosure extends Closure {
     this[$argIndex] = argIndex
   }
 
+  get argIndex() {
+    return this[$argIndex]
+  }
+
   bindValues(closureValues) {
     const { argIndex } = this
     return getItem(closureValues, argIndex)
   }
 
-  bindApplyArg(closureValues, arg) {
-    throw new Error('cannot apply argument to variable closure')
-  }
-
   bindApplyArgs(closureValues, args) {
     throw new Error('cannot apply arguments to variable closure')
+  }
+}
+
+export class ArrowVariableClosure extends VariableClosure {
+  bindApplyArgs(closureValues, args) {
+    return this
+      .bindValues(closureValues)
+      .$apply(args)
   }
 }

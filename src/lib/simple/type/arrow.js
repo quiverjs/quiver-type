@@ -66,7 +66,7 @@ export const assertArrowType = arrowType =>
 export const isArrowType = arrowType =>
   isInstanceOf(arrowType, ArrowType)
 
-export const arrow = (...argTypes) => {
+export const arrowType = (...argTypes) => {
   if(argTypes.length < 2) {
     throw new TypeError('arrow type must have at least 2 arg types')
   }

@@ -2,21 +2,22 @@ import { Term } from './term'
 import { termImpl } from './impl'
 import { assertType } from '../type/type'
 import { assertVariable } from './assert'
-import { setWithValue } from '../container'
-import { VariableClosure } from '../closure/variable'
+import { setWithValue } from '../../container'
+import { isArrowType } from '../type/arrow'
+import { VariableClosure, ArrowVariableClosure } from '../closure/variable'
 
 const $termVar = Symbol('@termVar')
 const $varType = Symbol('@varType')
 
-const findArgIndex = (argVars, termVar) => {
-  for(let i=argVars.size-1; i>=0; i++) {
-    const argVar = argVars.get(i)
-    if(argVar === termVar) {
-      return i
-    }
+const findArgIndex = (argVars, termVar, i) => {
+  const { item, next } = argVars
+  if(item === termVar) {
+    return i
+  } else {
+    return findArgIndex(next, termVar, i+1)
   }
 
-  throw new Error(`term variable ${termVar.toString()} not found in argVars`)
+  throw new Error(`term variable ${termVar} is not found in argVars`)
 }
 
 export const VariableTerm = termImpl(
@@ -55,18 +56,32 @@ export const VariableTerm = termImpl(
       }
     }
 
-    weakHeadNormalForm() {
-      return this
-    }
-
     normalForm() {
       return this
     }
 
     compileClosure(argVars) {
-      const { termVar } = this
-      const argIndex = findArgIndex(argVars, termVar)
+      const { termVar, varType } = this
+      const argIndex = findArgIndex(argVars, termVar, 0)
 
-      return new VariableClosure(argIndex)
+      if(isArrowType(varType)) {
+        return new ArrowVariableClosure(argIndex)
+      } else {
+        return new VariableClosure(argIndex)
+      }
+    }
+
+    isTerminal() {
+      return true
+    }
+
+    formatTerm() {
+      const { termVar, termType } = this
+      const typeRep = termType.formatType()
+
+      return ['var-term', termVar, typeRep]
     }
   })
+
+export const varTerm = (termVar, varType) =>
+  new VariableTerm(termVar, varType)

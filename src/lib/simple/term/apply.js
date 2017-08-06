@@ -1,10 +1,11 @@
-import { Term } from './term'
+import { Term, assertTerm } from './term'
 import { termImpl } from './impl'
-import { LambdaTerm } from './lambda'
-import { assertTerm, isInstanceOf } from './assert'
+import { ApplyClosure } from '../closure/apply'
+import { assertArrowType } from '../type/arrow'
 
 const $leftTerm = Symbol('@leftTerm')
 const $rightTerm = Symbol('@rightTerm')
+const $selfType = Symbol('@selfType')
 
 export const ApplyTerm = termImpl(
   class extends Term {
@@ -12,8 +13,18 @@ export const ApplyTerm = termImpl(
       assertTerm(leftTerm)
       assertTerm(rightTerm)
 
+      const leftType = leftTerm.termType()
+      const rightType = rightTerm.termType()
+
+      assertArrowType(leftType)
+      const selfType = leftType.rightType
+
+      const err = selfType.checkType(rightType)
+      if(err) throw err
+
       this[$leftTerm] = leftTerm
       this[$rightTerm] = rightTerm
+      this[$selfType] = selfType
     }
 
     get leftTerm() {
@@ -22,6 +33,10 @@ export const ApplyTerm = termImpl(
 
     get rightTerm() {
       return this[$rightTerm]
+    }
+
+    termType() {
+      return this[$selfType]
     }
 
     freeTermVariables() {
@@ -46,21 +61,30 @@ export const ApplyTerm = termImpl(
       }
     }
 
-    weakHeadNormalForm() {
+    normalForm() {
       const { leftTerm, rightTerm } = this
 
-      const leftForm = leftTerm.weakHeadNormalForm()
-      const rightForm = rightTerm.weakHeadNormalForm()
+      const newLeftTerm = leftTerm.normalForm()
+      const newRightTerm = rightTerm.normalForm()
 
-      if(isInstanceOf(leftForm, LambdaTerm)) {
-        return leftForm.applyTerm(rightTerm)
-          .weakHeadNormalForm()
-      }
+      if(newLeftTerm.isApplicable()) {
+        return newLeftTerm
+          .applyTerm(newRightTerm)
+          .normalForm()
 
-      if(leftForm === leftTerm && rightForm === rightTerm) {
+      } else if(newLeftTerm === leftTerm && newRightTerm === rightTerm) {
         return this
       } else {
-        return new ApplyTerm(leftForm, rightForm)
+        return new ApplyTerm(newLeftTerm, newRightTerm)
       }
+    }
+
+    compileClosure(closureVars) {
+      const { leftTerm, rightTerm } = this
+
+      const leftClosure = leftTerm.compileClosure(closureVars)
+      const rightClosure = rightTerm.compileClosure(closureVars)
+
+      return new ApplyClosure(leftClosure, rightClosure)
     }
   })

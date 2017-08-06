@@ -1,7 +1,7 @@
 import test from 'tape'
 
 import {
-  arrow
+  arrowType
 } from '../../../lib/simple/type/arrow'
 
 import {
@@ -19,7 +19,7 @@ import {
 
 test('arrow value test', assert => {
   assert.test('raw plus', assert => {
-    const PlusType = arrow(IntType, IntType, IntType)
+    const PlusType = arrowType(IntType, IntType, IntType)
 
     const plusFunc = a => b => (a+b)
 
@@ -37,7 +37,7 @@ test('arrow value test', assert => {
     assert.throws(() => plusValue.apply(1, 2, 3))
 
     const adder = plusValue.applyPartial(1)
-    const AdderType = arrow(IntType, IntType)
+    const AdderType = arrowType(IntType, IntType)
     assert.notOk(AdderType.checkValue(adder))
 
     assert.equals(adder.apply(2), 3)
@@ -65,7 +65,7 @@ test('arrow value test', assert => {
   })
 
   assert.test('wrapped mult', assert => {
-    const MultType = arrow(IntType, IntType, IntType)
+    const MultType = arrowType(IntType, IntType, IntType)
     const rawMult = (a, b) => (a*b)
 
     const mult = simpleArrowFunction(
@@ -101,7 +101,7 @@ test('arrow value test', assert => {
   })
 
   assert.test('invalid wrap', assert => {
-    const MultType = arrow(IntType, IntType, IntType)
+    const MultType = arrowType(IntType, IntType, IntType)
 
     // forgot currify
     const mult = new FunctionValue(MultType, 2,
@@ -115,7 +115,7 @@ test('arrow value test', assert => {
   })
 
   assert.test('nested wrap', assert => {
-    const AdderType = arrow(IntType, IntType)
+    const AdderType = arrowType(IntType, IntType)
 
     const add = simpleArrowFunction(
       [IntType, IntType],
